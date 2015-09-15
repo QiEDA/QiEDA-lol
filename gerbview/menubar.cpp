@@ -194,16 +194,6 @@ void GERBVIEW_FRAME::ReCreateMenuBar()
     // Separator
     miscellaneousMenu->AppendSeparator();
 
-    // Clear layer
-    AddMenuItem( miscellaneousMenu,
-                 ID_GERBVIEW_GLOBAL_DELETE,
-                 _( "&Clear Layer" ),
-                 _( "Clear current layer" ),
-                 KiBitmap( general_deletions_xpm ) );
-
-    // Separator
-    miscellaneousMenu->AppendSeparator();
-
     // Text editor
     AddMenuItem( miscellaneousMenu,
                  ID_MENU_GERBVIEW_SELECT_PREFERED_EDITOR,

@@ -41,19 +41,19 @@ void GBR_LAYER_BOX_SELECTOR::Resync()
     Freeze();
     Clear();
 
-    for( size_t layerid = 0; layerid < g_GERBER_List.GetImageCount(); ++layerid )
+    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
     {
-        wxBitmap    layerbmp( 14, 14 );
-        wxString    layername;
+        GERBER_IMAGE* gerber = *git;
+
+        int layerid = git-g_GERBER_List.m_GERBER_List.begin();
 
         if( !IsLayerEnabled( layerid ) )
             continue;
 
-        // Prepare Bitmap
+        wxString layername = gerber->GetDisplayName();
+
+        wxBitmap    layerbmp( 14, 14 );
         SetBitmapLayer( layerbmp, layerid );
-
-        layername = GetLayerName( layerid );
-
         Append( layername, layerbmp, (void*)(intptr_t) layerid );
     }
 
@@ -73,7 +73,8 @@ EDA_COLOR_T GBR_LAYER_BOX_SELECTOR::GetLayerColor( int aLayer ) const
 // Returns the name of the layer id
 wxString GBR_LAYER_BOX_SELECTOR::GetLayerName( int aLayer ) const
 {
-    wxString name = g_GERBER_List.GetDisplayName( aLayer );
+    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex(aLayer);
+    wxString name = gerber->GetDisplayName();
 
     return name;
 }

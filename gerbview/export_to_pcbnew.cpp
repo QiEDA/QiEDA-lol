@@ -155,26 +155,19 @@ GBR_TO_PCB_EXPORTER::~GBR_TO_PCB_EXPORTER()
  */
 void GERBVIEW_FRAME::ExportDataInPcbnewFormat( wxCommandEvent& event )
 {
-    int layercount = 0;
-
-    // Count the Gerber layers which are actually currently used
-    for( LAYER_NUM ii = 0; ii < g_GERBER_List.GetImageCount(); ++ii )
-    {
-        if( g_GERBER_List.GetGerberByListIndex( ii ) )
-            layercount++;
-    }
+    int layercount = g_GERBER_List.GetImageCount();
 
     if( layercount == 0 )
     {
         DisplayInfoMessage( this,
-                            _( "None of the Gerber layers contain any data" ) );
+                            _( "No gerber layers loaded" ) );
         return;
     }
 
     wxString        fileName;
     wxString        path = m_mruPath;
 
-    wxFileDialog    filedlg( this, _( "Board file name:" ),
+    wxFileDialog    filedlg( this, _( "Board file name" ),
                              path, fileName, PcbFileWildcard,
                              wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
 

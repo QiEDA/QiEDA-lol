@@ -82,9 +82,6 @@ BEGIN_EVENT_TABLE( GERBVIEW_FRAME, EDA_DRAW_FRAME )
     EVT_MENU( ID_MENU_GERBVIEW_SELECT_PREFERED_EDITOR,
               EDA_BASE_FRAME::OnSelectPreferredEditor )
 
-    // menu Miscellaneous
-    EVT_MENU( ID_GERBVIEW_GLOBAL_DELETE, GERBVIEW_FRAME::Process_Special_Functions )
-
     // Menu Help
     EVT_MENU( wxID_HELP, EDA_DRAW_FRAME::GetKicadHelp )
     EVT_MENU( wxID_INDEX, EDA_DRAW_FRAME::GetKicadHelp )
@@ -179,11 +176,6 @@ void GERBVIEW_FRAME::Process_Special_Functions( wxCommandEvent& event )
             if( dlg.ShowModal() == wxID_OK )
                 m_canvas->Refresh();
         }
-        break;
-
-    case ID_GERBVIEW_GLOBAL_DELETE:
-        Erase_Current_DrawLayer( true );
-        ClearMsgPanel();
         break;
 
     case ID_NO_TOOL_SELECTED:

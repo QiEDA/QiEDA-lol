@@ -58,24 +58,3 @@ bool GERBVIEW_FRAME::Clear_DrawLayers( bool query )
     syncLayerBox();
     return true;
 }
-
-
-void GERBVIEW_FRAME::Erase_Current_DrawLayer( bool query )
-{
-    int layer = getActiveLayer();
-    wxString msg;
-
-    msg.Printf( _( "Clear layer %d?" ), layer + 1 );
-
-    if( query && !IsOK( this, msg ) )
-        return;
-
-    SetCurItem( NULL );
-
-    g_GERBER_List.ClearImage( layer );
-
-    GetScreen()->SetModify();
-    m_canvas->Refresh();
-    m_LayersManager->UpdateLayerIcons();
-    syncLayerBox();
-}

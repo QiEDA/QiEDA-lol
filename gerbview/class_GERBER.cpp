@@ -373,6 +373,37 @@ void GERBER_IMAGE::ClearDrawingItems( void )
     m_Drawings.clear();
 }
 
+
+// Build a name for image aIdx which can be used in layers manager
+const wxString GERBER_IMAGE::GetDisplayName( void )
+{
+    wxString name;
+
+    if( m_FileFunction )
+    {
+        if( m_FileFunction->IsCopper() )
+        {
+            name.Printf( _( "Layer (%s, %s, %s)" ),
+                         GetChars( m_FileFunction->GetFileType() ),
+                         GetChars( m_FileFunction->GetBrdLayerId() ),
+                         GetChars( m_FileFunction->GetBrdLayerSide() ) );
+        }
+        else
+        {
+            name.Printf( _( "Layer (%s, %s)" ),
+                         GetChars( m_FileFunction->GetFileType() ),
+                         GetChars( m_FileFunction->GetBrdLayerId() ) );
+        }
+    }
+    else
+    {
+        wxFileName file(m_FileName);
+        name = file.GetFullName();
+    }
+
+    return name;
+}
+
 // GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
 GERBER_IMAGE_LIST::GERBER_IMAGE_LIST() :
         m_nextLayerId(0)
@@ -474,46 +505,14 @@ void GERBER_IMAGE_LIST::ClearImage( int aIdx )
     }
 }
 
-// Build a name for image aIdx which can be used in layers manager
-const wxString GERBER_IMAGE_LIST::GetDisplayName( int aIdx )
+// remove the loaded data of image aIdx, but do not delete it
+void GERBER_IMAGE_LIST::RemoveImage( int aIdx )
 {
-    wxString name;
-
-    GERBER_IMAGE* gerber = NULL;
-
     if( aIdx >= 0 && aIdx < (int)m_GERBER_List.size() )
-        gerber = m_GERBER_List[aIdx];
-
-    if( gerber && IsUsed(aIdx ) )
     {
-        if( gerber->m_FileFunction )
-        {
-            if( gerber->m_FileFunction->IsCopper() )
-            {
-                name.Printf( _( "Layer %d (%s, %s, %s)" ), aIdx + 1,
-                             GetChars( gerber->m_FileFunction->GetFileType() ),
-                             GetChars( gerber->m_FileFunction->GetBrdLayerId() ),
-                             GetChars( gerber->m_FileFunction->GetBrdLayerSide() ) );
-            }
-            else
-            {
-                name.Printf( _( "Layer %d (%s, %s)" ), aIdx + 1,
-                             GetChars( gerber->m_FileFunction->GetFileType() ),
-                             GetChars( gerber->m_FileFunction->GetBrdLayerId() ) );
-            }
-        }
-        else
-        {
-            wxFileName file(gerber->m_FileName);
-            name = file.GetFullName();
-        }
+        delete m_GERBER_List[aIdx];
+        m_GERBER_List.erase (m_GERBER_List.begin()+aIdx);
     }
-    else
-    {
-        name.Printf( _( "Layer %d" ), aIdx + 1 );
-    }
-
-    return name;
 }
 
 // return true if image is used (loaded and not cleared)

@@ -297,6 +297,14 @@ public:
     void            StepAndRepeatItem( const GERBER_DRAW_ITEM& aItem );
 
     /**
+     * @return a name for image aIdx which can be used in layers manager
+     * and layer selector
+     * is is "Layer n" (n = aIdx+1), followed by file attribute info (if X2 format)
+     * @param aIdx = the index ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
+     */
+    const wxString GetDisplayName( void );
+
+    /**
      * Function DisplayImageInfo
      * has knowledge about the frame and how and where to put status information
      * about this object into the frame's message panel.
@@ -364,12 +372,10 @@ public:
     void ClearImage( int aIdx );
 
     /**
-     * @return a name for image aIdx which can be used in layers manager
-     * and layer selector
-     * is is "Layer n" (n = aIdx+1), followed by file attribute info (if X2 format)
+     * remove the loaded data of image aIdx
      * @param aIdx = the index ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
      */
-    const wxString GetDisplayName( int aIdx );
+    void RemoveImage( int aIdx );
 
     /**
      * @return true if image is used (loaded and with items)
