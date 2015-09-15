@@ -183,6 +183,14 @@ GERBVIEW_FRAME::~GERBVIEW_FRAME()
 }
 
 
+
+void GERBVIEW_FRAME::SetLayout( GBR_LAYOUT* aLayout )
+{
+    delete m_gerberLayout;
+    m_gerberLayout = aLayout;
+}
+
+
 void GERBVIEW_FRAME::OnCloseWindow( wxCloseEvent& Event )
 {
     Destroy();

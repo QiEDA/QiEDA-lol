@@ -93,24 +93,19 @@ class GERBVIEW_FRAME : public EDA_DRAW_FRAME    // PCB_BASE_FRAME
 public:
     GBR_DISPLAY_OPTIONS m_DisplayOptions;
 
-    /**
-     * Function SetLayout
-     * sets the m_gerberLayout member in such as way as to ensure deleting any previous
-     * GBR_LAYOUT.
-     * @param aLayout The GBR_LAYOUT to put into the frame.
-     */
-    void SetLayout( GBR_LAYOUT* aLayout )
-    {
-        delete m_gerberLayout;
-        m_gerberLayout = aLayout;
-    }
-
     GBR_LAYOUT* GetGerberLayout() const
     {
         wxASSERT( m_gerberLayout );
         return m_gerberLayout;
     }
 
+    /**
+     * Function SetLayout
+     * sets the m_gerberLayout member in such as way as to ensure deleting any previous
+     * GBR_LAYOUT.
+     * @param aLayout The GBR_LAYOUT to put into the frame.
+     */
+    void SetLayout( GBR_LAYOUT* aLayout );
     /**
      * Function GetGerberLayoutBoundingBox
      * calculates the bounding box containing all gerber items.
