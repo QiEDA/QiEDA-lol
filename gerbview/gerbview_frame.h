@@ -298,30 +298,6 @@ public:
     void    SetGridVisibility( bool aVisible );
 
     /**
-     * Function GetVisibleLayers
-     * is a proxy function that calls the correspondent function in m_BoardSettings
-     * Returns a bit-mask of all the layers that are visible
-     * @return long - the visible layers in bit-mapped form.
-     */
-    long GetVisibleLayers() const;
-
-    /**
-     * Function SetVisibleLayers
-     * is a proxy function that calls the correspondent function in m_BoardSettings
-     * changes the bit-mask of visible layers
-     * @param aLayerMask = The new bit-mask of visible layers
-     */
-    void    SetVisibleLayers( long aLayerMask );
-
-    /**
-     * Function IsLayerVisible
-     * tests whether a given layer is visible
-     * @param aLayer = The layer to be tested
-     * @return bool - true if the layer is visible.
-     */
-    bool    IsLayerVisible( int aLayer ) const;
-
-    /**
      * Function GetVisibleElementColor
      * returns the color of a gerber visible element.
      */

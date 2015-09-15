@@ -242,13 +242,12 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
             end   = true;
             layer = active_layer;
         }
-
-        if( !gerbFrame->IsLayerVisible( layer ) )
-            continue;
-
         GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
 
         if( gerber == NULL )    // Graphic layer not yet used
+            continue;
+
+        if( !gerber->m_Visible )
             continue;
 
         EDA_COLOR_T color = gerbFrame->GetLayerColor( layer );
@@ -407,11 +406,12 @@ void GERBVIEW_FRAME::DrawItemsDCodeID( wxDC* aDC, GR_DRAWMODE aDrawMode )
     {
         GERBER_IMAGE* gerber = *git;
 
+        if( !gerber->m_Visible )
+            continue;
+
         for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
         {
             GERBER_DRAW_ITEM* item = *it;
-            if (!IsLayerVisible(item->GetLayer()))
-                continue;
 
             if (item->m_DCode <= 0)
                 continue;

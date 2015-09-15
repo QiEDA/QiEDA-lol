@@ -219,7 +219,6 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
     int  rowCount;
     int  menuId = event.GetId();
     bool visible = (menuId == ID_SHOW_ALL_LAYERS);
-    long visibleLayers = 0;
     bool force_active_layer_visible;
 
     m_alwaysShowActiveLayer = ( menuId == ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE );
@@ -243,14 +242,8 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
                 loc_visible = true;
 
             cb->SetValue( loc_visible );
-
-            if( loc_visible )
-                visibleLayers |= 1 << row;
-            else
-                visibleLayers &= ~( 1 << row );
         }
 
-        myframe->SetVisibleLayers( visibleLayers );
         myframe->GetCanvas()->Refresh();
         break;
     case ID_LAYER_MOVE_UP:
@@ -318,7 +311,7 @@ void GERBER_LAYER_WIDGET::ReFill()
         int layer = git-g_GERBER_List.m_GERBER_List.begin();
 
         AppendLayerRow( LAYER_WIDGET::ROW( msg, layer,
-                        myframe->GetLayerColor( layer ), wxEmptyString, true ) );
+                        myframe->GetLayerColor( layer ), wxEmptyString, gerber->m_Visible ) );
     }
 
     Thaw();
@@ -354,14 +347,9 @@ bool GERBER_LAYER_WIDGET::OnLayerSelect( int aLayer )
 
 void GERBER_LAYER_WIDGET::OnLayerVisible( int aLayer, bool isVisible, bool isFinal )
 {
-    long visibleLayers = myframe->GetVisibleLayers();
+    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex(aLayer);
 
-    if( isVisible )
-        visibleLayers |= 1 << aLayer;
-    else
-        visibleLayers &= ~( 1 << aLayer );
-
-    myframe->SetVisibleLayers( visibleLayers );
+    gerber->m_Visible = isVisible;
 
     if( isFinal )
         myframe->GetCanvas()->Refresh();

@@ -156,6 +156,7 @@ public:
 
     APERTURE_MACRO_SET m_aperture_macros;                       ///< a collection of APERTURE_MACROS, sorted by name
 
+    bool                m_Visible;                              // true if visible (should render)
 private:
     int                m_hasNegativeItems;                      // true if the image is negative or has some negative items
                                                                 // Used to optimize drawing, because when there are no

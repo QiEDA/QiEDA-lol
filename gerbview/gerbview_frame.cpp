@@ -95,8 +95,6 @@ GERBVIEW_FRAME::GERBVIEW_FRAME( KIWAY* aKiway, wxWindow* aParent ):
 
     SetLayout( new GBR_LAYOUT() );
 
-    SetVisibleLayers( -1 );         // All draw layers visible.
-
     SetScreen( new GBR_SCREEN( GetPageSettings().GetSizeIU() ) );
 
     // Create the PCB_LAYER_WIDGET *after* SetLayout():
@@ -520,27 +518,11 @@ bool GERBVIEW_FRAME::IsElementVisible( GERBER_VISIBLE_ID aItemIdVisible ) const
 }
 
 
-long GERBVIEW_FRAME::GetVisibleLayers() const
-{
-    return -1;    // TODO
-}
-
-
-void GERBVIEW_FRAME::SetVisibleLayers( long aLayerMask )
-{
-//    GetGerberLayout()->SetVisibleLayers( aLayerMask );
-}
-
-
-bool GERBVIEW_FRAME::IsLayerVisible( int aLayer ) const
-{
-    if( ! m_DisplayOptions.m_IsPrinting )
-        return m_LayersManager->IsLayerVisible( aLayer );
-    else
-        return GetGerberLayout()->IsLayerPrintable( aLayer );
-}
-
-
+/**
+ * Function GetVisibleElementColor
+ * returns the color of a pcb visible element.
+ * @see enum PCB_VISIBLE
+ */
 EDA_COLOR_T GERBVIEW_FRAME::GetVisibleElementColor( GERBER_VISIBLE_ID aItemIdVisible ) const
 {
     EDA_COLOR_T color = UNSPECIFIED_COLOR;
