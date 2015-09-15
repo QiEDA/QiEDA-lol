@@ -72,7 +72,7 @@
 
 #include <gerbview.h>
 #include <gerbview_frame.h>
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 #include <class_excellon.h>
 #include <kicad_string.h>
 #include <class_X2_gerber_attributes.h>

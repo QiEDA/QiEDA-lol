@@ -25,7 +25,7 @@
  */
 
 #include <vector>
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 
 /**
  * @brief GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files

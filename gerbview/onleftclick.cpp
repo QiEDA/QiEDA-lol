@@ -28,7 +28,7 @@
 
 #include <gerbview.h>
 #include <gerbview_frame.h>
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 #include <dialog_helpers.h>
 #include <class_gerber_image_list.h>
 

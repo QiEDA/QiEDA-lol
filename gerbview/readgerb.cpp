@@ -30,7 +30,7 @@
 #include <kicad_string.h>
 #include <gerbview.h>
 #include <gerbview_frame.h>
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 #include <class_gerber_image_list.h>
 
 #include <html_messagebox.h>

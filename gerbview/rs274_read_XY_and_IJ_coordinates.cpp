@@ -26,7 +26,7 @@
 
 #include <common.h>
 
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 #include <base_units.h>
 
 

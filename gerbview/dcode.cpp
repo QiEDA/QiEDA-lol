@@ -43,7 +43,7 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_gerber_draw_item.h>
-#include <class_GERBER.h>
+#include <class_gerber_image.h>
 
 #define DEFAULT_SIZE 100
 
