@@ -400,15 +400,6 @@ public:
     int getActiveLayer();
 
     /**
-     * Function getNextAvailableLayer
-     * finds the next empty layer starting at \a aLayer and returns it to the caller.  If no
-     * empty layers are found, NO_AVAILABLE_LAYERS is return.
-     * @param aLayer The first layer to search.
-     * @return The first empty layer found or NO_AVAILABLE_LAYERS.
-     */
-    int getNextAvailableLayer( int aLayer = 0 ) const;
-
-    /**
      * Function syncLayerWidget
      * updates the currently "selected" layer within the GERBER_LAYER_WIDGET.
      * The currently active layer is defined by the return value of getActiveLayer().
@@ -616,7 +607,6 @@ public:
 
     // PCB handling
     bool                Clear_DrawLayers( bool query );
-    void                Erase_Current_DrawLayer( bool query );
 
     // Conversion function
     void                ExportDataInPcbnewFormat( wxCommandEvent& event );

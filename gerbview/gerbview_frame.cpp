@@ -354,28 +354,6 @@ void GERBVIEW_FRAME::SetElementVisibility( GERBER_VISIBLE_ID aItemIdVisible,
     m_LayersManager->SetRenderState( aItemIdVisible, aNewState );
 }
 
-
-int GERBVIEW_FRAME::getNextAvailableLayer( int aLayer ) const
-{
-    int layer = aLayer;
-
-    for( int i = 0; i < GERBER_DRAWLAYERS_COUNT; ++i )
-    {
-        GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
-
-        if( gerber == NULL || gerber->m_FileName.IsEmpty() )
-            return layer;
-
-        ++layer;
-
-        if( layer >= GERBER_DRAWLAYERS_COUNT )
-            layer = 0;
-    }
-
-    return NO_AVAILABLE_LAYERS;
-}
-
-
 void GERBVIEW_FRAME::syncLayerWidget()
 {
     m_LayersManager->SelectLayer( getActiveLayer() );
