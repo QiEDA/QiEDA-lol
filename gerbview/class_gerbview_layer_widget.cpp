@@ -178,6 +178,7 @@ void GERBER_LAYER_WIDGET::onRightDownLayerRow( wxMouseEvent& event )
                                          _("Move down") ) );
         }
 
+        menu.AppendSeparator();
     }
 
     menu.SetRefData(new LAYER_WIDGT_ROW(rowId));
