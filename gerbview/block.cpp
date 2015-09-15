@@ -32,11 +32,16 @@
 
 #include <common.h>
 #include <class_drawpanel.h>
+#include <confirm.h>
+#include <gr_basic.h>
 
+#include <gerbview.h>
 #include <gerbview_frame.h>
+#include <class_gerber_draw_item.h>
 
-static void DrawMovingBlockOutlines( EDA_DRAW_PANEL* aPanel, wxDC* aDC, const wxPoint& aPosition,
-                                     bool erase );
+#include <wx/debug.h>
+
+#define BLOCK_COLOR BROWN
 
 
 int GERBVIEW_FRAME::BlockCommand( int key )
@@ -67,38 +72,6 @@ int GERBVIEW_FRAME::BlockCommand( int key )
     return cmd;
 }
 
-
-void GERBVIEW_FRAME::HandleBlockPlace( wxDC* DC )
-{
-    wxASSERT( m_canvas->IsMouseCaptured() );
-
-    GetScreen()->m_BlockLocate.SetState( STATE_BLOCK_STOP );
-
-    switch( GetScreen()->m_BlockLocate.GetCommand() )
-    {
-    case BLOCK_MOVE:                /* Move */
-        if( m_canvas->IsMouseCaptured() )
-            m_canvas->CallMouseCapture( DC, wxDefaultPosition, false );
-
-        Block_Move( DC );
-        GetScreen()->m_BlockLocate.ClearItemsList();
-        break;
-
-    default:
-        wxFAIL_MSG( wxT("HandleBlockPlace: Unexpected block command") );
-        break;
-    }
-
-    m_canvas->EndMouseCapture( GetToolId(), m_canvas->GetCurrentCursor(), wxEmptyString, false );
-    GetScreen()->SetModify();
-    GetScreen()->ClearBlockCommand();
-
-    wxASSERT( GetScreen()->m_BlockLocate.GetCount() == 0 );
-
-    DisplayToolMsg( wxEmptyString );
-}
-
-
 bool GERBVIEW_FRAME::HandleBlockEnd( wxDC* DC )
 {
     bool nextcmd  = false;
@@ -108,14 +81,7 @@ bool GERBVIEW_FRAME::HandleBlockEnd( wxDC* DC )
 
         switch( GetScreen()->m_BlockLocate.GetCommand() )
         {
-        case BLOCK_MOVE:            /* Move */
-            GetScreen()->m_BlockLocate.SetState( STATE_BLOCK_MOVE );
-            nextcmd = true;
-            m_canvas->CallMouseCapture( DC, wxDefaultPosition, false );
-            m_canvas->SetMouseCaptureCallback( DrawMovingBlockOutlines );
-            m_canvas->CallMouseCapture( DC, wxDefaultPosition, false );
-            break;
-
+        case BLOCK_MOVE:        // Move
         case BLOCK_ZOOM: /* Window Zoom */
             zoom_command = true;
             break;
@@ -136,78 +102,4 @@ bool GERBVIEW_FRAME::HandleBlockEnd( wxDC* DC )
         Window_Zoom( GetScreen()->m_BlockLocate );
 
     return nextcmd ;
-}
-
-
-/* Traces the outline of the block structures of a repositioning move
- */
-static void DrawMovingBlockOutlines( EDA_DRAW_PANEL* aPanel, wxDC* aDC, const wxPoint& aPositon,
-                                     bool aErase )
-{
-    BASE_SCREEN* screen = aPanel->GetScreen();
-
-    EDA_COLOR_T Color = YELLOW;
-
-    if( aErase )
-    {
-        screen->m_BlockLocate.Draw( aPanel, aDC, wxPoint( 0, 0 ), g_XorMode, Color );
-
-        if( screen->m_BlockLocate.GetMoveVector().x|| screen->m_BlockLocate.GetMoveVector().y )
-        {
-            screen->m_BlockLocate.Draw( aPanel,
-                                        aDC,
-                                        screen->m_BlockLocate.GetMoveVector(),
-                                        g_XorMode,
-                                        Color );
-        }
-    }
-
-    if( screen->m_BlockLocate.GetState() != STATE_BLOCK_STOP )
-    {
-        const wxPoint& cross_hair = aPanel->GetParent()->GetCrossHairPosition();
-
-        screen->m_BlockLocate.SetMoveVector(
-            wxPoint( cross_hair.x - screen->m_BlockLocate.GetRight(),
-                     cross_hair.y - screen->m_BlockLocate.GetBottom() ) );
-    }
-
-    screen->m_BlockLocate.Draw( aPanel, aDC, wxPoint( 0, 0 ), g_XorMode, Color );
-
-    if( screen->m_BlockLocate.GetMoveVector().x || screen->m_BlockLocate.GetMoveVector().y )
-    {
-        screen->m_BlockLocate.Draw( aPanel,
-                                    aDC,
-                                    screen->m_BlockLocate.GetMoveVector(),
-                                    g_XorMode,
-                                    Color );
-    }
-}
-
-
-void GERBVIEW_FRAME::Block_Move( wxDC* DC )
-{
-    wxPoint delta;
-    wxPoint oldpos;
-
-    oldpos = GetCrossHairPosition();
-    m_canvas->SetMouseCaptureCallback( NULL );
-
-    SetCrossHairPosition( oldpos );
-    m_canvas->MoveCursorToCrossHair();
-    GetScreen()->SetModify();
-    GetScreen()->m_BlockLocate.Normalize();
-
-    /* Calculate displacement vectors. */
-    delta = GetScreen()->m_BlockLocate.GetMoveVector();
-
-    /* Move items in block */
-    for( GERBER_DRAW_ITEM* item = GetItemsList(); item; item = item->Next() )
-    {
-        GERBER_DRAW_ITEM* gerb_item = item;
-
-        if( gerb_item->HitTest( GetScreen()->m_BlockLocate ) )
-            gerb_item->MoveAB( delta );
-    }
-
-    m_canvas->Refresh( true );
 }

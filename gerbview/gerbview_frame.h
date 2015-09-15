@@ -542,12 +542,6 @@ public:
     virtual int         BlockCommand( int key );
 
     /**
-     * Function HandleBlockPlace
-     * handles the block place command.
-     */
-    virtual void        HandleBlockPlace( wxDC* DC );
-
-    /**
      * Function HandleBlockEnd( )
      * handles the end of a block command,
      * It is called at the end of the definition of the area of a block.

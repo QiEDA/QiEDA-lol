@@ -74,9 +74,6 @@ bool GERBVIEW_FRAME::OnRightClick( const wxPoint& aPosition, wxMenu* PopMenu )
             {
                 AddMenuItem( PopMenu, ID_POPUP_CANCEL_CURRENT_COMMAND,
                              _( "Cancel Block" ), KiBitmap( cancel_xpm ) );
-                PopMenu->AppendSeparator();
-                AddMenuItem( PopMenu, ID_POPUP_PLACE_BLOCK,
-                             _( "Place Block" ), KiBitmap( checked_ok_xpm ) );
             }
             else
             {
