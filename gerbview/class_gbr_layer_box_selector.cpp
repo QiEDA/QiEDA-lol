@@ -33,6 +33,7 @@
 #include <colors_selection.h>
 #include <gerbview_frame.h>
 #include <class_GERBER.h>
+#include <class_gerber_image_list.h>
 
 #include <class_gbr_layer_box_selector.h>
 

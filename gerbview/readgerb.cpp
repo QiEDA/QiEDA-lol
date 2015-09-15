@@ -31,6 +31,7 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_GERBER.h>
+#include <class_gerber_image_list.h>
 
 #include <html_messagebox.h>
 #include <macros.h>

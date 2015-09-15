@@ -34,6 +34,7 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_GERBER.h>
+#include <class_gerber_image_list.h>
 
 
 /* localize a gerber item and return a pointer to it.

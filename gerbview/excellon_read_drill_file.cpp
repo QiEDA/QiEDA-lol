@@ -76,6 +76,7 @@
 #include <class_excellon.h>
 #include <kicad_string.h>
 #include <class_X2_gerber_attributes.h>
+#include <class_gerber_image_list.h>
 
 #include <html_messagebox.h>
 

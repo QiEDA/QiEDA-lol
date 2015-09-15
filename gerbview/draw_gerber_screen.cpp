@@ -43,6 +43,7 @@
 #include <gerbview_frame.h>
 #include <class_GERBER.h>
 #include <printout_controler.h>
+#include <class_gerber_image_list.h>
 
 
 void GERBVIEW_FRAME::PrintPage( wxDC* aDC, LSET aPrintMasklayer,

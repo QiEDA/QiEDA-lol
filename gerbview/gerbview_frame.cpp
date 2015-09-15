@@ -52,6 +52,7 @@
 #include <dialog_helpers.h>
 #include <class_DCodeSelectionbox.h>
 #include <class_gerbview_layer_widget.h>
+#include <class_gerber_image_list.h>
 
 
 // Config keywords

@@ -43,6 +43,7 @@
 #include <class_GERBER.h>
 #include <layer_widget.h>
 #include <class_gerbview_layer_widget.h>
+#include <class_gerber_image_list.h>
 
 
 /*

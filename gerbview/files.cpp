@@ -37,7 +37,7 @@
 #include <gerbview_id.h>
 #include <class_gerbview_layer_widget.h>
 #include <wildcards_and_files_ext.h>
-#include "class_GERBER.h"
+#include <class_gerber_image_list.h>
 
 
 void GERBVIEW_FRAME::OnGbrFileHistory( wxCommandEvent& event )

@@ -41,6 +41,7 @@
 #include <class_gbr_layer_box_selector.h>
 #include <class_DCodeSelectionbox.h>
 #include <dialog_helpers.h>
+#include <class_gerber_image_list.h>
 
 void GERBVIEW_FRAME::ReCreateHToolbar( void )
 {

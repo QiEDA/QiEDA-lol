@@ -42,6 +42,7 @@
 #include <class_DCodeSelectionbox.h>
 #include <class_gerbview_layer_widget.h>
 #include <dialog_show_page_borders.h>
+#include <class_gerber_image_list.h>
 
 
 // Event table:

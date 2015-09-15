@@ -41,6 +41,7 @@
 #include <gerbview_frame.h>
 #include <class_gerber_draw_item.h>
 #include <class_GERBER.h>
+#include <class_gerber_image_list.h>
 
 
 GERBER_DRAW_ITEM::GERBER_DRAW_ITEM( GBR_LAYOUT* aParent, GERBER_IMAGE* aGerberparams ) :

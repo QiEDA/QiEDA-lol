@@ -33,8 +33,8 @@
 #include <confirm.h>
 
 #include <gerbview_frame.h>
-#include <class_GERBER.h>
 #include <class_gerbview_layer_widget.h>
+#include <class_gerber_image_list.h>
 
 bool GERBVIEW_FRAME::Clear_DrawLayers( bool query )
 {

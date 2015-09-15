@@ -25,7 +25,7 @@
 #ifndef _CLASS_GERBER_H_
 #define _CLASS_GERBER_H_
 
-#include <vector>
+#include <list>
 #include <set>
 
 #include <dcode.h>
@@ -315,91 +315,5 @@ public:
 
     void ClearDrawingItems( void );
 };
-
-/**
- * @brief GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
- * which are loaded and can be displayed
- */
-class GERBER_IMAGE_LIST
-{
-
-    unsigned m_nextLayerId;
-
-public:
-    GERBER_IMAGE_LIST();
-    ~GERBER_IMAGE_LIST();
-
-    // the list of loaded images (1 image = 1 gerber file)
-    std::vector<GERBER_IMAGE*> m_GERBER_List;
-
-    //Accessor
-    GERBER_IMAGE* GetGerberByListIndex( int aIdx );
-
-    /**
-     * Add a GERBER_IMAGE* at index aIdx
-     * or at the first free location if aIdx < 0
-     * @param aGbrImage = the image to add
-     * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
-     * @return true if the index used, or -1 if no room to add image
-     */
-    int AddGbrImage( GERBER_IMAGE* aGbrImage );
-
-    /**
-     * Add a GERBER_IMAGE* at index aIdx
-     * or at the first free location if aIdx < 0
-     * @param aGbrImage = the image to add
-     * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
-     * @return true if the index used, or -1 if no room to add image
-     */
-    int ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage );
-
-    /**
-     * @return Number of images in list
-     */
-    size_t GetImageCount()
-    {
-        return m_GERBER_List.size();
-    }
-
-    /**
-     * remove all loaded data in list
-     */
-    void ClearList();
-
-    /**
-     * remove the loaded data of image aIdx
-     * @param aIdx = the index ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
-     */
-    void ClearImage( int aIdx );
-
-    /**
-     * remove the loaded data of image aIdx
-     * @param aIdx = the index ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
-     */
-    void RemoveImage( int aIdx );
-
-    /**
-     * @return true if image is used (loaded and with items)
-     * @param aIdx = the index ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
-     */
-    bool IsUsed( int aIdx );
-
-    /**
-     * Sort loaded images by Z order priority, if they have the X2 FileFormat info
-     * @param aDrawList: the draw list associated to the gerber images
-     * (SortImagesByZOrder updates the graphic layer of these items)
-     */
-    void SortImagesByZOrder();
-
-    void MoveLayerUp( int aIdx );
-    void MoveLayerDown( int aIdx );
-
-    GERBER_IMAGE* GetGerberById( int layerID );
-
-    int GetGerberIndexByLayer( int layerID );
-};
-
-
-extern GERBER_IMAGE_LIST g_GERBER_List;
 
 #endif  // ifndef _CLASS_GERBER_H_

@@ -42,6 +42,7 @@
 #include <select_layers_to_pcb.h>
 #include <build_version.h>
 #include <wildcards_and_files_ext.h>
+#include <class_gerber_image_list.h>
 
 
 // Imported function
