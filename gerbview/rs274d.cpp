@@ -551,9 +551,9 @@ bool GERBER_IMAGE::Execute_G_Command( char*& text, int G_command )
         break;
 
     case GC_TURN_OFF_POLY_FILL:
-        if( m_Exposure && m_Parent->GetGerberLayout()->m_Drawings )    // End of polygon
+        if( m_Exposure && m_Drawings.size() > 0 )    // End of polygon
         {
-            GERBER_DRAW_ITEM * gbritem = m_Parent->GetGerberLayout()->m_Drawings.GetLast();
+            GERBER_DRAW_ITEM * gbritem = *(m_Drawings.end());
             StepAndRepeatItem( *gbritem );
         }
         m_Exposure = false;
@@ -617,7 +617,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             {
                 m_Exposure = true;
                 gbritem    = new GERBER_DRAW_ITEM( layout, this );
-                layout->m_Drawings.Append( gbritem );
+                m_Drawings.push_back( gbritem );
                 gbritem->m_Shape = GBR_POLYGON;
                 gbritem->SetLayer( m_GraphicLayer );
                 gbritem->m_Flashed = false;
@@ -627,7 +627,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             {
             case GERB_INTERPOL_ARC_NEG:
             case GERB_INTERPOL_ARC_POS:
-                gbritem = layout->m_Drawings.GetLast();
+                gbritem = *(m_Drawings.end());
 
                 fillArcPOLY( gbritem, m_PreviousPos,
                              m_CurrentPos, m_IJPos,
@@ -636,7 +636,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
                 break;
 
             default:
-                gbritem = layout->m_Drawings.GetLast();
+                gbritem = *(m_Drawings.end());
                 gbritem->m_Start = m_PreviousPos;       // m_Start is used as temporary storage
                 if( gbritem->m_PolyCorners.size() == 0 )
                     gbritem->m_PolyCorners.push_back( gbritem->m_Start );
@@ -651,9 +651,9 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             break;
 
         case 2:     // code D2: exposure OFF (i.e. "move to")
-            if( m_Exposure && layout->m_Drawings )    // End of polygon
+            if( m_Exposure && m_Drawings.size() > 0 )    // End of polygon
             {
-                gbritem = layout->m_Drawings.GetLast();
+                gbritem = *(m_Drawings.end());
                 StepAndRepeatItem( *gbritem );
             }
             m_Exposure    = false;
@@ -684,7 +684,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             {
             case GERB_INTERPOL_LINEAR_1X:
                 gbritem = new GERBER_DRAW_ITEM( layout, this );
-                layout->m_Drawings.Append( gbritem );
+                m_Drawings.push_back( gbritem );
 
                 fillLineGBRITEM( gbritem, dcode, m_GraphicLayer, m_PreviousPos,
                                  m_CurrentPos, size, GetLayerParams().m_LayerNegative );
@@ -700,7 +700,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             case GERB_INTERPOL_ARC_NEG:
             case GERB_INTERPOL_ARC_POS:
                 gbritem = new GERBER_DRAW_ITEM( layout, this );
-                layout->m_Drawings.Append( gbritem );
+                m_Drawings.push_back( gbritem );
 
                 fillArcGBRITEM( gbritem, dcode, m_GraphicLayer, m_PreviousPos,
                                 m_CurrentPos, m_IJPos, size,
@@ -734,7 +734,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             }
 
             gbritem = new GERBER_DRAW_ITEM( layout, this );
-            layout->m_Drawings.Append( gbritem );
+            m_Drawings.push_back( gbritem );
             fillFlashedGBRITEM( gbritem, aperture,
                                 dcode, m_GraphicLayer, m_CurrentPos,
                                 size, GetLayerParams().m_LayerNegative );

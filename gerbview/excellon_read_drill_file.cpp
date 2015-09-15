@@ -535,7 +535,7 @@ bool EXCELLON_IMAGE::Execute_Drill_Command( char*& text )
                     return false;
                 }
                 gbritem = new GERBER_DRAW_ITEM( GetParent()->GetGerberLayout(), this );
-                GetParent()->GetGerberLayout()->m_Drawings.Append( gbritem );
+                m_Drawings.push_back( gbritem );
                 if( m_SlotOn )  // Oval hole
                 {
                     fillLineGBRITEM( gbritem,

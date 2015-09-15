@@ -58,13 +58,6 @@ enum Gbr_Basic_Shapes {
 
 class GERBER_DRAW_ITEM : public EDA_ITEM
 {
-    // make SetNext() and SetBack() private so that they may not be called from anywhere.
-    // list management is done on GERBER_DRAW_ITEMs using DLIST<GERBER_DRAW_ITEM> only.
-private:
-    void SetNext( EDA_ITEM* aNext )       { Pnext = aNext; }
-    void SetBack( EDA_ITEM* aBack )       { Pback = aBack; }
-
-
 public:
     bool    m_UnitsMetric;                  /* store here the gerber units (inch/mm).  Used
                                              * only to calculate aperture macros shapes sizes */
@@ -115,9 +108,6 @@ public:
      * @return - GERBER_DRAW_ITEM*
      */
     GERBER_DRAW_ITEM* Copy() const;
-
-    GERBER_DRAW_ITEM* Next() const { return static_cast<GERBER_DRAW_ITEM*>( Pnext ); }
-    GERBER_DRAW_ITEM* Back() const { return static_cast<GERBER_DRAW_ITEM*>( Pback ); }
 
     /**
      * Function GetLayer
@@ -278,28 +268,6 @@ public:
      */
     bool Save( FILE* aFile ) const;
 
-    /**
-     * Function UnLink
-     * detaches this object from its owner.
-     */
-    void UnLink()
-    {
-        DLIST<GERBER_DRAW_ITEM>* list = (DLIST<GERBER_DRAW_ITEM>*) GetList();
-        wxASSERT( list );
-
-        if( list )
-            list->Remove( this );
-    }
-
-    /**
-     * Function DeleteStructure
-     * deletes this object after UnLink()ing it from its owner.
-     */
-    void DeleteStructure()
-    {
-        UnLink();
-        delete this;
-    }
 #if defined(DEBUG)
     void Show( int nestLevel, std::ostream& os ) const;  // override
 #endif

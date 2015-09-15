@@ -221,34 +221,43 @@ bool GBR_TO_PCB_EXPORTER::ExportPcb( LAYER_NUM* aLayerLookUpTable, int aCopperLa
 
     // create an image of gerber data
     // First: non copper layers:
-    GERBER_DRAW_ITEM* gerb_item = m_gerbview_frame->GetItemsList();
+
     int pcbCopperLayerMax = 31;
 
-    for( ; gerb_item; gerb_item = gerb_item->Next() )
+    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
     {
-        int layer = gerb_item->GetLayer();
+        int layer = g_GERBER_List.m_GERBER_List.begin() - git;
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
+
 
         if( !IsPcbLayer( pcb_layer_number ) )
             continue;
 
-        if( pcb_layer_number > pcbCopperLayerMax )
-            export_non_copper_item( gerb_item, pcb_layer_number );
+        GERBER_IMAGE* gerber = *git;
+        for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
+        {
+            GERBER_DRAW_ITEM* item = *it;
+            export_non_copper_item( item, pcb_layer_number );
+        }
     }
 
     // Copper layers
-    gerb_item = m_gerbview_frame->GetItemsList();
-
-    for( ; gerb_item; gerb_item = gerb_item->Next() )
+    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
     {
-        int layer = gerb_item->GetLayer();
+        int layer = g_GERBER_List.m_GERBER_List.begin() - git;
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
 
-        if( pcb_layer_number < 0 || pcb_layer_number > pcbCopperLayerMax )
-            continue;
 
-        else
-            export_copper_item( gerb_item, pcb_layer_number );
+        if( pcb_layer_number < 0 || pcb_layer_number > pcbCopperLayerMax ) {
+            continue;
+        }
+
+        GERBER_IMAGE* gerber = *git;
+        for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
+        {
+            GERBER_DRAW_ITEM* item = *it;
+            export_copper_item( item, pcb_layer_number );
+        }
     }
 
     fprintf( m_fp, ")\n" );

@@ -111,17 +111,6 @@ public:
     }
 
     /**
-     * Function GetItemsList
-     * @return the first GERBER_DRAW_ITEM * item of the items list
-     */
-    GERBER_DRAW_ITEM* GetItemsList()
-    {
-        GERBER_DRAW_ITEM* item = GetGerberLayout()->m_Drawings;
-
-        return item;
-    }
-
-    /**
      * Function GetGerberLayoutBoundingBox
      * calculates the bounding box containing all gerber items.
      * @return EDA_RECT - the items bounding box

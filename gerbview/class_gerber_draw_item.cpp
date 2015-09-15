@@ -325,9 +325,6 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
     if( d_codeDescr == NULL )
         d_codeDescr = &dummyD_CODE;
 
-    if( gerbFrame->IsLayerVisible( g_GERBER_List.GetGerberIndexByLayer(GetLayer()) ) == false )
-        return;
-
     color = gerbFrame->GetLayerColor( g_GERBER_List.GetGerberIndexByLayer(GetLayer()) );
 
     if( aDrawMode & GR_HIGHLIGHT )

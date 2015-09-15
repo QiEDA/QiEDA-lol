@@ -113,15 +113,8 @@ GERBER_IMAGE::~GERBER_IMAGE()
     }
 
     delete m_FileFunction;
-}
 
-/*
- * Function GetItemsList
- * returns the first GERBER_DRAW_ITEM * item of the items list
- */
-GERBER_DRAW_ITEM * GERBER_IMAGE::GetItemsList()
-{
-    return m_Parent->GetItemsList();
+    ClearDrawingItems();
 }
 
 D_CODE* GERBER_IMAGE::GetDCODE( int aDCODE, bool create )
@@ -229,10 +222,11 @@ bool GERBER_IMAGE::HasNegativeItems()
         else
         {
             m_hasNegativeItems = 0;
-            for( GERBER_DRAW_ITEM* item = GetItemsList(); item; item = item->Next() )
+
+            for (std::list<GERBER_DRAW_ITEM *>::iterator it = m_Drawings.begin();
+                 it != m_Drawings.end(); ++it)
             {
-                if( item->GetLayer() != m_GraphicLayer )
-                    continue;
+                GERBER_DRAW_ITEM* item = *it;
 
                 if( item->HasNegativeItems() )
                 {
@@ -317,7 +311,7 @@ void GERBER_IMAGE::StepAndRepeatItem( const GERBER_DRAW_ITEM& aItem )
             move_vector.y = scaletoIU( jj * GetLayerParams().m_StepForRepeat.y,
                                    GetLayerParams().m_StepForRepeatMetric );
             dupItem->MoveXY( move_vector );
-            m_Parent->GetGerberLayout()->m_Drawings.Append( dupItem );
+            m_Drawings.push_back( dupItem );
         }
     }
 }
@@ -367,6 +361,16 @@ void GERBER_IMAGE::DisplayImageInfo( void )
         msg.Printf( wxT( "X=%f Y=%f" ), (double) m_ImageJustifyOffset.x*2.54/1000,
                                     (double) m_ImageJustifyOffset.y*2.54/1000 );
     m_Parent->AppendMsgPanel( _( "Image Justify Offset" ), msg, DARKRED );
+}
+
+void GERBER_IMAGE::ClearDrawingItems( void )
+{
+    for (std::list<GERBER_DRAW_ITEM*>::iterator it = m_Drawings.begin() ; it != m_Drawings.end(); ++it)
+    {
+        delete (*it);
+    }
+
+    m_Drawings.clear();
 }
 
 // GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
@@ -463,6 +467,7 @@ void GERBER_IMAGE_LIST::ClearImage( int aIdx )
 {
     if( aIdx >= 0 && aIdx < (int)m_GERBER_List.size() && m_GERBER_List[aIdx] )
     {
+        m_GERBER_List[aIdx]->ClearDrawingItems();
         m_GERBER_List[aIdx]->InitToolTable();
         m_GERBER_List[aIdx]->ResetDefaultValues();
         m_GERBER_List[aIdx]->m_InUse = false;
@@ -549,31 +554,9 @@ static bool sortZorder( const GERBER_IMAGE* const& ref, const GERBER_IMAGE* cons
     return ref->m_FileFunction->GetZSubOrder() > test->m_FileFunction->GetZSubOrder();
 }
 
-void GERBER_IMAGE_LIST::SortImagesByZOrder( GERBER_DRAW_ITEM* aDrawList )
+void GERBER_IMAGE_LIST::SortImagesByZOrder()
 {
     std::sort( m_GERBER_List.begin(), m_GERBER_List.end(), sortZorder );
-
-    // The image order has changed.
-    // Graphic layer numbering must be updated to match the widgets layer order
-
-    // Store the old/new graphic layer info:
-    std::map <int, int> tab_lyr;
-
-    for( unsigned layer = 0; layer < m_GERBER_List.size(); ++layer )
-    {
-        if( m_GERBER_List[layer] )
-        {
-            tab_lyr[m_GERBER_List[layer]->m_GraphicLayer] = layer;
-            m_GERBER_List[layer]->m_GraphicLayer = layer ;
-        }
-    }
-
-    // update the graphic layer in items to draw
-    for( GERBER_DRAW_ITEM* item = aDrawList; item; item = item->Next() )
-    {
-        int layer = item->GetLayer();
-        item->SetLayer( tab_lyr[layer] );
-    }
 }
 
 

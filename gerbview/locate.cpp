@@ -33,6 +33,7 @@
 
 #include <gerbview.h>
 #include <gerbview_frame.h>
+#include <class_GERBER.h>
 
 
 /* localize a gerber item and return a pointer to it.
@@ -49,29 +50,40 @@ GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition, int aTypeloc
 
     int layer = getActiveLayer();
 
-    // Search first on active layer
-    GERBER_DRAW_ITEM* gerb_item = GetItemsList();
+    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
 
-    for( ; gerb_item; gerb_item = gerb_item->Next() )
+    GERBER_DRAW_ITEM* gerb_item = NULL;
+
+    if(gerber != NULL)
     {
-        if( gerb_item->GetLayer()!= layer )
-            continue;
-
-        if( gerb_item->HitTest( ref ) )
+        // Search first on active layer
+        for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
         {
-            found = true;
-            break;
+            gerb_item = *it;
+            if( gerb_item->GetLayer()!= layer )
+                continue;
+
+            if( gerb_item->HitTest( ref ) )
+            {
+                found = true;
+                break;
+            }
         }
     }
 
     if( !found ) // Search on all layers
     {
-        for( gerb_item = GetItemsList(); gerb_item; gerb_item = gerb_item->Next() )
+        for( int layer = 0; layer <  g_GERBER_List.GetImageCount(); layer++ )
         {
-            if( gerb_item->HitTest( ref ) )
+            gerber = g_GERBER_List.GetGerberByListIndex( layer );
+            for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
             {
-                found = true;
-                break;
+                gerb_item = *it;
+                if( gerb_item->HitTest( ref ) )
+                {
+                    found = true;
+                    break;
+                }
             }
         }
     }

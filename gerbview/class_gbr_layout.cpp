@@ -32,6 +32,7 @@
 
 #include <common.h>
 #include <class_gbr_layout.h>
+#include <class_GERBER.h>
 
 GBR_LAYOUT::GBR_LAYOUT()
 {
@@ -48,8 +49,16 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
 {
     EDA_RECT bbox;
 
-    for( GERBER_DRAW_ITEM* gerb_item = m_Drawings; gerb_item; gerb_item = gerb_item->Next() )
-        bbox.Merge( gerb_item->GetBoundingBox() );
+    for (std::vector<GERBER_IMAGE*>::iterator it=g_GERBER_List.m_GERBER_List.begin(); it != g_GERBER_List.m_GERBER_List.end(); ++it)
+    {
+        GERBER_IMAGE *gerber = *it;
+        for (std::list<GERBER_DRAW_ITEM *>::iterator jt = gerber->m_Drawings.begin();
+             jt != gerber->m_Drawings.end(); ++jt)
+        {
+            GERBER_DRAW_ITEM* item = *jt;
+            bbox.Merge( item->GetBoundingBox() );
+        }
+    }
 
     SetBoundingBox( bbox );
     return bbox;

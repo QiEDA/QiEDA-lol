@@ -102,6 +102,7 @@ class GERBER_IMAGE
     GERBER_LAYER       m_GBRLayerParams; // hold params for the current gerber layer
 
 public:
+    std::list<GERBER_DRAW_ITEM*> m_Drawings;
     bool               m_InUse;                                 // true if this image is currently in use
                                                                 // (a file is loaded in it)
     wxString           m_FileName;                              // Full File Name for this layer
@@ -183,12 +184,6 @@ public:
     {
         return m_Parent;
     }
-
-    /**
-     * Function GetItemsList
-     * @return the first GERBER_DRAW_ITEM * item of the items list
-     */
-    GERBER_DRAW_ITEM * GetItemsList();
 
     /**
      * Function GetLayerParams
@@ -308,6 +303,8 @@ public:
      * Display info about Image Parameters.
      */
     void DisplayImageInfo( void );
+
+    void ClearDrawingItems( void );
 };
 
 /**
@@ -316,14 +313,15 @@ public:
  */
 class GERBER_IMAGE_LIST
 {
-    // the list of loaded images (1 image = 1 gerber file)
-    std::vector<GERBER_IMAGE*> m_GERBER_List;
 
     unsigned m_nextLayerId;
 
 public:
     GERBER_IMAGE_LIST();
     ~GERBER_IMAGE_LIST();
+
+    // the list of loaded images (1 image = 1 gerber file)
+    std::vector<GERBER_IMAGE*> m_GERBER_List;
 
     //Accessor
     GERBER_IMAGE* GetGerberByListIndex( int aIdx );
@@ -344,7 +342,7 @@ public:
      * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
      * @return true if the index used, or -1 if no room to add image
      */
-        int ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage );
+    int ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage );
 
     /**
      * @return Number of images in list
@@ -384,7 +382,7 @@ public:
      * @param aDrawList: the draw list associated to the gerber images
      * (SortImagesByZOrder updates the graphic layer of these items)
      */
-    void SortImagesByZOrder( GERBER_DRAW_ITEM* aDrawList );
+    void SortImagesByZOrder();
 
     void MoveLayerUp( int aIdx );
     void MoveLayerDown( int aIdx );
