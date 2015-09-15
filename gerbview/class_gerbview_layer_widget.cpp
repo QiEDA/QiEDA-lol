@@ -149,6 +149,12 @@ void GERBER_LAYER_WIDGET::onRightDownLayers( wxMouseEvent& event )
 {
     wxMenu          menu;
 
+    menu.Append( new wxMenuItem( &menu, ID_SHOW_NO_LAYERS_BUT_ACTIVE,
+                                 _( "Hide All Layers But Active" ) ) );
+
+    menu.Append( new wxMenuItem( &menu, ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE,
+                                 _( "Always Hide All Layers But Active" ) ) );
+
     baseRightClickMenu(menu);
 
     PopupMenu( &menu );
@@ -186,7 +192,14 @@ void GERBER_LAYER_WIDGET::onRightDownLayerRow( wxMouseEvent& event )
 
     menu.Append( new wxMenuItem( &menu, ID_LAYER_DELETE,
                                  _("Delete layer") ) );
+
     menu.AppendSeparator();
+
+    menu.Append( new wxMenuItem( &menu, ID_LAYER_HIDE_OTHERS,
+                                 _( "Hide Other Layers" ) ) );
+
+    menu.Append( new wxMenuItem( &menu, ID_LAYER_SHOW_OTHERS,
+                                 _( "Show Other Layers" ) ) );
 
     baseRightClickMenu(menu);
 
@@ -201,12 +214,6 @@ void GERBER_LAYER_WIDGET::baseRightClickMenu( wxMenu& aMenu )
     aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_ALL_LAYERS,
                                  _("Show All Layers") ) );
 
-    aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_NO_LAYERS_BUT_ACTIVE,
-                                 _( "Hide All Layers But Active" ) ) );
-
-    aMenu.Append( new wxMenuItem( &aMenu, ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE,
-                                 _( "Always Hide All Layers But Active" ) ) );
-
     aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_NO_LAYERS,
                                  _( "Hide All Layers" ) ) );
 
@@ -220,12 +227,8 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
 {
     int  rowCount;
     int  menuId = event.GetId();
-    bool visible = (menuId == ID_SHOW_ALL_LAYERS);
-    bool force_active_layer_visible;
 
     m_alwaysShowActiveLayer = ( menuId == ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE );
-    force_active_layer_visible = ( menuId == ID_SHOW_NO_LAYERS_BUT_ACTIVE ||
-                                   menuId == ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE );
 
     switch( menuId )
     {
@@ -233,15 +236,45 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
     case ID_SHOW_NO_LAYERS:
     case ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE:
     case ID_SHOW_NO_LAYERS_BUT_ACTIVE:
+    case ID_LAYER_SHOW_OTHERS:
+    case ID_LAYER_HIDE_OTHERS:
         rowCount = GetLayerRowCount();
         for( int row=0; row < rowCount; ++row )
         {
             wxCheckBox* cb = (wxCheckBox*) getLayerComp( row, COLUMN_COLOR_LYR_CB );
             int layer = getDecodedId( cb->GetId() );
-            bool loc_visible = visible;
+            bool loc_visible = false;
 
-            if( force_active_layer_visible && (layer == myframe->getActiveLayer() ) )
+            if( menuId == ID_SHOW_ALL_LAYERS )  // all layers visible
+            {
                 loc_visible = true;
+            }
+            else if( menuId == ID_SHOW_NO_LAYERS )  //all layers not visible catch
+            {
+                loc_visible = false;
+            }
+            else if ( ( menuId == ID_SHOW_NO_LAYERS_BUT_ACTIVE ||
+                        menuId == ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE ) && (layer == myframe->getActiveLayer() ))   //layer only visible if active alyer
+            {
+                loc_visible = true;
+            }
+            else if( menuId == ID_LAYER_SHOW_OTHERS ||
+                    menuId == ID_LAYER_HIDE_OTHERS )
+            {
+                wxMenu* menu = (wxMenu*) event.GetEventObject();
+                LAYER_WIDGT_ROW* const layerRowData = (LAYER_WIDGT_ROW*)menu->GetRefData();
+
+                if( menuId == ID_LAYER_SHOW_OTHERS &&
+                        layerRowData->m_row != layer )  // show the other layers except for us
+                {
+                    loc_visible = true;
+                }
+                else if( menuId == ID_LAYER_HIDE_OTHERS &&
+                        layerRowData->m_row == layer)   // show only the selected layer
+                {
+                    loc_visible = true;
+                }
+            }
 
             cb->SetValue( loc_visible );
 
