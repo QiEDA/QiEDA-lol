@@ -511,18 +511,6 @@ public:
      *         true if some items found and HandleBlockPlace must be called later.
      */
     virtual bool        HandleBlockEnd( wxDC* DC );
-
-    /**
-     * Function Block_Move
-     * moves all tracks and segments within the selected block.
-     * New location is determined by the current offset from the selected
-     * block's original location.
-     * Defined separately in Pcbnew and GerbView
-     *
-     * @param DC A device context to draw on.
-     */
-    void                Block_Move( wxDC* DC );
-
     /**
      * Function ToPlotter
      * Open a dialog frame to create plot and drill files
