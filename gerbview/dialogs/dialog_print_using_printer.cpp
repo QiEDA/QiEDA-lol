@@ -163,7 +163,7 @@ void DIALOG_PRINT_USING_PRINTER::InitValues( )
         msg << wxT( " " ) << ii + 1;
         m_BoxSelectLayer[ii] = new wxCheckBox( this, -1, msg );
 
-        if( g_GERBER_List.GetGerberByListIndex( ii ) == NULL )     // Nothing loaded on this draw layer
+        if( m_Parent->m_GERBER_List->GetGerberByListIndex( ii ) == NULL )     // Nothing loaded on this draw layer
             m_BoxSelectLayer[ii]->Enable( false );
 
         if( ii < 16 )

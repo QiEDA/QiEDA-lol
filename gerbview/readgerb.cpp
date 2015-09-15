@@ -55,7 +55,7 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
     if( replace )
     {
         layer = getActiveLayer();
-        gerber = g_GERBER_List.GetGerberByListIndex( layer );
+        gerber = m_GERBER_List->GetGerberByListIndex( layer );
 
         if( gerber == NULL )
         {
@@ -64,12 +64,12 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
             return false;
         }
 
-        g_GERBER_List.ReplaceGbrImage( layer, gerber );
+        m_GERBER_List->ReplaceGbrImage( layer, gerber );
     }
     else
     {
         gerber = new GERBER_IMAGE( this );
-        layer = g_GERBER_List.AddGbrImage( gerber );
+        layer = m_GERBER_List->AddGbrImage( gerber );
         gerber->SetLayerNumber(layer);
     }
 

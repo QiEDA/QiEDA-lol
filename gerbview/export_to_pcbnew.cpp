@@ -156,7 +156,7 @@ GBR_TO_PCB_EXPORTER::~GBR_TO_PCB_EXPORTER()
  */
 void GERBVIEW_FRAME::ExportDataInPcbnewFormat( wxCommandEvent& event )
 {
-    int layercount = g_GERBER_List.GetImageCount();
+    int layercount = m_GERBER_List->GetImageCount();
 
     if( layercount == 0 )
     {
@@ -218,9 +218,9 @@ bool GBR_TO_PCB_EXPORTER::ExportPcb( LAYER_NUM* aLayerLookUpTable, int aCopperLa
 
     int pcbCopperLayerMax = 31;
 
-    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::iterator git = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin(); git != m_gerbview_frame->m_GERBER_List->m_Gerbers.end(); ++git)
     {
-        int layer = g_GERBER_List.m_GERBER_List.begin() - git;
+        int layer = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin() - git;
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
 
 
@@ -236,9 +236,9 @@ bool GBR_TO_PCB_EXPORTER::ExportPcb( LAYER_NUM* aLayerLookUpTable, int aCopperLa
     }
 
     // Copper layers
-    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::iterator git = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin(); git != m_gerbview_frame->m_GERBER_List->m_Gerbers.end(); ++git)
     {
-        int layer = g_GERBER_List.m_GERBER_List.begin() - git;
+        int layer = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin() - git;
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
 
 

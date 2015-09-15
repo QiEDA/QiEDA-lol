@@ -37,10 +37,14 @@
 #include <class_colors_design_settings.h>
 #include <common.h>                         // PAGE_INFO
 #include <gerbview.h>                       // GERBER_DRAWLAYERS_COUNT
+#include "gerbview_frame.h"
 #include <class_title_block.h>
 #include <class_gerber_draw_item.h>
 
+#include <gerbview_frame.h>
 #include <gr_basic.h>
+
+class GERBVIEW_FRAME;
 
 /**
  * Class GBR_LAYOUT
@@ -53,9 +57,11 @@ private:
     TITLE_BLOCK         m_titles;
     wxPoint             m_originAxisPosition;
     std::bitset <GERBER_DRAWLAYERS_COUNT> m_printLayersMask; // When printing: the list of layers to print
+    GERBVIEW_FRAME*     m_Parent;
 public:
+    GERBVIEW_FRAME* GetParent() const { return m_Parent; }
 
-    GBR_LAYOUT();
+    GBR_LAYOUT(GERBVIEW_FRAME* aParent);
     ~GBR_LAYOUT();
 
     const wxPoint&      GetAuxOrigin() const

@@ -66,6 +66,7 @@ GERBVIEW_FRAME::GERBVIEW_FRAME( KIWAY* aKiway, wxWindow* aParent ):
     EDA_DRAW_FRAME( aKiway, aParent, FRAME_GERBER, wxT( "GerbView" ),
         wxDefaultPosition, wxDefaultSize, KICAD_DEFAULT_DRAWFRAME_STYLE, GERBVIEW_FRAME_NAME )
 {
+    m_GERBER_List = new GERBER_IMAGE_LIST();
     m_colorsSettings = &g_ColorsSettings;
     m_gerberLayout = NULL;
     m_zoomLevelCoeff = ZOOM_FACTOR( 110 );   // Adjusted to roughly displays zoom level = 1
@@ -94,7 +95,7 @@ GERBVIEW_FRAME::GERBVIEW_FRAME( KIWAY* aKiway, wxWindow* aParent ):
     icon.CopyFromBitmap( KiBitmap( icon_gerbview_xpm ) );
     SetIcon( icon );
 
-    SetLayout( new GBR_LAYOUT() );
+    SetLayout( new GBR_LAYOUT( this ) );
 
     SetScreen( new GBR_SCREEN( GetPageSettings().GetSizeIU() ) );
 
@@ -232,7 +233,7 @@ bool GERBVIEW_FRAME::OpenProjectFiles( const std::vector<wxString>& aFileSet, in
 
 double GERBVIEW_FRAME::BestZoom()
 {
-    if( g_GERBER_List.GetImageCount() == 0  )
+    if( m_GERBER_List->GetImageCount() == 0  )
         return ZOOM_FACTOR( 350.0 );
 
     EDA_RECT bbox = GetGerberLayout()->ComputeBoundingBox();
@@ -366,7 +367,7 @@ void GERBVIEW_FRAME::syncLayerBox()
     m_SelLayerBox->SetSelection( getActiveLayer() );
 
     int             dcodeSelected = -1;
-    GERBER_IMAGE*   gerber = g_GERBER_List.GetGerberByListIndex( getActiveLayer() );
+    GERBER_IMAGE*   gerber = m_GERBER_List->GetGerberByListIndex( getActiveLayer() );
 
     if( gerber )
         dcodeSelected = gerber->m_Selected_Tool;
@@ -391,9 +392,9 @@ void GERBVIEW_FRAME::List_D_Codes()
                             IU_PER_MM;
     int       curr_layer = getActiveLayer();
 
-    for( int layer = 0; layer < g_GERBER_List.GetImageCount(); ++layer )
+    for( int layer = 0; layer < m_GERBER_List->GetImageCount(); ++layer )
     {
-        GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
+        GERBER_IMAGE* gerber = m_GERBER_List->GetGerberByListIndex( layer );
 
         if( gerber == NULL )
             continue;
@@ -448,7 +449,7 @@ void GERBVIEW_FRAME::List_D_Codes()
 
 void GERBVIEW_FRAME::UpdateTitleAndInfo()
 {
-    GERBER_IMAGE*   gerber = g_GERBER_List.GetGerberByListIndex(  getActiveLayer() );
+    GERBER_IMAGE*   gerber = m_GERBER_List->GetGerberByListIndex(  getActiveLayer() );
     wxString        text;
 
     // Display the gerber filename

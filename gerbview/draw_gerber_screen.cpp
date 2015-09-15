@@ -231,7 +231,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
 
     // Draw layers from bottom to top, and active layer last
     // in non transparent modes, the last layer drawn mask mask previously drawn layer
-    for( int layer = g_GERBER_List.GetImageCount()-1; !end; --layer )
+    for( int layer = gerbFrame->m_GERBER_List->GetImageCount()-1; !end; --layer )
     {
         int active_layer = gerbFrame->getActiveLayer();
 
@@ -243,7 +243,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
             end   = true;
             layer = active_layer;
         }
-        GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
+        GERBER_IMAGE* gerber = gerbFrame->m_GERBER_List->GetGerberByListIndex( layer );
 
         if( gerber == NULL )    // Graphic layer not yet used
             continue;
@@ -403,7 +403,7 @@ void GERBVIEW_FRAME::DrawItemsDCodeID( wxDC* aDC, GR_DRAWMODE aDrawMode )
 
     GRSetDrawMode( aDC, aDrawMode );
 
-    for (std::vector<GERBER_IMAGE*>::reverse_iterator git = g_GERBER_List.m_GERBER_List.rbegin() ; git != g_GERBER_List.m_GERBER_List.rend(); ++git)
+    for (std::vector<GERBER_IMAGE*>::reverse_iterator git = m_GERBER_List->m_Gerbers.rbegin() ; git != m_GERBER_List->m_Gerbers.rend(); ++git)
     {
         GERBER_IMAGE* gerber = *git;
 

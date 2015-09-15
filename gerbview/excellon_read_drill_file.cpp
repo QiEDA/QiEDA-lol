@@ -175,12 +175,12 @@ bool GERBVIEW_FRAME::Read_EXCELLON_File( const wxString& aFullFileName )
 {
     wxString msg;
     int layerId = getActiveLayer();      // current layer used in GerbView
-    EXCELLON_IMAGE* drill_Layer = (EXCELLON_IMAGE*) g_GERBER_List.GetGerberByListIndex( layerId );
+    EXCELLON_IMAGE* drill_Layer = (EXCELLON_IMAGE*) m_GERBER_List->GetGerberByListIndex( layerId );
 
     if( drill_Layer == NULL )
     {
         drill_Layer = new EXCELLON_IMAGE( this );
-        layerId = g_GERBER_List.AddGbrImage( drill_Layer );
+        layerId = m_GERBER_List->AddGbrImage( drill_Layer );
         drill_Layer->SetLayerNumber(layerId);
     }
 

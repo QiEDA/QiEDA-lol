@@ -35,24 +35,24 @@ GERBER_IMAGE_LIST::~GERBER_IMAGE_LIST()
 {
     ClearList();
 
-    for( unsigned layer = 0; layer < m_GERBER_List.size(); ++layer )
+    for( unsigned layer = 0; layer < m_Gerbers.size(); ++layer )
     {
-        delete m_GERBER_List[layer];
-        m_GERBER_List[layer] = NULL;
+        delete m_Gerbers[layer];
+        m_Gerbers[layer] = NULL;
     }
 }
 
 GERBER_IMAGE* GERBER_IMAGE_LIST::GetGerberByListIndex( int aIdx )
 {
-    if( aIdx < m_GERBER_List.size() && aIdx >= 0 )
-        return m_GERBER_List[aIdx];
+    if( aIdx < m_Gerbers.size() && aIdx >= 0 )
+        return m_Gerbers[aIdx];
 
     return NULL;
 }
 
 GERBER_IMAGE* GERBER_IMAGE_LIST::GetGerberById( int layerID )
 {
-    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
     {
         if( (*it)->m_GraphicLayer == layerID )
         {
@@ -66,11 +66,11 @@ GERBER_IMAGE* GERBER_IMAGE_LIST::GetGerberById( int layerID )
 
 int GERBER_IMAGE_LIST::GetGerberIndexByLayer( int layerID )
 {
-    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
     {
         if( (*it)->m_GraphicLayer == layerID )
         {
-            int result = it - m_GERBER_List.begin();
+            int result = it - m_Gerbers.begin();
             return result;
         }
     }
@@ -80,7 +80,7 @@ int GERBER_IMAGE_LIST::GetGerberIndexByLayer( int layerID )
 
 int GERBER_IMAGE_LIST::AddGbrImage( GERBER_IMAGE* aGbrImage )
 {
-    m_GERBER_List.push_back(aGbrImage);
+    m_Gerbers.push_back(aGbrImage);
     int idx = m_nextLayerId++;
 
     return idx;
@@ -93,7 +93,7 @@ int GERBER_IMAGE_LIST::ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage )
 
     if( IsUsed( idx ) )
     {
-        m_GERBER_List[idx] = aGbrImage;
+        m_Gerbers[idx] = aGbrImage;
     }
 
     return idx;
@@ -104,12 +104,12 @@ int GERBER_IMAGE_LIST::ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage )
 // (can be reused)
 void GERBER_IMAGE_LIST::ClearList()
 {
-    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
     {
         delete (*it);
     }
 
-    m_GERBER_List.clear();
+    m_Gerbers.clear();
 
     m_nextLayerId = 0;
 }
@@ -117,30 +117,30 @@ void GERBER_IMAGE_LIST::ClearList()
 // remove the loaded data of image aIdx, but do not delete it
 void GERBER_IMAGE_LIST::ClearImage( int aIdx )
 {
-    if( aIdx >= 0 && aIdx < (int)m_GERBER_List.size() && m_GERBER_List[aIdx] )
+    if( aIdx >= 0 && aIdx < (int)m_Gerbers.size() && m_Gerbers[aIdx] )
     {
-        m_GERBER_List[aIdx]->ClearDrawingItems();
-        m_GERBER_List[aIdx]->InitToolTable();
-        m_GERBER_List[aIdx]->ResetDefaultValues();
-        m_GERBER_List[aIdx]->m_InUse = false;
+        m_Gerbers[aIdx]->ClearDrawingItems();
+        m_Gerbers[aIdx]->InitToolTable();
+        m_Gerbers[aIdx]->ResetDefaultValues();
+        m_Gerbers[aIdx]->m_InUse = false;
     }
 }
 
 // remove the loaded data of image aIdx, but do not delete it
 void GERBER_IMAGE_LIST::RemoveImage( int aIdx )
 {
-    if( aIdx >= 0 && aIdx < (int)m_GERBER_List.size() )
+    if( aIdx >= 0 && aIdx < (int)m_Gerbers.size() )
     {
-        delete m_GERBER_List[aIdx];
-        m_GERBER_List.erase (m_GERBER_List.begin()+aIdx);
+        delete m_Gerbers[aIdx];
+        m_Gerbers.erase (m_Gerbers.begin()+aIdx);
     }
 }
 
 // return true if image is used (loaded and not cleared)
 bool GERBER_IMAGE_LIST::IsUsed( int aIdx )
 {
-    if( aIdx >= 0 && aIdx < (int)m_GERBER_List.size() )
-        return m_GERBER_List[aIdx] != NULL && m_GERBER_List[aIdx]->m_InUse;
+    if( aIdx >= 0 && aIdx < (int)m_Gerbers.size() )
+        return m_Gerbers[aIdx] != NULL && m_Gerbers[aIdx]->m_InUse;
 
     return false;
 }
@@ -176,7 +176,7 @@ static bool sortZorder( const GERBER_IMAGE* const& ref, const GERBER_IMAGE* cons
 
 void GERBER_IMAGE_LIST::SortImagesByZOrder()
 {
-    std::sort( m_GERBER_List.begin(), m_GERBER_List.end(), sortZorder );
+    std::sort( m_Gerbers.begin(), m_Gerbers.end(), sortZorder );
 }
 
 
@@ -184,18 +184,14 @@ void GERBER_IMAGE_LIST::MoveLayerUp( int aIdx )
 {
     if( aIdx > 0 )
     {
-        std::iter_swap(m_GERBER_List.begin() + aIdx-1, m_GERBER_List.begin() + aIdx);
+        std::iter_swap(m_Gerbers.begin() + aIdx-1, m_Gerbers.begin() + aIdx);
     }
 }
 
 void GERBER_IMAGE_LIST::MoveLayerDown( int aIdx )
 {
-    if( aIdx < m_GERBER_List.size()-1 )
+    if( aIdx < m_Gerbers.size()-1 )
     {
-        std::iter_swap(m_GERBER_List.begin() + aIdx, m_GERBER_List.begin() + aIdx+1);
+        std::iter_swap(m_Gerbers.begin() + aIdx, m_Gerbers.begin() + aIdx+1);
     }
 }
-
-
-// The global image list:
-GERBER_IMAGE_LIST g_GERBER_List;

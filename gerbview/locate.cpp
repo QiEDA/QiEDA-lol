@@ -51,7 +51,7 @@ GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition, int aTypeloc
 
     int layer = getActiveLayer();
 
-    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
+    GERBER_IMAGE* gerber = m_GERBER_List->GetGerberByListIndex( layer );
 
     GERBER_DRAW_ITEM* gerb_item = NULL;
 
@@ -74,9 +74,9 @@ GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition, int aTypeloc
 
     if( !found ) // Search on all layers
     {
-        for( int layer = 0; layer <  g_GERBER_List.GetImageCount(); layer++ )
+        for( int layer = 0; layer <  m_GERBER_List->GetImageCount(); layer++ )
         {
-            gerber = g_GERBER_List.GetGerberByListIndex( layer );
+            gerber = m_GERBER_List->GetGerberByListIndex( layer );
             for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
             {
                 gerb_item = *it;

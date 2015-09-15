@@ -42,11 +42,13 @@ void GBR_LAYER_BOX_SELECTOR::Resync()
     Freeze();
     Clear();
 
-    for (std::vector<GERBER_IMAGE*>::iterator git = g_GERBER_List.m_GERBER_List.begin(); git != g_GERBER_List.m_GERBER_List.end(); ++git)
+    GERBVIEW_FRAME* gerbviewFrame = (GERBVIEW_FRAME*)m_parent->GetParent(); //we are child of toolbar which is child of frame
+
+    for (std::vector<GERBER_IMAGE*>::iterator git = gerbviewFrame->m_GERBER_List->m_Gerbers.begin(); git != gerbviewFrame->m_GERBER_List->m_Gerbers.end(); ++git)
     {
         GERBER_IMAGE* gerber = *git;
 
-        int layerid = git-g_GERBER_List.m_GERBER_List.begin();
+        int layerid = git-gerbviewFrame->m_GERBER_List->m_Gerbers.begin();
 
         if( !IsLayerEnabled( layerid ) )
             continue;
@@ -74,7 +76,9 @@ EDA_COLOR_T GBR_LAYER_BOX_SELECTOR::GetLayerColor( int aLayer ) const
 // Returns the name of the layer id
 wxString GBR_LAYER_BOX_SELECTOR::GetLayerName( int aLayer ) const
 {
-    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex(aLayer);
+    GERBVIEW_FRAME* gerbviewFrame = (GERBVIEW_FRAME*)m_parent->GetParent(); //we are child of toolbar which is child of frame
+
+    GERBER_IMAGE* gerber = gerbviewFrame->m_GERBER_List->GetGerberByListIndex(aLayer);
     wxString name = gerber->GetDisplayName();
 
     return name;

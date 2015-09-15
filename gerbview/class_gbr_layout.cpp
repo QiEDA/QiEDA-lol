@@ -35,7 +35,8 @@
 #include <class_gerber_image.h>
 #include <class_gerber_image_list.h>
 
-GBR_LAYOUT::GBR_LAYOUT()
+GBR_LAYOUT::GBR_LAYOUT( GERBVIEW_FRAME* aParent ) :
+        m_Parent( aParent )
 {
     m_printLayersMask.set();
 }
@@ -50,7 +51,7 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
 {
     EDA_RECT bbox;
 
-    for (std::vector<GERBER_IMAGE*>::iterator it=g_GERBER_List.m_GERBER_List.begin(); it != g_GERBER_List.m_GERBER_List.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::iterator it=m_Parent->m_GERBER_List->m_Gerbers.begin(); it != m_Parent->m_GERBER_List->m_Gerbers.end(); ++it)
     {
         GERBER_IMAGE *gerber = *it;
         for (std::list<GERBER_DRAW_ITEM *>::iterator jt = gerber->m_Drawings.begin();
@@ -64,3 +65,4 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
     SetBoundingBox( bbox );
     return bbox;
 }
+

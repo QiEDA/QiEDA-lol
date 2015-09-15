@@ -41,7 +41,7 @@ public:
     ~GERBER_IMAGE_LIST();
 
     // the list of loaded images (1 image = 1 gerber file)
-    std::vector<GERBER_IMAGE*> m_GERBER_List;
+    std::vector<GERBER_IMAGE*> m_Gerbers;
 
     //Accessor
     GERBER_IMAGE* GetGerberByListIndex( int aIdx );
@@ -69,7 +69,7 @@ public:
      */
     size_t GetImageCount()
     {
-        return m_GERBER_List.size();
+        return m_Gerbers.size();
     }
 
     /**
@@ -109,8 +109,5 @@ public:
 
     int GetGerberIndexByLayer( int layerID );
 };
-
-
-extern GERBER_IMAGE_LIST g_GERBER_List;
 
 #endif  // ifndef _CLASS_GERBER_IMAGE_LIST_H_
