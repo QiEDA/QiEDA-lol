@@ -77,8 +77,6 @@
 #include <kicad_string.h>
 #include <class_X2_gerber_attributes.h>
 
-#include <cmath>
-
 #include <html_messagebox.h>
 
 // Default format for dimensions
@@ -180,8 +178,9 @@ bool GERBVIEW_FRAME::Read_EXCELLON_File( const wxString& aFullFileName )
 
     if( drill_Layer == NULL )
     {
-        drill_Layer = new EXCELLON_IMAGE( this, layerId );
-        layerId = g_GERBER_List.AddGbrImage( drill_Layer, layerId );
+        drill_Layer = new EXCELLON_IMAGE( this );
+        layerId = g_GERBER_List.AddGbrImage( drill_Layer );
+        drill_Layer->SetLayerNumber(layerId);
     }
 
     if( layerId < 0 )

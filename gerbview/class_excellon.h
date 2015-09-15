@@ -96,8 +96,8 @@ private:
     excellon_state m_State;         // state of excellon file analysis
     bool           m_SlotOn;        // true during an oval driil definition
 
-public: EXCELLON_IMAGE( GERBVIEW_FRAME* aParent, int layer ) :
-        GERBER_IMAGE( aParent, layer )
+public: EXCELLON_IMAGE( GERBVIEW_FRAME* aParent ) :
+        GERBER_IMAGE( aParent )
     {
         m_State  = READ_HEADER_STATE;
         m_SlotOn = false;

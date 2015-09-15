@@ -187,19 +187,11 @@ bool GERBVIEW_FRAME::LoadGerberFiles( const wxString& aFullFileName )
 
         setActiveLayer( layer, false );
 
-        if( Read_GERBER_File( filename.GetFullPath(), filename.GetFullPath() ) )
+        if( Read_GERBER_File( filename.GetFullPath(), filename.GetFullPath(), false ) )
         {
             UpdateFileHistory( m_lastFileName );
 
             layer = getNextAvailableLayer( layer );
-
-            if( layer == NO_AVAILABLE_LAYERS )
-            {
-                wxString msg = wxT( "No more empty available layers.\n"
-                                    "The remaining gerber files will not be loaded." );
-                wxMessageBox( msg );
-                break;
-            }
 
             setActiveLayer( layer, false );
         }

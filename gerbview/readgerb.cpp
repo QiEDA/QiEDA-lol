@@ -38,7 +38,8 @@
 /* Read a gerber file, RS274D, RS274X or RS274X2 format.
  */
 bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
-                                           const wxString& D_Code_FullFileName )
+                                        const wxString& D_Code_FullFileName,
+                                        bool replace )
 {
     int      G_command = 0;        // command number for G commands like G04
     int      D_commande = 0;       // command number for D commands like D02
@@ -48,14 +49,27 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
     wxString msg;
     char*    text;
     int layer;         // current layer used in GerbView
+    GERBER_IMAGE* gerber = NULL;
 
-    layer = getActiveLayer();
-    GERBER_IMAGE* gerber = g_GERBER_List.GetGbrImage( layer );
-
-    if( gerber == NULL )
+    if( replace )
     {
-        gerber = new GERBER_IMAGE( this, layer );
-        g_GERBER_List.AddGbrImage( gerber, layer );
+        layer = getActiveLayer();
+        gerber = g_GERBER_List.GetGbrImage( layer );
+
+        if( gerber == NULL )
+        {
+            msg.Printf( _( "No selected layer to replace" ) );
+            DisplayError( this, msg, 10 );
+            return false;
+        }
+
+        g_GERBER_List.ReplaceGbrImage( layer, gerber );
+    }
+    else
+    {
+        gerber = new GERBER_IMAGE( this );
+        layer = g_GERBER_List.AddGbrImage( gerber );
+        gerber->SetLayerNumber(layer);
     }
 
     ClearMessageList( );

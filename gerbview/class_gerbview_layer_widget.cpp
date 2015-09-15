@@ -173,7 +173,7 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
 {
     int  rowCount;
     int  menuId = event.GetId();
-    bool visible = (menuId == ID_SHOW_ALL_LAYERS) ? true : false;
+    bool visible = (menuId == ID_SHOW_ALL_LAYERS);
     long visibleLayers = 0;
     bool force_active_layer_visible;
 
@@ -238,7 +238,7 @@ void GERBER_LAYER_WIDGET::ReFill()
 
     ClearLayerRows();
 
-    for( int layer = 0; layer < GERBER_DRAWLAYERS_COUNT; ++layer )
+    for( size_t layer = 0; layer < g_GERBER_List.GetImageCount(); ++layer )
     {
         wxString msg = g_GERBER_List.GetDisplayName( layer );
 

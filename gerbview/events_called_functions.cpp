@@ -198,7 +198,7 @@ void GERBVIEW_FRAME::Process_Special_Functions( wxCommandEvent& event )
         break;
 
     case ID_GERBVIEW_SHOW_LIST_DCODES:
-        Liste_D_Codes();
+        List_D_Codes();
         break;
 
     case ID_POPUP_PLACE_BLOCK:

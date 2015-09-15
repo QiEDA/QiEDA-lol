@@ -165,10 +165,15 @@ private:
                                                                 // 1 = have negative items found
 
 public:
-    GERBER_IMAGE( GERBVIEW_FRAME* aParent, int layer );
+    GERBER_IMAGE( GERBVIEW_FRAME* aParent );
     virtual ~GERBER_IMAGE();
     int  UsedDcodeNumber();
     virtual void ResetDefaultValues();
+
+    void SetLayerNumber( int aLayer )
+    {
+        m_GraphicLayer = aLayer;
+    }
 
     /**
      * Function GetParent
@@ -308,7 +313,6 @@ public:
 /**
  * @brief GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
  * which are loaded and can be displayed
- * there are 32 images max which can be loaded
  */
 class GERBER_IMAGE_LIST
 {
@@ -329,8 +333,24 @@ public:
      * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
      * @return true if the index used, or -1 if no room to add image
      */
-    int AddGbrImage( GERBER_IMAGE* aGbrImage, int aIdx );
+    int AddGbrImage( GERBER_IMAGE* aGbrImage );
 
+    /**
+     * Add a GERBER_IMAGE* at index aIdx
+     * or at the first free location if aIdx < 0
+     * @param aGbrImage = the image to add
+     * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
+     * @return true if the index used, or -1 if no room to add image
+     */
+        int ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage );
+
+    /**
+     * @return Number of images in list
+     */
+    size_t GetImageCount()
+    {
+        return m_GERBER_List.size();
+    }
 
     /**
      * remove all loaded data in list

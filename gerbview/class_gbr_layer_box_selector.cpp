@@ -41,7 +41,7 @@ void GBR_LAYER_BOX_SELECTOR::Resync()
     Freeze();
     Clear();
 
-    for( int layerid = 0; layerid < GERBER_DRAWLAYERS_COUNT; ++layerid )
+    for( size_t layerid = 0; layerid < g_GERBER_List.GetImageCount(); ++layerid )
     {
         wxBitmap    layerbmp( 14, 14 );
         wxString    layername;

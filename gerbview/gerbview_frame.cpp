@@ -407,7 +407,7 @@ void GERBVIEW_FRAME::syncLayerBox()
 }
 
 
-void GERBVIEW_FRAME::Liste_D_Codes()
+void GERBVIEW_FRAME::List_D_Codes()
 {
     int             ii, jj;
     D_CODE*         pt_D_code;
@@ -417,7 +417,7 @@ void GERBVIEW_FRAME::Liste_D_Codes()
                             IU_PER_MM;
     int       curr_layer = getActiveLayer();
 
-    for( int layer = 0; layer < GERBER_DRAWLAYERS_COUNT; ++layer )
+    for( int layer = 0; layer < g_GERBER_List.GetImageCount(); ++layer )
     {
         GERBER_IMAGE* gerber = g_GERBER_List.GetGbrImage( layer );
 

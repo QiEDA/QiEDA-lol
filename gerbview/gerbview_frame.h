@@ -610,7 +610,8 @@ public:
      */
     bool                LoadGerberFiles( const wxString& aFileName );
     bool                Read_GERBER_File( const wxString&   GERBER_FullFileName,
-                                          const wxString&   D_Code_FullFileName );
+                                          const wxString&   D_Code_FullFileName,
+                                          bool              replace);
 
     /**
      * function LoadDrllFiles
@@ -628,7 +629,7 @@ public:
     /**
      * Set Size Items (Lines, Flashes) from DCodes List
      */
-    void                Liste_D_Codes();
+    void                List_D_Codes();
 
     // PCB handling
     bool                Clear_DrawLayers( bool query );

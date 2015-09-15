@@ -61,7 +61,7 @@ void GERBVIEW_FRAME::ReCreateMenuBar()
     AddMenuItem( fileMenu,
                  wxID_FILE,
                  _( "Load &Gerber File" ),
-                 _( "Load a new Gerber file on the current layer. Previous data will be deleted" ),
+                 _( "Load a new Gerber file into a new layer." ),
                  KiBitmap( gerber_file_xpm ) );
 
     // Excellon

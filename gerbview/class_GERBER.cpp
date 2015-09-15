@@ -89,10 +89,9 @@ void GERBER_LAYER::ResetDefaultValues()
 }
 
 
-GERBER_IMAGE::GERBER_IMAGE( GERBVIEW_FRAME* aParent, int aLayer )
+GERBER_IMAGE::GERBER_IMAGE( GERBVIEW_FRAME* aParent )
 {
     m_Parent = aParent;
-    m_GraphicLayer = aLayer;        // Graphic layer Number
 
     m_Selected_Tool = FIRST_DCODE;
     m_FileFunction = NULL;          // file function parameters
@@ -100,7 +99,9 @@ GERBER_IMAGE::GERBER_IMAGE( GERBVIEW_FRAME* aParent, int aLayer )
     ResetDefaultValues();
 
     for( unsigned ii = 0; ii < DIM( m_Aperture_List ); ii++ )
+    {
         m_Aperture_List[ii] = 0;
+    }
 }
 
 
@@ -210,7 +211,9 @@ void GERBER_IMAGE::ResetDefaultValues()
     m_Exposure = false;
 
     for( unsigned ii = 0; ii < DIM( m_FilesList ); ii++ )
+    {
         m_FilesList[ii] = NULL;
+    }
 }
 
 /* Function HasNegativeItems
@@ -230,6 +233,7 @@ bool GERBER_IMAGE::HasNegativeItems()
             {
                 if( item->GetLayer() != m_GraphicLayer )
                     continue;
+
                 if( item->HasNegativeItems() )
                 {
                     m_hasNegativeItems = 1;
@@ -368,10 +372,6 @@ void GERBER_IMAGE::DisplayImageInfo( void )
 // GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
 GERBER_IMAGE_LIST::GERBER_IMAGE_LIST()
 {
-    m_GERBER_List.reserve( GERBER_DRAWLAYERS_COUNT );
-
-    for( unsigned layer = 0; layer < GERBER_DRAWLAYERS_COUNT; ++layer )
-        m_GERBER_List.push_back( NULL );
 }
 
 GERBER_IMAGE_LIST::~GERBER_IMAGE_LIST()
@@ -387,35 +387,29 @@ GERBER_IMAGE_LIST::~GERBER_IMAGE_LIST()
 
 GERBER_IMAGE* GERBER_IMAGE_LIST::GetGbrImage( int aIdx )
 {
-    if( (unsigned)aIdx < m_GERBER_List.size() )
+    if( aIdx < m_GERBER_List.size() && aIdx >= 0 )
         return m_GERBER_List[aIdx];
 
     return NULL;
 }
 
-/**
- * creates a new, empty GERBER_IMAGE* at index aIdx
- * or at the first free location if aIdx < 0
- * @param aIdx = the location to use ( 0 ... GERBER_DRAWLAYERS_COUNT-1 )
- * @return true if the index used, or -1 if no room to add image
- */
-int GERBER_IMAGE_LIST::AddGbrImage( GERBER_IMAGE* aGbrImage, int aIdx )
+int GERBER_IMAGE_LIST::AddGbrImage( GERBER_IMAGE* aGbrImage )
+{
+    m_GERBER_List.push_back(aGbrImage);
+    int idx = m_GERBER_List.size()-1;
+
+    return idx;
+}
+
+
+int GERBER_IMAGE_LIST::ReplaceGbrImage( int aIdx, GERBER_IMAGE* aGbrImage )
 {
     int idx = aIdx;
 
-    if( idx < 0 )
+    if( IsUsed( idx ) )
     {
-        for( idx = 0; idx < (int)m_GERBER_List.size(); idx++ )
-        {
-            if( !IsUsed( idx ) )
-                break;
-        }
+        m_GERBER_List[idx] = aGbrImage;
     }
-
-    if( idx >= (int)m_GERBER_List.size() )
-        return -1;  // No room
-
-    m_GERBER_List[idx] = aGbrImage;
 
     return idx;
 }
@@ -425,8 +419,12 @@ int GERBER_IMAGE_LIST::AddGbrImage( GERBER_IMAGE* aGbrImage, int aIdx )
 // (can be reused)
 void GERBER_IMAGE_LIST::ClearList()
 {
-    for( unsigned layer = 0; layer < m_GERBER_List.size(); ++layer )
-        ClearImage( layer );
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    {
+        delete (*it);
+    }
+
+    m_GERBER_List.clear();
 }
 
 // remove the loaded data of image aIdx, but do not delete it
@@ -469,10 +467,15 @@ const wxString GERBER_IMAGE_LIST::GetDisplayName( int aIdx )
             }
         }
         else
-            name.Printf( _( "Layer %d *" ), aIdx + 1 );
+        {
+            wxFileName file(gerber->m_FileName);
+            name = file.GetFullName();
+        }
     }
     else
+    {
         name.Printf( _( "Layer %d" ), aIdx + 1 );
+    }
 
     return name;
 }
