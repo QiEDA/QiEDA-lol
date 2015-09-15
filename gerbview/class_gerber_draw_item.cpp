@@ -228,7 +228,7 @@ D_CODE* GERBER_DRAW_ITEM::GetDcodeDescr()
     if( (m_DCode < FIRST_DCODE) || (m_DCode > LAST_DCODE) )
         return NULL;
 
-    GERBER_IMAGE* gerber = g_GERBER_List.GetGbrImage( m_Layer );
+    GERBER_IMAGE* gerber = g_GERBER_List.GetGerberById( m_Layer );
 
     if( gerber == NULL )
         return NULL;
@@ -325,10 +325,10 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
     if( d_codeDescr == NULL )
         d_codeDescr = &dummyD_CODE;
 
-    if( gerbFrame->IsLayerVisible( GetLayer() ) == false )
+    if( gerbFrame->IsLayerVisible( g_GERBER_List.GetGerberIndexByLayer(GetLayer()) ) == false )
         return;
 
-    color = gerbFrame->GetLayerColor( GetLayer() );
+    color = gerbFrame->GetLayerColor( g_GERBER_List.GetGerberIndexByLayer(GetLayer()) );
 
     if( aDrawMode & GR_HIGHLIGHT )
         ColorChangeHighlightFlag( &color, !(aDrawMode & GR_AND) );

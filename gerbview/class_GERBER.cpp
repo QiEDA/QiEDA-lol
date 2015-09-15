@@ -370,7 +370,8 @@ void GERBER_IMAGE::DisplayImageInfo( void )
 }
 
 // GERBER_IMAGE_LIST is a helper class to handle a list of GERBER_IMAGE files
-GERBER_IMAGE_LIST::GERBER_IMAGE_LIST()
+GERBER_IMAGE_LIST::GERBER_IMAGE_LIST() :
+        m_nextLayerId(0)
 {
 }
 
@@ -385,7 +386,7 @@ GERBER_IMAGE_LIST::~GERBER_IMAGE_LIST()
     }
 }
 
-GERBER_IMAGE* GERBER_IMAGE_LIST::GetGbrImage( int aIdx )
+GERBER_IMAGE* GERBER_IMAGE_LIST::GetGerberByListIndex( int aIdx )
 {
     if( aIdx < m_GERBER_List.size() && aIdx >= 0 )
         return m_GERBER_List[aIdx];
@@ -393,10 +394,38 @@ GERBER_IMAGE* GERBER_IMAGE_LIST::GetGbrImage( int aIdx )
     return NULL;
 }
 
+GERBER_IMAGE* GERBER_IMAGE_LIST::GetGerberById( int layerID )
+{
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    {
+        if( (*it)->m_GraphicLayer == layerID )
+        {
+            return *it;
+        }
+    }
+
+    return NULL;
+}
+
+
+int GERBER_IMAGE_LIST::GetGerberIndexByLayer( int layerID )
+{
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_GERBER_List.begin() ; it != m_GERBER_List.end(); ++it)
+    {
+        if( (*it)->m_GraphicLayer == layerID )
+        {
+            int result = it - m_GERBER_List.begin();
+            return result;
+        }
+    }
+
+    return 0;
+}
+
 int GERBER_IMAGE_LIST::AddGbrImage( GERBER_IMAGE* aGbrImage )
 {
     m_GERBER_List.push_back(aGbrImage);
-    int idx = m_GERBER_List.size()-1;
+    int idx = m_nextLayerId++;
 
     return idx;
 }
@@ -425,6 +454,8 @@ void GERBER_IMAGE_LIST::ClearList()
     }
 
     m_GERBER_List.clear();
+
+    m_nextLayerId = 0;
 }
 
 // remove the loaded data of image aIdx, but do not delete it
@@ -542,6 +573,23 @@ void GERBER_IMAGE_LIST::SortImagesByZOrder( GERBER_DRAW_ITEM* aDrawList )
     {
         int layer = item->GetLayer();
         item->SetLayer( tab_lyr[layer] );
+    }
+}
+
+
+void GERBER_IMAGE_LIST::MoveLayerUp( int aIdx )
+{
+    if( aIdx > 0 )
+    {
+        std::iter_swap(m_GERBER_List.begin() + aIdx-1, m_GERBER_List.begin() + aIdx);
+    }
+}
+
+void GERBER_IMAGE_LIST::MoveLayerDown( int aIdx )
+{
+    if( aIdx < m_GERBER_List.size()-1 )
+    {
+        std::iter_swap(m_GERBER_List.begin() + aIdx, m_GERBER_List.begin() + aIdx+1);
     }
 }
 

@@ -319,12 +319,14 @@ class GERBER_IMAGE_LIST
     // the list of loaded images (1 image = 1 gerber file)
     std::vector<GERBER_IMAGE*> m_GERBER_List;
 
+    unsigned m_nextLayerId;
+
 public:
     GERBER_IMAGE_LIST();
     ~GERBER_IMAGE_LIST();
 
     //Accessor
-    GERBER_IMAGE* GetGbrImage( int aIdx );
+    GERBER_IMAGE* GetGerberByListIndex( int aIdx );
 
     /**
      * Add a GERBER_IMAGE* at index aIdx
@@ -383,6 +385,13 @@ public:
      * (SortImagesByZOrder updates the graphic layer of these items)
      */
     void SortImagesByZOrder( GERBER_DRAW_ITEM* aDrawList );
+
+    void MoveLayerUp( int aIdx );
+    void MoveLayerDown( int aIdx );
+
+    GERBER_IMAGE* GetGerberById( int layerID );
+
+    int GetGerberIndexByLayer( int layerID );
 };
 
 

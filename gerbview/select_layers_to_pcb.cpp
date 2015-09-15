@@ -126,7 +126,7 @@ void LAYERS_MAP_DIALOG::initDialog()
     m_gerberActiveLayersCount = 0;
     for( int ii = 0; ii < GERBER_DRAWLAYERS_COUNT; ++ii )
     {
-        if( g_GERBER_List.GetGbrImage( ii ) == NULL )
+        if( g_GERBER_List.GetGerberByListIndex( ii ) == NULL )
             break;
 
         if( (pcb_layer_num == m_exportBoardCopperLayersCount - 1)
@@ -194,7 +194,7 @@ void LAYERS_MAP_DIALOG::initDialog()
                                  wxRIGHT | wxLEFT, 5 );
 
         /* Add file name and extension without path. */
-        wxFileName fn( g_GERBER_List.GetGbrImage( ii )->m_FileName );
+        wxFileName fn( g_GERBER_List.GetGerberByListIndex( ii )->m_FileName );
         label = new wxStaticText( this, wxID_STATIC, fn.GetFullName(),
                                   wxDefaultPosition, wxDefaultSize );
         flexColumnBoxSizer->Add( label, 0,

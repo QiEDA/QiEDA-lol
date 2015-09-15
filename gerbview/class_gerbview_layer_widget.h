@@ -41,7 +41,8 @@ enum LAYER_MANAGER
     ID_SHOW_NO_LAYERS,
     ID_SHOW_NO_LAYERS_BUT_ACTIVE,
     ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE,
-    ID_REPLACE_LAYER,
+    ID_LAYER_MOVE_UP,
+    ID_LAYER_MOVE_DOWN,
     ID_SORT_GBR_LAYERS,
     ID_LAYER_MANAGER_END = ID_SORT_GBR_LAYERS,
 };
@@ -67,6 +68,8 @@ class GERBER_LAYER_WIDGET : public LAYER_WIDGET
 
     void onPopupSelection( wxCommandEvent& event );
 
+    void onRightDownLayerRow( wxMouseEvent& event );
+
     /// this is for the popup menu, the right click handler has to be installed
     /// on every child control within the layer panel.
     void installRightLayerClickHandler();
@@ -78,6 +81,19 @@ class GERBER_LAYER_WIDGET : public LAYER_WIDGET
      */
     virtual bool useAlternateBitmap(int aRow);
 
+    void baseRightClickMenu( wxMenu& aMenu );
+
+    class LAYER_WIDGT_ROW: public wxObjectRefData
+    {
+    public:
+        LAYER_WIDGT_ROW (int row)
+                :wxObjectRefData()
+                ,m_row(row)
+        {
+        }
+
+        int m_row;
+    };
 public:
 
     /**

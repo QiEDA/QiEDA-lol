@@ -160,7 +160,7 @@ void GERBVIEW_FRAME::ExportDataInPcbnewFormat( wxCommandEvent& event )
     // Count the Gerber layers which are actually currently used
     for( LAYER_NUM ii = 0; ii < g_GERBER_List.GetImageCount(); ++ii )
     {
-        if( g_GERBER_List.GetGbrImage( ii ) )
+        if( g_GERBER_List.GetGerberByListIndex( ii ) )
             layercount++;
     }
 

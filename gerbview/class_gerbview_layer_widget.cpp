@@ -66,7 +66,7 @@ GERBER_LAYER_WIDGET::GERBER_LAYER_WIDGET( GERBVIEW_FRAME* aParent, wxWindow* aFo
     SetLayersManagerTabsText( );
 
     //-----<Popup menu>-------------------------------------------------
-    // handle the popup menu over the layer window.
+    // handle the poawpup menu over the layer window.
     m_LayerScrolledWindow->Connect( wxEVT_RIGHT_DOWN,
         wxMouseEventHandler( GERBER_LAYER_WIDGET::onRightDownLayers ), NULL, this );
 
@@ -138,7 +138,7 @@ void GERBER_LAYER_WIDGET::installRightLayerClickHandler()
             wxWindow* w = getLayerComp( row, col );
 
             w->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler(
-                GERBER_LAYER_WIDGET::onRightDownLayers ), NULL, this );
+                GERBER_LAYER_WIDGET::onRightDownLayerRow ), NULL, this );
         }
     }
 }
@@ -148,26 +148,68 @@ void GERBER_LAYER_WIDGET::onRightDownLayers( wxMouseEvent& event )
 {
     wxMenu          menu;
 
-    // Remember: menu text is capitalized (see our rules_for_capitalization_in_Kicad_UI.txt)
-    menu.Append( new wxMenuItem( &menu, ID_SHOW_ALL_LAYERS,
-                                 _("Show All Layers") ) );
+    baseRightClickMenu(menu);
 
-    menu.Append( new wxMenuItem( &menu, ID_SHOW_NO_LAYERS_BUT_ACTIVE,
-                                 _( "Hide All Layers But Active" ) ) );
-
-    menu.Append( new wxMenuItem( &menu, ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE,
-                                 _( "Always Hide All Layers But Active" ) ) );
-
-    menu.Append( new wxMenuItem( &menu, ID_SHOW_NO_LAYERS,
-                                 _( "Hide All Layers" ) ) );
-
-    menu.AppendSeparator();
-    menu.Append( new wxMenuItem( &menu, ID_SORT_GBR_LAYERS,
-                                 _( "Sort Layers if X2 Mode" ) ) );
     PopupMenu( &menu );
 
     passOnFocus();
 }
+
+
+void GERBER_LAYER_WIDGET::onRightDownLayerRow( wxMouseEvent& event )
+{
+    wxMenu          menu;
+
+    wxWindow* w = (wxWindow*) event.GetEventObject();
+    int rowId = getDecodedId( w->GetId() );
+
+    if( g_GERBER_List.GetImageCount() > 1) //are there more than 1 layer?
+    {
+        if( rowId != 0 ) // layer id 0 is "top"
+        {
+            menu.Append( new wxMenuItem( &menu, ID_LAYER_MOVE_UP,
+                                         _("Move up") ) );
+
+        }
+
+        if( rowId != g_GERBER_List.GetImageCount()-1 ) // not end of layer list
+        {
+            menu.Append( new wxMenuItem( &menu, ID_LAYER_MOVE_DOWN,
+                                         _("Move down") ) );
+        }
+
+        menu.AppendSeparator();
+
+        menu.SetRefData(new LAYER_WIDGT_ROW(rowId));
+    }
+
+    baseRightClickMenu(menu);
+
+    PopupMenu( &menu );
+
+    passOnFocus();
+}
+
+
+void GERBER_LAYER_WIDGET::baseRightClickMenu( wxMenu& aMenu )
+{
+    aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_ALL_LAYERS,
+                                 _("Show All Layers") ) );
+
+    aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_NO_LAYERS_BUT_ACTIVE,
+                                 _( "Hide All Layers But Active" ) ) );
+
+    aMenu.Append( new wxMenuItem( &aMenu, ID_ALWAYS_SHOW_NO_LAYERS_BUT_ACTIVE,
+                                 _( "Always Hide All Layers But Active" ) ) );
+
+    aMenu.Append( new wxMenuItem( &aMenu, ID_SHOW_NO_LAYERS,
+                                 _( "Hide All Layers" ) ) );
+
+    aMenu.AppendSeparator();
+    aMenu.Append( new wxMenuItem( &aMenu, ID_SORT_GBR_LAYERS,
+                                 _( "Sort Layers if X2 Mode" ) ) );
+}
+
 
 void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
 {
@@ -208,6 +250,22 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
         myframe->SetVisibleLayers( visibleLayers );
         myframe->GetCanvas()->Refresh();
         break;
+    case ID_LAYER_MOVE_UP:
+    case ID_LAYER_MOVE_DOWN:
+        {
+            wxMenu* menu = (wxMenu*) event.GetEventObject();
+            LAYER_WIDGT_ROW* const layerRowData = (LAYER_WIDGT_ROW*)menu->GetRefData();
+
+            if( menuId == ID_LAYER_MOVE_UP )
+                g_GERBER_List.MoveLayerUp(layerRowData->m_row);
+            else
+                g_GERBER_List.MoveLayerDown(layerRowData->m_row);
+
+            myframe->ReFillLayerWidget();
+            myframe->syncLayerBox();
+            myframe->GetCanvas()->Refresh();
+        }
+        break;
 
     case ID_SORT_GBR_LAYERS:
         g_GERBER_List.SortImagesByZOrder( myframe->GetItemsList() );
@@ -217,6 +275,7 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
         break;
     }
 }
+
 
 bool  GERBER_LAYER_WIDGET::OnLayerSelected()
 {

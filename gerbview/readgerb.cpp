@@ -54,7 +54,7 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
     if( replace )
     {
         layer = getActiveLayer();
-        gerber = g_GERBER_List.GetGbrImage( layer );
+        gerber = g_GERBER_List.GetGerberByListIndex( layer );
 
         if( gerber == NULL )
         {

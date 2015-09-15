@@ -246,7 +246,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
         if( !gerbFrame->IsLayerVisible( layer ) )
             continue;
 
-        GERBER_IMAGE* gerber = g_GERBER_List.GetGbrImage( layer );
+        GERBER_IMAGE* gerber = g_GERBER_List.GetGerberByListIndex( layer );
 
         if( gerber == NULL )    // Graphic layer not yet used
             continue;
