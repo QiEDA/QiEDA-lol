@@ -28,10 +28,6 @@
 #include <vector>
 #include <set>
 
-
-#define CURSEUR_ON_GRILLE  0
-#define CURSEUR_OFF_GRILLE 1
-
 /**
 * size of single line of a text from a gerber file.
 * warning: some files can have very long lines, so the buffer must be large.

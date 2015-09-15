@@ -90,13 +90,7 @@ public:
 };
 
 
-/*******************************************************/
 void GERBVIEW_FRAME::ToPrinter( wxCommandEvent& event )
-/*******************************************************/
-
-/* Virtual function:
- * Display the print dialog
- */
 {
     if( s_printData == NULL )  // First print
         s_printData = new wxPrintData();
@@ -118,10 +112,8 @@ void GERBVIEW_FRAME::ToPrinter( wxCommandEvent& event )
 }
 
 
-/*************************************************************************************/
 DIALOG_PRINT_USING_PRINTER::DIALOG_PRINT_USING_PRINTER( GERBVIEW_FRAME* parent ) :
     DIALOG_PRINT_USING_PRINTER_BASE( parent )
-/*************************************************************************************/
 {
     m_Parent = parent;
     m_Config = Kiface().KifaceSettings();
@@ -138,9 +130,7 @@ DIALOG_PRINT_USING_PRINTER::DIALOG_PRINT_USING_PRINTER( GERBVIEW_FRAME* parent )
 }
 
 
-/************************************************************************/
-void DIALOG_PRINT_USING_PRINTER::InitValues( )
-/************************************************************************/
+void DIALOG_PRINT_USING_PRINTER::InitValues()
 {
     SetFocus();
     wxString msg;
@@ -306,6 +296,7 @@ void DIALOG_PRINT_USING_PRINTER::SetPrintParameters()
     }
 }
 
+
 void DIALOG_PRINT_USING_PRINTER::OnScaleSelectionClick( wxCommandEvent& event )
 {
     double scale = s_ScaleList[m_ScaleOption->GetSelection()];
@@ -315,6 +306,7 @@ void DIALOG_PRINT_USING_PRINTER::OnScaleSelectionClick( wxCommandEvent& event )
     if( m_FineAdjustYscaleOpt )
         m_FineAdjustYscaleOpt->Enable(enable);
 }
+
 
 // Open a dialog box for printer setup (printer options, page size ...)
 void DIALOG_PRINT_USING_PRINTER::OnPageSetup( wxCommandEvent& event )
@@ -327,6 +319,7 @@ void DIALOG_PRINT_USING_PRINTER::OnPageSetup( wxCommandEvent& event )
     (*s_printData) = pageSetupDialog.GetPageSetupDialogData().GetPrintData();
     (*s_pageSetupData) = pageSetupDialog.GetPageSetupDialogData();
 }
+
 
 bool DIALOG_PRINT_USING_PRINTER::PreparePrintPrms()
 {
@@ -342,6 +335,7 @@ bool DIALOG_PRINT_USING_PRINTER::PreparePrintPrms()
 
     return true;
 }
+
 
 // Open and display a previewer frame for printing
 void DIALOG_PRINT_USING_PRINTER::OnPrintPreview( wxCommandEvent& event )

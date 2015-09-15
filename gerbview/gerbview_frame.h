@@ -471,7 +471,7 @@ public:
      */
     bool OnHotKey( wxDC* aDC, int aHotkeyCode, const wxPoint& aPosition, EDA_ITEM* aItem = NULL );
 
-    GERBER_DRAW_ITEM*   Locate( const wxPoint& aPosition, int typeloc );
+    GERBER_DRAW_ITEM*   Locate( const wxPoint& aPosition );
 
     void                Process_Config( wxCommandEvent& event );
     void                InstallGerberOptionsDialog( wxCommandEvent& event );

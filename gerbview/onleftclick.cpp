@@ -37,7 +37,7 @@
  */
 void GERBVIEW_FRAME::OnLeftClick( wxDC* DC, const wxPoint& aPosition )
 {
-    GERBER_DRAW_ITEM* DrawStruct = Locate( aPosition, CURSEUR_OFF_GRILLE );
+    GERBER_DRAW_ITEM* DrawStruct = Locate( aPosition );
 
     GetScreen()->SetCurItem( DrawStruct );
 

@@ -40,14 +40,11 @@
 /* localize a gerber item and return a pointer to it.
  * Display info about this item
  */
-GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition, int aTypeloc )
+GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition )
 {
     m_messagePanel->EraseMsgBox();
     wxPoint ref = aPosition;
     bool found = false;
-
-    if( aTypeloc == CURSEUR_ON_GRILLE )
-        ref = GetNearestGridPosition( ref );
 
     int layer = getActiveLayer();
 

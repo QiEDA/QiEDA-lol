@@ -50,7 +50,7 @@ bool GERBVIEW_FRAME::OnRightClick( const wxPoint& aPosition, wxMenu* PopMenu )
     // Simple location of elements where possible.
     if( !busy )
     {
-        DrawStruct = Locate( aPosition, CURSEUR_OFF_GRILLE );
+        DrawStruct = Locate( aPosition );
         busy = DrawStruct && DrawStruct->GetFlags();
     }
 
