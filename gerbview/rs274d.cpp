@@ -553,7 +553,7 @@ bool GERBER_IMAGE::Execute_G_Command( char*& text, int G_command )
     case GC_TURN_OFF_POLY_FILL:
         if( m_Exposure && m_Drawings.size() > 0 )    // End of polygon
         {
-            GERBER_DRAW_ITEM * gbritem = *(m_Drawings.end());
+            GERBER_DRAW_ITEM * gbritem = m_Drawings.back();
             StepAndRepeatItem( *gbritem );
         }
         m_Exposure = false;
@@ -627,7 +627,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
             {
             case GERB_INTERPOL_ARC_NEG:
             case GERB_INTERPOL_ARC_POS:
-                gbritem = *(m_Drawings.end());
+                gbritem = m_Drawings.back();
 
                 fillArcPOLY( gbritem, m_PreviousPos,
                              m_CurrentPos, m_IJPos,
@@ -636,7 +636,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
                 break;
 
             default:
-                gbritem = *(m_Drawings.end());
+                gbritem = m_Drawings.back();
                 gbritem->m_Start = m_PreviousPos;       // m_Start is used as temporary storage
                 if( gbritem->m_PolyCorners.size() == 0 )
                     gbritem->m_PolyCorners.push_back( gbritem->m_Start );
@@ -653,7 +653,7 @@ bool GERBER_IMAGE::Execute_DCODE_Command( char*& text, int D_commande )
         case 2:     // code D2: exposure OFF (i.e. "move to")
             if( m_Exposure && m_Drawings.size() > 0 )    // End of polygon
             {
-                gbritem = *(m_Drawings.end());
+                gbritem = m_Drawings.back();
                 StepAndRepeatItem( *gbritem );
             }
             m_Exposure    = false;
