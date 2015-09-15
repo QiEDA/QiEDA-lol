@@ -244,6 +244,9 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
                 loc_visible = true;
 
             cb->SetValue( loc_visible );
+
+            GERBER_IMAGE* gerber = myframe->m_GERBER_List->GetGerberByListIndex(layer);
+            gerber->m_Visible = loc_visible;
         }
 
         myframe->GetCanvas()->Refresh();
