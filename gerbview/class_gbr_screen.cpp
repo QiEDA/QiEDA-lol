@@ -31,8 +31,6 @@
 #include <common.h>
 #include <macros.h>
 #include <class_gbr_screen.h>
-#include <base_units.h>
-#include <gerbview_id.h>
 
 #define DMIL_GRID( x ) wxRealPoint( x * IU_PER_DECIMILS,\
                                     x * IU_PER_DECIMILS )

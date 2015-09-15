@@ -31,6 +31,7 @@
 #include <dcode.h>
 #include <class_gerber_draw_item.h>
 #include <class_aperture_macro.h>
+#include <gerbview.h>
 
 // An useful macro used when reading gerber files;
 #define IsNumber( x ) ( ( ( (x) >= '0' ) && ( (x) <='9' ) )   \
@@ -166,7 +167,6 @@ private:
 public:
     GERBER_IMAGE( GERBVIEW_FRAME* aParent, int layer );
     virtual ~GERBER_IMAGE();
-    void Clear_GERBER_IMAGE();
     int  UsedDcodeNumber();
     virtual void ResetDefaultValues();
 
@@ -209,13 +209,6 @@ public:
      * @param aMessage = the straing to add in list
      */
     void    ReportMessage( const wxString aMessage );
-
-    /**
-     * Function ClearMessageList
-     * Clear the message list
-     * Call it before reading a Gerber file
-     */
-    void    ClearMessageList();
 
     /**
      * Function InitToolTable

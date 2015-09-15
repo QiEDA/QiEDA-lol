@@ -28,7 +28,6 @@
 #include <common.h>
 #include <confirm.h>
 #include <kicad_string.h>
-#include <gestfich.h>
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_GERBER.h>

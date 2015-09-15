@@ -41,8 +41,6 @@
 
 #include <gerbview.h>
 #include <gerbview_frame.h>
-#include <colors_selection.h>
-#include <class_gerber_draw_item.h>
 #include <class_GERBER.h>
 #include <printout_controler.h>
 
@@ -67,7 +65,7 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, LSET aPrintMasklayer,
 
     // Find the layer to be printed
     int page = printParameters->m_Flags;    // contains the page number (not necessarily layer number)
-    int layer = 0;
+    size_t layer = 0;
 
     // Find the layer number for the printed page (search through the mask and count bits)
     while( page > 0 )
@@ -75,7 +73,9 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, LSET aPrintMasklayer,
         if( printLayersMask[layer++] )
             --page;
     }
-    --layer;
+
+    if( layer > 0 ) /* prevent underflow */
+        --layer;
 
     std::bitset <GERBER_DRAWLAYERS_COUNT> printCurrLayerMask;
     printCurrLayerMask.reset();
@@ -407,7 +407,7 @@ void GERBVIEW_FRAME::DrawItemsDCodeID( wxDC* aDC, GR_DRAWMODE aDrawMode )
 
     for( GERBER_DRAW_ITEM* item = GetItemsList(); item != NULL; item = item->Next() )
     {
-        if( IsLayerVisible( item->GetLayer() ) == false )
+        if( !IsLayerVisible( item->GetLayer() ) )
             continue;
 
         if( item->m_DCode <= 0 )

@@ -31,7 +31,6 @@
 
 #include <common.h>
 #include <class_drawpanel.h>
-#include <gerbview.h>
 #include <gerbview_frame.h>
 
 

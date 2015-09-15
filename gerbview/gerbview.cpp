@@ -34,16 +34,12 @@
 #include <kiface_i.h>
 #include <pgm_base.h>
 #include <class_drawpanel.h>
-#include <confirm.h>
-#include <gestfich.h>
 
 #include <gerbview.h>
-#include <gerbview_id.h>
 #include <hotkeys.h>
 #include <gerbview_frame.h>
 
 #include <build_version.h>
-
 
 // Colors for layers and items
 COLORS_DESIGN_SETTINGS g_ColorsSettings;
@@ -124,7 +120,7 @@ KIFACE_I& Kiface() { return kiface; }
 // KIFACE_GETTER will not have name mangling due to declaration in kiway.h.
 MY_API( KIFACE* ) KIFACE_GETTER(  int* aKIFACEversion, int aKiwayVersion, PGM_BASE* aProgram )
 {
-    process = (PGM_BASE*) aProgram;
+    process = aProgram;
     return &kiface;
 }
 

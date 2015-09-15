@@ -26,8 +26,6 @@
 
 #include <common.h>
 
-#include <gerbview.h>
-#include <macros.h>
 #include <class_GERBER.h>
 #include <base_units.h>
 

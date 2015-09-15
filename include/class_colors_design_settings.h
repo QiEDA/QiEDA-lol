@@ -29,6 +29,7 @@
 
 #ifndef _COLORS_DESIGN_SETTING_H
 #define _COLORS_DESIGN_SETTING_H
+#include <colors.h>
 #include <layers_id_colors_and_visibility.h>
 
 

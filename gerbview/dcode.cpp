@@ -34,15 +34,9 @@
 
 #include <common.h>
 #include <class_drawpanel.h>
-#include <confirm.h>
-#include <macros.h>
 #include <trigo.h>
-#include <gr_basic.h>
-#include <base_units.h>
 
-#include <gerbview.h>
 #include <gerbview_frame.h>
-#include <class_gerber_draw_item.h>
 #include <class_GERBER.h>
 
 #define DEFAULT_SIZE 100
@@ -155,62 +149,6 @@ int D_CODE::GetShapeDim( GERBER_DRAW_ITEM* aParent )
     }
 
     return dim;
-}
-
-
-void GERBVIEW_FRAME::CopyDCodesSizeToItems()
-{
-    static D_CODE dummy( 999 );   //Used if D_CODE not found in list
-
-    GERBER_DRAW_ITEM* gerb_item = GetItemsList();
-    for( ; gerb_item; gerb_item = gerb_item->Next() )
-    {
-        D_CODE*           dcode     = gerb_item->GetDcodeDescr();
-        wxASSERT( dcode );
-        if( dcode == NULL )
-            dcode = &dummy;
-
-        dcode->m_InUse = true;
-
-        gerb_item->m_Size = dcode->m_Size;
-
-        if(                                             // Line Item
-            (gerb_item->m_Shape == GBR_SEGMENT )        /* rectilinear segment */
-            || (gerb_item->m_Shape == GBR_ARC )         /* segment arc (rounded tips) */
-            || (gerb_item->m_Shape == GBR_CIRCLE )      /* segment in a circle (ring) */
-            )
-        {
-        }
-        else        // Spots ( Flashed Items )
-        {
-            switch( dcode->m_Shape )
-            {
-            case APT_CIRCLE:        /* spot round */
-                gerb_item->m_Shape = GBR_SPOT_CIRCLE;
-                break;
-
-            case APT_OVAL:          /* spot oval*/
-                gerb_item->m_Shape = GBR_SPOT_OVAL;
-                break;
-
-            case APT_RECT:                /* spot rect*/
-                gerb_item->m_Shape = GBR_SPOT_RECT;
-                break;
-
-            case APT_POLYGON:
-                gerb_item->m_Shape = GBR_SPOT_POLY;
-                break;
-
-            case APT_MACRO:                /* spot defined by a macro */
-                gerb_item->m_Shape = GBR_SPOT_MACRO;
-                break;
-
-            default:
-                wxMessageBox( wxT( "GERBVIEW_FRAME::CopyDCodesSizeToItems() error" ) );
-                break;
-            }
-        }
-    }
 }
 
 

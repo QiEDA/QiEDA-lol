@@ -34,8 +34,6 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <trigo.h>
-#include <macros.h>
-#include <class_gerber_draw_item.h>
 #include <class_GERBER.h>
 #include <class_X2_gerber_attributes.h>
 

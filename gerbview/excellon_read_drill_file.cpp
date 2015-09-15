@@ -72,10 +72,6 @@
 
 #include <gerbview.h>
 #include <gerbview_frame.h>
-#include <trigo.h>
-#include <macros.h>
-#include <base_units.h>
-#include <class_gerber_draw_item.h>
 #include <class_GERBER.h>
 #include <class_excellon.h>
 #include <kicad_string.h>
@@ -328,7 +324,7 @@ bool EXCELLON_IMAGE::Execute_HEADER_Command( char*& text )
     for( unsigned ii = 0; ; ii++ )
     {
         candidate = &excellonHeaderCmdList[ii];
-        int len = candidate->m_Name.size();
+        unsigned len = candidate->m_Name.size();
         if( len == 0 )                                                  // End of list reached
             break;
         if( candidate->m_Name.compare( 0, len, text, len ) == 0 )       // found.
@@ -604,7 +600,7 @@ bool EXCELLON_IMAGE::Execute_EXCELLON_G_Command( char*& text )
     for( unsigned ii = 0; ; ii++ )
     {
         candidate = &excellon_G_CmdList[ii];
-        int len = candidate->m_Name.size();
+        unsigned len = candidate->m_Name.size();
         if( len == 0 )                                                  // End of list reached
             break;
         if( candidate->m_Name.compare( 0, len, text, len ) == 0 )       // found.

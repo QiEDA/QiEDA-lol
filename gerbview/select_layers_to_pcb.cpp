@@ -146,7 +146,7 @@ void LAYERS_MAP_DIALOG::initDialog()
     else        // Add the second list of gerber files
     {
         m_flexRightColumnBoxSizer = new wxFlexGridSizer( 16, 4, 0, 0 );
-        for( int ii = 0; ii < 4; ii++ )
+        for( size_t ii = 0; ii < 4; ii++ )
             m_flexRightColumnBoxSizer->AddGrowableCol( ii );
         m_flexRightColumnBoxSizer->SetFlexibleDirection( wxBOTH );
         m_flexRightColumnBoxSizer->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );

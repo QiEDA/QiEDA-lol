@@ -118,7 +118,7 @@ public:
     {
         GERBER_DRAW_ITEM* item = GetGerberLayout()->m_Drawings;
 
-        return (GERBER_DRAW_ITEM*) item;
+        return item;
     }
 
     /**
@@ -419,11 +419,6 @@ public:
      */
     int getNextAvailableLayer( int aLayer = 0 ) const;
 
-    bool hasAvailableLayers() const
-    {
-        return getNextAvailableLayer() != NO_AVAILABLE_LAYERS;
-    }
-
     /**
      * Function syncLayerWidget
      * updates the currently "selected" layer within the GERBER_LAYER_WIDGET.
@@ -523,10 +518,8 @@ public:
      */
     bool OnHotKey( wxDC* aDC, int aHotkeyCode, const wxPoint& aPosition, EDA_ITEM* aItem = NULL );
 
-    GERBER_DRAW_ITEM*   GerberGeneralLocateAndDisplay();
     GERBER_DRAW_ITEM*   Locate( const wxPoint& aPosition, int typeloc );
 
-    void                Process_Settings( wxCommandEvent& event );
     void                Process_Config( wxCommandEvent& event );
     void                InstallGerberOptionsDialog( wxCommandEvent& event );
 
@@ -616,7 +609,6 @@ public:
      * @return true if file was opened successfully.
      */
     bool                LoadGerberFiles( const wxString& aFileName );
-    int                 ReadGerberFile( FILE* File, bool Append );
     bool                Read_GERBER_File( const wxString&   GERBER_FullFileName,
                                           const wxString&   D_Code_FullFileName );
 
@@ -636,7 +628,6 @@ public:
     /**
      * Set Size Items (Lines, Flashes) from DCodes List
      */
-    void                CopyDCodesSizeToItems();
     void                Liste_D_Codes();
 
     // PCB handling

@@ -32,7 +32,6 @@
 #include <wx/event.h>
 
 #include <common.h>
-#include <macros.h>
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include "common/kibitmap.h"

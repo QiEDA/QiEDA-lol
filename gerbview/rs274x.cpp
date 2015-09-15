@@ -820,7 +820,7 @@ bool GERBER_IMAGE::ExecuteRS274XCommand( int       command,
             }
 
             dcode->m_Shape = APT_MACRO;
-            dcode->SetMacro( (APERTURE_MACRO*) pam );
+            dcode->SetMacro( pam );
         }
         break;
 
@@ -877,7 +877,7 @@ static char* GetNextLine(  char aBuff[GERBER_BUFZ], char* aText, FILE* aFile  )
 {
     for( ; ; )
     {
-        switch (*aText )
+        switch ( *aText )
         {
             case ' ':     // skip blanks
             case '\n':
@@ -888,6 +888,7 @@ static char* GetNextLine(  char aBuff[GERBER_BUFZ], char* aText, FILE* aFile  )
             case 0:    // End of text found in aBuff: Read a new string
                 if( fgets( aBuff, GERBER_BUFZ, aFile ) == NULL )
                     return NULL;
+
                 aText = aBuff;
                 return aText;
 
@@ -895,7 +896,6 @@ static char* GetNextLine(  char aBuff[GERBER_BUFZ], char* aText, FILE* aFile  )
                 return aText;
         }
     }
-    return aText;
 }
 
 
