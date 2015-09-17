@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar  9 2015)
+// C++ code generated with wxFormBuilder (version Jun 17 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -14,7 +14,10 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	this->SetSizeHints( wxSize( -1,-1 ), wxDefaultSize );
 	
 	wxBoxSizer* bMainSizer;
-	bMainSizer = new wxBoxSizer( wxHORIZONTAL );
+	bMainSizer = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bOptionsSizer;
+	bOptionsSizer = new wxBoxSizer( wxHORIZONTAL );
 	
 	wxStaticBoxSizer* sbLayersSizer;
 	sbLayersSizer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Layers:") ), wxVERTICAL );
@@ -22,12 +25,12 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	wxBoxSizer* bleftSizer;
 	bleftSizer = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_leftLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Layers:") ), wxVERTICAL );
+	m_leftLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( sbLayersSizer->GetStaticBox(), wxID_ANY, _("Layers:") ), wxVERTICAL );
 	
 	
 	bleftSizer->Add( m_leftLayersBoxSizer, 1, wxALL, 5 );
 	
-	m_rightLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Layers:") ), wxVERTICAL );
+	m_rightLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( sbLayersSizer->GetStaticBox(), wxID_ANY, _("Layers:") ), wxVERTICAL );
 	
 	
 	bleftSizer->Add( m_rightLayersBoxSizer, 1, wxALL, 5 );
@@ -36,7 +39,7 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	sbLayersSizer->Add( bleftSizer, 1, wxEXPAND, 5 );
 	
 	
-	bMainSizer->Add( sbLayersSizer, 1, wxEXPAND, 5 );
+	bOptionsSizer->Add( sbLayersSizer, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* bmiddleLeftSizer;
 	bmiddleLeftSizer = new wxBoxSizer( wxVERTICAL );
@@ -68,7 +71,7 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	bmiddleLeftSizer->Add( m_FineAdjustYscaleOpt, 0, wxBOTTOM|wxRIGHT|wxLEFT|wxEXPAND, 5 );
 	
 	
-	bMainSizer->Add( bmiddleLeftSizer, 0, wxEXPAND, 5 );
+	bOptionsSizer->Add( bmiddleLeftSizer, 0, wxEXPAND, 5 );
 	
 	wxBoxSizer* bmiddleRightSizer;
 	bmiddleRightSizer = new wxBoxSizer( wxVERTICAL );
@@ -76,7 +79,7 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	wxStaticBoxSizer* sbOptionsSizer;
 	sbOptionsSizer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Options:") ), wxVERTICAL );
 	
-	m_Print_Mirror = new wxCheckBox( this, wxID_ANY, _("Mirror"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_Print_Mirror = new wxCheckBox( sbOptionsSizer->GetStaticBox(), wxID_ANY, _("Mirror"), wxDefaultPosition, wxDefaultSize, 0 );
 	sbOptionsSizer->Add( m_Print_Mirror, 0, wxALL, 5 );
 	
 	
@@ -91,10 +94,13 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	bmiddleRightSizer->Add( m_ModeColorOption, 0, wxALL|wxEXPAND, 5 );
 	
 	
-	bMainSizer->Add( bmiddleRightSizer, 0, wxEXPAND, 5 );
+	bOptionsSizer->Add( bmiddleRightSizer, 0, wxEXPAND, 5 );
+	
+	
+	bMainSizer->Add( bOptionsSizer, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* b_buttonsSizer;
-	b_buttonsSizer = new wxBoxSizer( wxVERTICAL );
+	b_buttonsSizer = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_buttonOption = new wxButton( this, wxID_PRINT_OPTIONS, _("Page Options"), wxDefaultPosition, wxDefaultSize, 0 );
 	b_buttonsSizer->Add( m_buttonOption, 0, wxALL|wxEXPAND, 5 );
@@ -110,7 +116,7 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	b_buttonsSizer->Add( m_buttonQuit, 0, wxALL|wxEXPAND, 5 );
 	
 	
-	bMainSizer->Add( b_buttonsSizer, 0, wxALIGN_CENTER_VERTICAL, 5 );
+	bMainSizer->Add( b_buttonsSizer, 0, wxALIGN_RIGHT, 5 );
 	
 	
 	this->SetSizer( bMainSizer );
