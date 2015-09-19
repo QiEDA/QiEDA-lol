@@ -33,6 +33,7 @@ set( GERBVIEW_SRCS
     block.cpp
     class_am_param.cpp
     class_aperture_macro.cpp
+    class_board_printout_controller.cpp
     class_DCodeSelectionbox.cpp
     class_gbr_screen.cpp
     class_gbr_layout.cpp
@@ -58,7 +59,6 @@ set( GERBVIEW_SRCS
     onleftclick.cpp
     onrightclick.cpp
     pcbplot.cpp
-    printout_control.cpp
     readgerb.cpp
     rs274_read_XY_and_IJ_coordinates.cpp
     rs274d.cpp

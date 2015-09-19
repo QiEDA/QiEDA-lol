@@ -45,7 +45,7 @@
 
 #include <gerbview_frame.h>
 
-#include <printout_controler.h>
+#include <class_board_printout_controller.h>
 
 
 
@@ -56,26 +56,20 @@ PRINT_PARAMETERS::PRINT_PARAMETERS()
     m_PrintScale            = 1.0;
     m_XScaleAdjust          = 1.0;
     m_YScaleAdjust          = 1.0;
-    m_Print_Sheet_Ref       = false;
-    m_PrintMaskLayer.set();
+    m_LayerQueue.clear();
     m_PrintMirror           = false;
     m_Print_Black_and_White = true;
-    m_OptionPrintPage       = 1;
-    m_PageCount             = 1;
-    m_ForceCentered         = false;
-    m_Flags                 = 0;
-    m_DrillShapeOpt         = PRINT_PARAMETERS::SMALL_DRILL_SHAPE;
     m_PageSetupData         = NULL;
 }
 
 
 BOARD_PRINTOUT_CONTROLLER::BOARD_PRINTOUT_CONTROLLER( const PRINT_PARAMETERS& aParams,
-                                                      EDA_DRAW_FRAME*         aParent,
+                                                      GERBVIEW_FRAME*         aParent,
                                                       const wxString&         aTitle ) :
     wxPrintout( aTitle )
 {
-    m_PrintParams = aParams;   // Make a local copy of the print parameters.
     m_Parent = aParent;
+    m_PrintParams =  aParams;
 }
 
 
@@ -83,8 +77,7 @@ bool BOARD_PRINTOUT_CONTROLLER::OnPrintPage( int aPage )
 {
     // in gerbview, draw layers are always printed on separate pages
     // because handling negative objects when using only one page is tricky
-    m_PrintParams.m_Flags = aPage;
-    DrawPage();
+    DrawPage( aPage );
 
     return true;
 }
@@ -96,17 +89,12 @@ void BOARD_PRINTOUT_CONTROLLER::GetPageInfo( int* minPage, int* maxPage,
     *minPage     = 1;
     *selPageFrom = 1;
 
-    int icnt = 1;
-
-    if( m_PrintParams.m_OptionPrintPage == 0 )
-        icnt = m_PrintParams.m_PageCount;
-
-    *maxPage   = icnt;
-    *selPageTo = icnt;
+    *maxPage   = m_PrintParams.m_LayerQueue.size();
+    *selPageTo  = m_PrintParams.m_LayerQueue.size();
 }
 
 
-void BOARD_PRINTOUT_CONTROLLER::DrawPage()
+void BOARD_PRINTOUT_CONTROLLER::DrawPage( int aPage )
 {
     wxPoint       offset;
     double        userscale;
@@ -120,12 +108,6 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
     wxBusyCursor  dummy;
 
     boardBoundingBox = ((GERBVIEW_FRAME*) m_Parent)->GetGerberLayoutBoundingBox();
-    wxString titleblockFilename;    // TODO see if we uses the gerber file name
-
-    // Use the page size as the drawing area when the board is shown or the user scale
-    // is less than 1.
-    if( m_PrintParams.PrintBorderAndTitleBlock() )
-        boardBoundingBox = EDA_RECT( wxPoint( 0, 0 ), pageSizeIU );
 
     // Compute the PCB size in internal units
     userscale = m_PrintParams.m_PrintScale;
@@ -142,7 +124,9 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
             userscale = (scaleX < scaleY) ? scaleX : scaleY;
         }
         else
+        {
             userscale = 1.0;
+        }
     }
 
     wxSize scaledPageSize = pageSizeIU;
@@ -212,12 +196,6 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
     GRResetPenAndBrush( dc );
 
     EDA_DRAW_PANEL* panel = m_Parent->GetCanvas();
-    EDA_RECT        tmp   = *panel->GetClipBox();
-
-    // Set clip box to the max size
-    #define MAX_VALUE (INT_MAX/2)   // MAX_VALUE is the max we can use in an integer
-                                    // and that allows calculations without overflow
-    panel->SetClipBox( EDA_RECT( wxPoint( 0, 0 ), wxSize( MAX_VALUE, MAX_VALUE ) ) );
 
     screen->m_IsPrinting = true;
     EDA_COLOR_T bg_color = m_Parent->GetDrawBgColor();
@@ -225,10 +203,6 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
     // Print frame reference, if requested, before printing draw layers
     if( m_PrintParams.m_Print_Black_and_White )
         GRForceBlackPen( true );
-
-    if( m_PrintParams.PrintBorderAndTitleBlock() )
-        m_Parent->DrawWorkSheet( dc, screen, m_PrintParams.m_PenDefaultSize,
-                                 IU_PER_MILS, titleblockFilename );
 
     if( printMirror )
     {
@@ -242,12 +216,8 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
         int x_dc_offset = PlotAreaSizeInPixels.x;
         x_dc_offset = KiROUND( x_dc_offset  * userscale );
         dc->SetDeviceOrigin( x_dc_offset, 0 );
-
-        panel->SetClipBox( EDA_RECT( wxPoint( -MAX_VALUE / 2, -MAX_VALUE / 2 ),
-                                     panel->GetClipBox()->GetSize() ) );
     }
 
-    // screen->m_DrawOrg = offset;
     dc->SetLogicalOrigin( offset.x, offset.y );
     m_Parent->SetDrawBgColor( WHITE );
 
@@ -256,9 +226,8 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage()
     // B&W mode is handled in print page function
     GRForceBlackPen( false );
 
-    m_Parent->PrintPage( dc, m_PrintParams.m_PrintMaskLayer, printMirror, &m_PrintParams );
+    m_Parent->PrintPage( dc, m_PrintParams, aPage );
 
     m_Parent->SetDrawBgColor( bg_color );
     screen->m_IsPrinting = false;
-    panel->SetClipBox( tmp );
 }

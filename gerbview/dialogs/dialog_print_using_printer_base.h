@@ -15,13 +15,14 @@ class DIALOG_SHIM;
 
 #include "dialog_shim.h"
 #include <wx/string.h>
-#include <wx/sizer.h>
-#include <wx/statbox.h>
+#include <wx/checklst.h>
 #include <wx/gdicmn.h>
-#include <wx/radiobox.h>
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
+#include <wx/sizer.h>
+#include <wx/statbox.h>
+#include <wx/radiobox.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
@@ -45,8 +46,7 @@ class DIALOG_PRINT_USING_PRINTER_BASE : public DIALOG_SHIM
 			wxID_PRINT_ALL
 		};
 		
-		wxStaticBoxSizer* m_leftLayersBoxSizer;
-		wxStaticBoxSizer* m_rightLayersBoxSizer;
+		wxCheckListBox* m_LayerSelect;
 		wxRadioBox* m_ScaleOption;
 		wxStaticText* m_FineAdjustXscaleTitle;
 		wxTextCtrl* m_FineAdjustXscaleOpt;

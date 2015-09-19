@@ -22,21 +22,9 @@ DIALOG_PRINT_USING_PRINTER_BASE::DIALOG_PRINT_USING_PRINTER_BASE( wxWindow* pare
 	wxStaticBoxSizer* sbLayersSizer;
 	sbLayersSizer = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Layers:") ), wxVERTICAL );
 	
-	wxBoxSizer* bleftSizer;
-	bleftSizer = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_leftLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( sbLayersSizer->GetStaticBox(), wxID_ANY, _("Layers:") ), wxVERTICAL );
-	
-	
-	bleftSizer->Add( m_leftLayersBoxSizer, 1, wxALL, 5 );
-	
-	m_rightLayersBoxSizer = new wxStaticBoxSizer( new wxStaticBox( sbLayersSizer->GetStaticBox(), wxID_ANY, _("Layers:") ), wxVERTICAL );
-	
-	
-	bleftSizer->Add( m_rightLayersBoxSizer, 1, wxALL, 5 );
-	
-	
-	sbLayersSizer->Add( bleftSizer, 1, wxEXPAND, 5 );
+	wxArrayString m_LayerSelectChoices;
+	m_LayerSelect = new wxCheckListBox( sbLayersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_LayerSelectChoices, 0 );
+	sbLayersSizer->Add( m_LayerSelect, 1, wxALL|wxEXPAND, 5 );
 	
 	
 	bOptionsSizer->Add( sbLayersSizer, 1, wxEXPAND, 5 );

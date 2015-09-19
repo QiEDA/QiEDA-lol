@@ -111,6 +111,8 @@ public:
      *        useful only to print/plot gebview layers
      */
     void Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC,
+               std::vector<GERBER_IMAGE*>& layers,
+               GERBER_IMAGE* selectedLayer,
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
                bool aPrintBlackAndWhite = false );
     /**

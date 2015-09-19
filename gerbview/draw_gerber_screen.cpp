@@ -42,18 +42,14 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
-#include <printout_controler.h>
+#include <class_board_printout_controller.h>
 #include <class_gerber_image_list.h>
 
 
-void GERBVIEW_FRAME::PrintPage( wxDC* aDC, LSET aPrintMasklayer,
-                                bool aPrintMirrorMode, void* aData )
+void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage )
 {
-    wxCHECK_RET( aData != NULL, wxT( "aData cannot be NULL." ) );
-
     // Save current draw options, because print mode has specific options:
     GBR_DISPLAY_OPTIONS imgDisplayOptions = m_DisplayOptions;
-    std::bitset <GERBER_DRAWLAYERS_COUNT> printLayersMask = GetGerberLayout()->GetPrintableLayers();
 
     // Set draw options for printing:
     m_DisplayOptions.m_DisplayFlashedItemsFill = true;
@@ -62,36 +58,21 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, LSET aPrintMasklayer,
     m_DisplayOptions.m_DisplayDCodes = false;
     m_DisplayOptions.m_IsPrinting = true;
 
-    PRINT_PARAMETERS* printParameters = (PRINT_PARAMETERS*) aData;
+    m_canvas->SetPrintMirrored( aParams.m_PrintMirror );
 
-    // Find the layer to be printed
-    int page = printParameters->m_Flags;    // contains the page number (not necessarily layer number)
-    size_t layer = 0;
+    std::vector<GERBER_IMAGE*>::const_iterator first = aParams.m_LayerQueue.begin() + aPage -1;
+    std::vector<GERBER_IMAGE*>::const_iterator last = aParams.m_LayerQueue.begin() + aPage;
+    std::vector<GERBER_IMAGE*> printLayer(first, last);
 
-    // Find the layer number for the printed page (search through the mask and count bits)
-    while( page > 0 )
-    {
-        if( printLayersMask[layer++] )
-            --page;
-    }
-
-    if( layer > 0 ) /* prevent overflow */
-        --layer;
-
-    std::bitset <GERBER_DRAWLAYERS_COUNT> printCurrLayerMask;
-    printCurrLayerMask.reset();
-    printCurrLayerMask.set( layer );
-    GetGerberLayout()->SetPrintableLayers( printCurrLayerMask );
-    m_canvas->SetPrintMirrored( aPrintMirrorMode );
-    bool printBlackAndWhite = printParameters->m_Print_Black_and_White;
-
-    GetGerberLayout()->Draw( m_canvas, aDC, (GR_DRAWMODE) 0,
-                             wxPoint( 0, 0 ), printBlackAndWhite );
+    GetGerberLayout()->Draw( m_canvas, aDC,
+                             printLayer,
+                             NULL,
+                             (GR_DRAWMODE) 0,
+                             wxPoint( 0, 0 ), aParams.m_Print_Black_and_White );
 
     m_canvas->SetPrintMirrored( false );
 
     // Restore draw options:
-    GetGerberLayout()->SetPrintableLayers( printLayersMask );
     m_DisplayOptions = imgDisplayOptions;
 }
 
@@ -123,7 +104,10 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
     }
 
     // Draw according to the current setting.  This needs to be GR_COPY or GR_OR.
-    GetGerberLayout()->Draw( m_canvas, DC, drawMode, wxPoint( 0, 0 ) );
+    GetGerberLayout()->Draw( m_canvas, DC,
+                             m_GERBER_List->m_Gerbers,
+                             m_GERBER_List->GetGerberByListIndex( getActiveLayer() ),
+                             drawMode, wxPoint( 0, 0 ) );
 
     // Draw the "background" now, i.e. grid and axis after gerber layers
     // because most of time the actual background is erased by successive drawings of each gerber
@@ -158,8 +142,13 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
 /*
  * Redraw All GerbView layers, using a buffered mode or not
  */
-void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
-                       const wxPoint& aOffset, bool aPrintBlackAndWhite )
+void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
+                       wxDC* aDC,
+                       std::vector<GERBER_IMAGE*>& aLayers,
+                       GERBER_IMAGE* aSelectedLayer,
+                       GR_DRAWMODE aDrawMode,
+                       const wxPoint& aOffset,
+                       bool aPrintBlackAndWhite )
 {
     GERBVIEW_FRAME* gerbFrame = (GERBVIEW_FRAME*) aPanel->GetParent();
 
@@ -231,21 +220,30 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
 
     // Draw layers from bottom to top, and active layer last
     // in non transparent modes, the last layer drawn mask mask previously drawn layer
-    for( int layer = gerbFrame->m_GERBER_List->GetImageCount()-1; !end; --layer )
+    for( int layer = aLayers.size()-1; !end; --layer )
     {
-        int active_layer = gerbFrame->getActiveLayer();
+        int dcode_highlight = 0;
+        GERBER_IMAGE* gerber = NULL;
+        if( layer >= 0 )
+        {
+            gerber = aLayers[layer];
 
-        if( layer == active_layer ) // active layer will be drawn after other layers
-            continue;
-
-        if( layer < 0 )   // last loop: draw active layer
+            if( aSelectedLayer != NULL
+                && gerber == aSelectedLayer ) // active layer will be drawn after other layers
+            {
+                continue;
+            }
+        }
+        else
         {
             end   = true;
-            layer = active_layer;
-        }
-        GERBER_IMAGE* gerber = gerbFrame->m_GERBER_List->GetGerberByListIndex( layer );
+            gerber = aSelectedLayer;
 
-        if( gerber == NULL )    // Graphic layer not yet used
+            if( gerber != NULL )
+                dcode_highlight = gerber->m_Selected_Tool;
+        }
+
+        if( gerber == NULL )
             continue;
 
         if( !gerber->m_Visible )
@@ -317,10 +315,6 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
             doBlit = true;
         }
 
-        int dcode_highlight = 0;
-
-        if( layer == gerbFrame->getActiveLayer() )
-            dcode_highlight = gerber->m_Selected_Tool;
 
         GR_DRAWMODE layerdrawMode = GR_COPY;
 

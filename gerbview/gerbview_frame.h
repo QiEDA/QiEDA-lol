@@ -39,6 +39,7 @@
 #include <class_gbr_screen.h>
 #include <class_page_info.h>
 #include "class_gerber_image_list.h"
+#include <class_board_printout_controller.h>
 
 #define NO_AVAILABLE_LAYERS UNDEFINED_LAYER
 
@@ -595,15 +596,8 @@ public:
         // currently: do nothing in GerbView.
     }
 
-    /** Virtual function PrintPage
-     * used to print a page
-     * @param aDC = wxDC given by the calling print function
-     * @param aPrintMasklayer = a 32 bits mask: bit n = 1 -> layer n is printed
-     * @param aPrintMirrorMode = not used here (Set when printing in mirror mode)
-     * @param aData = a pointer on an auxiliary data (not always used, NULL if not used)
-     */
-    virtual void    PrintPage( wxDC* aDC, LSET aPrintMasklayer, bool aPrintMirrorMode,
-                               void* aData = NULL );
+
+    void PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int page );
 
     /**
      * Function DrawItemsDCodeID
