@@ -115,35 +115,6 @@ public:
                GERBER_IMAGE* selectedLayer,
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
                bool aPrintBlackAndWhite = false );
-    /**
-     * Function SetPrintableLayers
-     * changes the list of printable layers
-     * @param aLayerMask = The new bit-mask of printable layers
-     */
-    void SetPrintableLayers( const std::bitset <GERBER_DRAWLAYERS_COUNT>& aLayerMask  )
-    {
-        m_printLayersMask = aLayerMask;
-    }
-
-    /**
-     * Function GetPrintableLayers
-     * @return the bit-mask of printable layers
-     */
-    std::bitset <GERBER_DRAWLAYERS_COUNT> GetPrintableLayers()
-    {
-        return m_printLayersMask;
-    }
-
-     /**
-     * Function IsLayerPrintable
-     * tests whether a given layer is visible
-     * @param aLayer = The layer to be tested
-     * @return bool - true if the layer is visible.
-     */
-    bool    IsLayerPrintable( int aLayer ) const
-    {
-        return m_printLayersMask[ aLayer ];
-    }
 
 #if defined(DEBUG)
     void    Show( int nestLevel, std::ostream& os ) const;  // overload

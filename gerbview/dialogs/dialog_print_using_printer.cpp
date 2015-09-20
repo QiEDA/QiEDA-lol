@@ -299,14 +299,6 @@ bool DIALOG_PRINT_USING_PRINTER::PreparePrintPrms()
 {
     SetPrintParameters();
 
-    // If no layer selected, we have no plot. prompt user if it happens
-    // because he could think there is a bug in Pcbnew:
-    if( m_Parent->GetGerberLayout()->GetPrintableLayers().none() )
-    {
-        DisplayError( this, _( "No layer selected" ) );
-        return false;
-    }
-
     return true;
 }
 
