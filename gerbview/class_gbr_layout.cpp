@@ -78,6 +78,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
                        GERBER_IMAGE* aSelectedLayer,
                        GR_DRAWMODE aDrawMode,
                        const wxPoint& aOffset,
+                       EDA_COLOR_T aBGColor,
                        bool aPrintBlackAndWhite )
 {
     GERBVIEW_FRAME* gerbFrame = (GERBVIEW_FRAME*) aPanel->GetParent();
@@ -89,7 +90,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
     // If aDrawMode = UNSPECIFIED_DRAWMODE, items are drawn to the main screen, and therefore
     // artifacts can happen with negative items or negative images
 
-    wxColour bgColor = MakeColour( gerbFrame->GetDrawBgColor() );
+    wxColour bgColor = MakeColour( aBGColor );
     wxBrush  bgBrush( bgColor, wxBRUSHSTYLE_SOLID );
 
     int      bitmapWidth, bitmapHeight;
@@ -183,7 +184,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
 
         // Force black and white draw mode on request:
         if( aPrintBlackAndWhite )
-            gerbFrame->SetLayerColor( layer, gerbFrame->GetDrawBgColor() == BLACK ? WHITE : BLACK );
+            gerbFrame->SetLayerColor( layer, aBGColor == BLACK ? WHITE : BLACK );
 
         if( useBufferBitmap )
         {

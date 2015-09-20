@@ -195,10 +195,7 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage( int aPage )
 
     GRResetPenAndBrush( dc );
 
-    EDA_DRAW_PANEL* panel = m_Parent->GetCanvas();
-
     screen->m_IsPrinting = true;
-    EDA_COLOR_T bg_color = m_Parent->GetDrawBgColor();
 
     // Print frame reference, if requested, before printing draw layers
     if( m_PrintParams.m_Print_Black_and_White )
@@ -219,7 +216,6 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage( int aPage )
     }
 
     dc->SetLogicalOrigin( offset.x, offset.y );
-    m_Parent->SetDrawBgColor( WHITE );
 
     // Never force black pen to print draw layers
     // because negative objects need a white pen, not a black pen
@@ -228,6 +224,5 @@ void BOARD_PRINTOUT_CONTROLLER::DrawPage( int aPage )
 
     m_Parent->PrintPage( dc, m_PrintParams, aPage );
 
-    m_Parent->SetDrawBgColor( bg_color );
     screen->m_IsPrinting = false;
 }
