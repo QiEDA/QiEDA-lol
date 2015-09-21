@@ -120,7 +120,6 @@ public:
                const std::vector<GERBER_IMAGE*>& aLayers,
                GERBER_IMAGE* selectedLayer,
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
-               EDA_COLOR_T aBGColor,
                bool aPrintBlackAndWhite = false );
 
 #if defined(DEBUG)

@@ -72,7 +72,6 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage 
                              NULL,
                              (GR_DRAWMODE) 0,
                              wxPoint( 0, 0 ),
-                             WHITE,
                              aParams.m_Print_Black_and_White );
 
     m_canvas->SetPrintMirrored( false );
@@ -114,7 +113,7 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
                              m_DisplayOptions,
                              GetGerberLayout()->GetGerbers(),
                              GetGerberLayout()->GetGerberByListIndex( getActiveLayer() ),
-                             drawMode, wxPoint( 0, 0 ),GetDrawBgColor() );
+                             drawMode, wxPoint( 0, 0 ) );
 
     // Draw the "background" now, i.e. grid and axis after gerber layers
     // because most of time the actual background is erased by successive drawings of each gerber
