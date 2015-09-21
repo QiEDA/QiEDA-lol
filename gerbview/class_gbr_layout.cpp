@@ -435,6 +435,7 @@ int GBR_LAYOUT::AddGerber( GERBER_IMAGE* aGbrImage )
 
     /* Assign a draw color */
     aGbrImage->m_DrawColor = color_default[idx % 32];
+    aGbrImage->m_GraphicLayer = idx;
 
     return idx;
 }

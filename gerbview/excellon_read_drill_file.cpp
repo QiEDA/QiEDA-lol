@@ -176,7 +176,6 @@ bool GERBVIEW_FRAME::Read_EXCELLON_File( const wxString& aFullFileName )
 
     EXCELLON_IMAGE* drill_Layer = new EXCELLON_IMAGE( this );
     int layerId = GetGerberLayout()->AddGerber( drill_Layer );
-    drill_Layer->SetLayerNumber(layerId);
 
     if( layerId < 0 )
     {

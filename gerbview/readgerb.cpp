@@ -62,14 +62,13 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
             return false;
         }
 
-        // TODO rethink this option
+
         //m_GERBER_List->ReplaceGbrImage( layer, gerber );
     }
     else
     {
         gerber = new GERBER_IMAGE( this );
         layer = GetGerberLayout()->AddGerber( gerber );
-        gerber->SetLayerNumber(layer);
     }
 
     ClearMessageList( );
