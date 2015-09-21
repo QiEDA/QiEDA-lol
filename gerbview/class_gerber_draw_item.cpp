@@ -98,12 +98,6 @@ GERBER_DRAW_ITEM::~GERBER_DRAW_ITEM()
 }
 
 
-GERBER_DRAW_ITEM* GERBER_DRAW_ITEM::Copy() const
-{
-    return new GERBER_DRAW_ITEM( *this );
-}
-
-
 wxPoint GERBER_DRAW_ITEM::GetABPosition( const wxPoint& aXYPosition ) const
 {
     /* Note: RS274Xrevd_e is obscure about the order of transforms:
@@ -228,14 +222,7 @@ D_CODE* GERBER_DRAW_ITEM::GetDcodeDescr()
     if( (m_DCode < FIRST_DCODE) || (m_DCode > LAST_DCODE) )
         return NULL;
 
-    GERBVIEW_FRAME* frame = ((GBR_LAYOUT*)m_Parent)->GetParent();
-
-    GERBER_IMAGE* gerber = frame->GetGerberLayout()->GetGerberById( m_Layer );
-
-    if( gerber == NULL )
-        return NULL;
-
-    D_CODE* d_code = gerber->GetDCODE( m_DCode, false );
+    D_CODE* d_code = m_imageParams->GetDCODE( m_DCode, false );
 
     return d_code;
 }
@@ -329,8 +316,7 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
 
     // TODO MARK FIX THIS REFERENCING
 
-    GERBER_IMAGE* gerber = gerbFrame->GetGerberLayout()->GetGerberById(GetLayer());
-    color = gerber->m_DrawColor;
+    color = m_imageParams->m_DrawColor;
 
     if( aDrawMode & GR_HIGHLIGHT )
         ColorChangeHighlightFlag( &color, !(aDrawMode & GR_AND) );

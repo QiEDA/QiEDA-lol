@@ -102,14 +102,6 @@ public:
     ~GERBER_DRAW_ITEM();
 
     /**
-     * Function Copy
-     * will copy this object
-     * the corresponding type.
-     * @return - GERBER_DRAW_ITEM*
-     */
-    GERBER_DRAW_ITEM* Copy() const;
-
-    /**
      * Function GetLayer
      * returns the layer this item is on.
      */
