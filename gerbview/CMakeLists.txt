@@ -64,7 +64,7 @@ set( GERBVIEW_SRCS
     rs274x.cpp
     select_layers_to_pcb.cpp
     toolbars_gerber.cpp
-    )
+)
 
 set( GERBVIEW_EXTRA_SRCS
     ../common/base_screen.cpp

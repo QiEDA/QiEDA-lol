@@ -298,7 +298,10 @@ bool GERBER_DRAW_ITEM::HasNegativeItems()
 }
 
 
-void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode,
+void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel,
+                             wxDC* aDC,
+                             GERBER_DISPLAY_OPTIONS& aDisplayOptions,
+                             GR_DRAWMODE aDrawMode,
                              const wxPoint& aOffset )
 {
     // used when a D_CODE is not found. default D_CODE to draw a flashed item
@@ -309,7 +312,6 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
     int           halfPenWidth;
     static bool   show_err;
     D_CODE*       d_codeDescr = GetDcodeDescr();
-    GERBVIEW_FRAME* gerbFrame = (GERBVIEW_FRAME*) aPanel->GetParent();
 
     if( d_codeDescr == NULL )
         d_codeDescr = &dummyD_CODE;
@@ -323,7 +325,14 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
 
     ColorApplyHighlightFlag( &color );
 
-    alt_color = gerbFrame->GetNegativeItemsColor();
+    if( aDisplayOptions.m_DisplayNegativeObjects )
+    {
+        alt_color = aDisplayOptions.m_NegativeObjectColor;
+    }
+    else
+    {
+        alt_color = aDisplayOptions.m_BackgroundColor;
+    }
 
     /* isDark is true if flash is positive and should use a drawing
      *   color other than the background color, else use the background color
@@ -339,12 +348,12 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
 
     GRSetDrawMode( aDC, aDrawMode );
 
-    isFilled = gerbFrame->DisplayLinesSolidMode();
+    isFilled = aDisplayOptions.m_DisplayLinesFill;
 
     switch( m_Shape )
     {
     case GBR_POLYGON:
-        isFilled = gerbFrame->DisplayPolygonsSolidMode();
+        isFilled = aDisplayOptions.m_DisplayPolygonsFill;
 
         if( !isDark )
             isFilled = true;
@@ -396,7 +405,7 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
     case GBR_SPOT_OVAL:
     case GBR_SPOT_POLY:
     case GBR_SPOT_MACRO:
-        isFilled = gerbFrame->DisplayFlashedItemsSolidMode();
+        isFilled = aDisplayOptions.m_DisplayFlashedItemsFill;
         d_codeDescr->DrawFlashedShape( this, aPanel->GetClipBox(), aDC, color, alt_color,
                                        m_Start, isFilled );
         break;

@@ -48,14 +48,16 @@
 void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage )
 {
     // Save current draw options, because print mode has specific options:
-    GBR_DISPLAY_OPTIONS imgDisplayOptions = m_DisplayOptions;
+    GERBER_DISPLAY_OPTIONS imgDisplayOptions;
 
     // Set draw options for printing:
-    m_DisplayOptions.m_DisplayFlashedItemsFill = true;
-    m_DisplayOptions.m_DisplayLinesFill = true;
-    m_DisplayOptions.m_DisplayPolygonsFill = true;
-    m_DisplayOptions.m_DisplayDCodes = false;
-    m_DisplayOptions.m_IsPrinting = true;
+    imgDisplayOptions.m_DisplayFlashedItemsFill = true;
+    imgDisplayOptions.m_DisplayLinesFill = true;
+    imgDisplayOptions.m_DisplayPolygonsFill = true;
+    imgDisplayOptions.m_DisplayDCodes = false;
+    imgDisplayOptions.m_IsPrinting = true;
+    imgDisplayOptions.m_NegativeObjectColor = GetVisibleElementColor( NEGATIVE_OBJECTS_VISIBLE );
+    imgDisplayOptions.m_BackgroundColor = WHITE;
 
     m_canvas->SetPrintMirrored( aParams.m_PrintMirror );
 
@@ -63,7 +65,9 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage 
     std::vector<GERBER_IMAGE*>::const_iterator last = aParams.m_LayerQueue.begin() + aPage;
     std::vector<GERBER_IMAGE*> printLayer(first, last);
 
-    GetGerberLayout()->Draw( m_canvas, aDC,
+    GetGerberLayout()->Draw( m_canvas,
+                             aDC,
+                             imgDisplayOptions,
                              printLayer,
                              NULL,
                              (GR_DRAWMODE) 0,
@@ -72,9 +76,6 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage 
                              aParams.m_Print_Black_and_White );
 
     m_canvas->SetPrintMirrored( false );
-
-    // Restore draw options:
-    m_DisplayOptions = imgDisplayOptions;
 }
 
 
@@ -104,8 +105,13 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
         break;
     }
 
+    m_DisplayOptions.m_NegativeObjectColor = GetVisibleElementColor( NEGATIVE_OBJECTS_VISIBLE );
+    m_DisplayOptions.m_BackgroundColor = GetDrawBgColor();
+
     // Draw according to the current setting.  This needs to be GR_COPY or GR_OR.
-    GetGerberLayout()->Draw( m_canvas, DC,
+    GetGerberLayout()->Draw( m_canvas,
+                             DC,
+                             m_DisplayOptions,
                              GetGerberLayout()->GetGerbers(),
                              GetGerberLayout()->GetGerberByListIndex( getActiveLayer() ),
                              drawMode, wxPoint( 0, 0 ),GetDrawBgColor() );

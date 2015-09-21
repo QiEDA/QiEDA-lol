@@ -40,6 +40,7 @@
 #include "gerbview_frame.h"
 #include <class_title_block.h>
 #include <class_gerber_draw_item.h>
+#include <class_gerber_display_options.h>
 
 #include <gerbview_frame.h>
 #include <gr_basic.h>
@@ -113,8 +114,10 @@ public:
      * @param aPrintBlackAndWhite = true to force black and white insdeat of color
      *        useful only to print/plot gebview layers
      */
-    void Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC,
-               const std::vector<GERBER_IMAGE*>& layers,
+    void Draw( EDA_DRAW_PANEL* aPanel,
+               wxDC* aDC,
+               GERBER_DISPLAY_OPTIONS& aDisplayOptions,
+               const std::vector<GERBER_IMAGE*>& aLayers,
                GERBER_IMAGE* selectedLayer,
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
                EDA_COLOR_T aBGColor,

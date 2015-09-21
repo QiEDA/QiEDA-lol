@@ -39,6 +39,7 @@
 #include <class_gbr_screen.h>
 #include <class_page_info.h>
 #include <class_board_printout_controller.h>
+#include <class_gerber_display_options.h>
 
 #define NO_AVAILABLE_LAYERS UNDEFINED_LAYER
 
@@ -46,35 +47,6 @@ class DCODE_SELECTION_BOX;
 class GERBER_LAYER_WIDGET;
 class GBR_LAYER_BOX_SELECTOR;
 class GERBER_DRAW_ITEM;
-
-
-/**
- * Class GBR_DISPLAY_OPTIONS
- * A helper class to handle display options.
- */
-class GBR_DISPLAY_OPTIONS
-{
-public:
-    bool    m_DisplayFlashedItemsFill;
-    bool    m_DisplayLinesFill;
-    bool    m_DisplayPolygonsFill;
-    bool    m_DisplayPolarCood;
-    bool    m_DisplayDCodes;
-    bool    m_DisplayNegativeObjects;
-    bool    m_IsPrinting;
-
-public:
-    GBR_DISPLAY_OPTIONS()
-    {
-        m_DisplayFlashedItemsFill = true;
-        m_DisplayLinesFill      = true;
-        m_DisplayPolygonsFill   = true;
-        m_DisplayPolarCood      = false;
-        m_DisplayDCodes = false;
-        m_IsPrinting = false;
-        m_DisplayNegativeObjects = false;
-    }
-};
 
 
 /**
@@ -91,7 +63,7 @@ class GERBVIEW_FRAME : public EDA_DRAW_FRAME    // PCB_BASE_FRAME
     PAGE_INFO       m_paper;            // used only to show paper limits to screen
 
 public:
-    GBR_DISPLAY_OPTIONS m_DisplayOptions;
+    GERBER_DISPLAY_OPTIONS m_DisplayOptions;
 
     GBR_LAYOUT* GetGerberLayout() const
     {
@@ -308,36 +280,6 @@ public:
      * in order to see negative objects
      */
     EDA_COLOR_T GetNegativeItemsColor() const;
-
-    /**
-     * Function DisplayLinesSolidMode
-     * @return true to draw gerber lines in solid (filled) mode,
-     * false to draw gerber lines in sketch mode
-     */
-    bool DisplayLinesSolidMode()
-    {
-        return  m_DisplayOptions.m_DisplayLinesFill;
-    }
-
-    /**
-     * Function DisplayPolygonsSolidMode
-     * @return true to draw polygon in solid (filled) mode,
-     * false to draw polygon outlines only
-     */
-    bool DisplayPolygonsSolidMode()
-    {
-        return  m_DisplayOptions.m_DisplayPolygonsFill;
-    }
-
-    /**
-     * Function DisplayFlashedItemsSolidMode
-     * @return true to draw flashed items in solid (filled) mode,
-     * false to draw draw flashed in sketch mode
-     */
-    bool DisplayFlashedItemsSolidMode()
-    {
-        return  m_DisplayOptions.m_DisplayFlashedItemsFill;
-    }
 
     /**
      * Function ReFillLayerWidget

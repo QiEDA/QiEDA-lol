@@ -78,6 +78,7 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
  */
 void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
                        wxDC* aDC,
+                       GERBER_DISPLAY_OPTIONS& aDisplayOptions,
                        const std::vector<GERBER_IMAGE*>& aLayers,
                        GERBER_IMAGE* aSelectedLayer,
                        GR_DRAWMODE aDrawMode,
@@ -85,8 +86,6 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
                        EDA_COLOR_T aBGColor,
                        bool aPrintBlackAndWhite )
 {
-    GERBVIEW_FRAME* gerbFrame = (GERBVIEW_FRAME*) aPanel->GetParent();
-
     // Because Images can be negative (i.e with background filled in color) items are drawn
     // graphic layer per graphic layer, after the background is filled
     // to a temporary bitmap
@@ -266,7 +265,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
             if( dcode_highlight && dcode_highlight == item->m_DCode )
                 DrawModeAddHighlight( &drawMode);
 
-            item->Draw( aPanel, plotDC, drawMode, wxPoint(0,0) );
+            item->Draw( aPanel, plotDC, aDisplayOptions, drawMode, wxPoint(0,0) );
             doBlit = true;
         }
 

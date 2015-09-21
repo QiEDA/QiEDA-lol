@@ -33,6 +33,7 @@
 #include <dlist.h>
 #include <layers_id_colors_and_visibility.h>
 #include <gr_basic.h>
+#include "class_gerber_display_options.h"
 
 class GERBER_IMAGE;
 class GBR_LAYOUT;
@@ -200,6 +201,7 @@ public:
     /* Display on screen: */
     void Draw( EDA_DRAW_PANEL*         aPanel,
                wxDC*                   aDC,
+               GERBER_DISPLAY_OPTIONS& aDisplayOptions,
                GR_DRAWMODE             aDrawMode,
                const wxPoint&aOffset );
 
