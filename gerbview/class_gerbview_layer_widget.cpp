@@ -348,7 +348,9 @@ void GERBER_LAYER_WIDGET::ReFill()
         int layer = git-myframe->GetGerberLayout()->GetGerbers().begin();
 
         AppendLayerRow( LAYER_WIDGET::ROW( msg, layer,
-                        myframe->GetLayerColor( layer ), wxEmptyString, gerber->m_Visible ) );
+                        gerber->m_DrawColor,
+                                           wxEmptyString,
+                                           gerber->m_Visible ) );
     }
 
     Thaw();
@@ -360,7 +362,9 @@ void GERBER_LAYER_WIDGET::ReFill()
 
 void GERBER_LAYER_WIDGET::OnLayerColorChange( int aLayer, EDA_COLOR_T aColor )
 {
-    myframe->SetLayerColor( aLayer, aColor );
+    GERBER_IMAGE* gerber = myframe->GetGerberLayout()->GetGerberById(aLayer);
+    gerber->m_DrawColor = aColor;
+
     myframe->m_SelLayerBox->ResyncBitmapOnly();
     myframe->GetCanvas()->Refresh();
 }

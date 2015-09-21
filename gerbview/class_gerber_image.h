@@ -103,6 +103,7 @@ class GERBER_IMAGE
 
 public:
     std::list<GERBER_DRAW_ITEM*> m_Drawings;
+    EDA_COLOR_T         m_DrawColor;
     bool               m_InUse;                                 // true if this image is currently in use
                                                                 // (a file is loaded in it)
     wxString           m_FileName;                              // Full File Name for this layer

@@ -302,18 +302,6 @@ public:
     void    SetVisibleElementColor( GERBER_VISIBLE_ID aItemIdVisible, EDA_COLOR_T aColor );
 
     /**
-     * Function GetLayerColor
-     * gets a layer color for any valid layer.
-     */
-    EDA_COLOR_T GetLayerColor( int aLayer ) const;
-
-    /**
-     * Function SetLayerColor
-     * changes a layer color for any valid layer.
-     */
-    void    SetLayerColor( int aLayer, EDA_COLOR_T aColor );
-
-    /**
      * Function GetNegativeItemsColor
      * @return the color of negative items.
      * This is usually the background color, but can be an other color

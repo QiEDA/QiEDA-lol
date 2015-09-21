@@ -590,19 +590,10 @@ EDA_COLOR_T GERBVIEW_FRAME::GetNegativeItemsColor() const
         return GetDrawBgColor();
 }
 
-
-EDA_COLOR_T GERBVIEW_FRAME::GetLayerColor( int aLayer ) const
-{
-    return m_colorsSettings->GetLayerColor( aLayer );
-}
-
-
-void GERBVIEW_FRAME::SetLayerColor( int aLayer, EDA_COLOR_T aColor )
-{
-    m_colorsSettings->SetLayerColor( aLayer, aColor );
-}
-
-
+/**
+ * Function getActiveLayer
+ * returns the active layer
+ */
 int GERBVIEW_FRAME::getActiveLayer()
 {
     return ( (GBR_SCREEN*) GetScreen() )->m_Active_Layer;

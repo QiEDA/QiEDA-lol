@@ -66,9 +66,11 @@ void GBR_LAYER_BOX_SELECTOR::Resync()
 // Returns a color index from the layer id
 EDA_COLOR_T GBR_LAYER_BOX_SELECTOR::GetLayerColor( int aLayer ) const
 {
-    GERBVIEW_FRAME* frame = (GERBVIEW_FRAME*) GetParent()->GetParent();
+    GERBVIEW_FRAME* gerbviewFrame = (GERBVIEW_FRAME*) GetParent()->GetParent();
 
-    return frame->GetLayerColor( aLayer );
+    GERBER_IMAGE* gerber = gerbviewFrame->GetGerberLayout()->GetGerberById( aLayer );
+
+    return gerber->m_DrawColor;
 }
 
 

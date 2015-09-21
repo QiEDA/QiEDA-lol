@@ -328,7 +328,9 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
         d_codeDescr = &dummyD_CODE;
 
     // TODO MARK FIX THIS REFERENCING
-    color = gerbFrame->GetLayerColor( gerbFrame->GetGerberLayout()->GetGerberIndexByLayer(GetLayer()) );
+
+    GERBER_IMAGE* gerber = gerbFrame->GetGerberLayout()->GetGerberById(GetLayer());
+    color = gerber->m_DrawColor;
 
     if( aDrawMode & GR_HIGHLIGHT )
         ColorChangeHighlightFlag( &color, !(aDrawMode & GR_AND) );
