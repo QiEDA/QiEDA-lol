@@ -416,10 +416,25 @@ int GBR_LAYOUT::GetGerberIndexByLayer( int layerID )
     return 0;
 }
 
+
 int GBR_LAYOUT::AddGerber( GERBER_IMAGE* aGbrImage )
 {
+    static const EDA_COLOR_T color_default[] = {
+            GREEN,     BLUE,         LIGHTGRAY, MAGENTA,
+            RED,       DARKGREEN,    BROWN,     MAGENTA,
+            LIGHTGRAY, BLUE,         GREEN,     CYAN,
+            LIGHTRED,  LIGHTMAGENTA, YELLOW,    RED,
+            BLUE,      BROWN,        LIGHTCYAN, RED,
+            MAGENTA,   CYAN,         BROWN,     MAGENTA,
+            LIGHTGRAY, BLUE,         GREEN,     DARKCYAN,
+            YELLOW,    LIGHTMAGENTA, YELLOW,    LIGHTGRAY,
+    };
+
     m_Gerbers.push_back(aGbrImage);
     int idx = m_nextLayerId++;
+
+    /* Assign a draw color */
+    aGbrImage->m_DrawColor = color_default[idx % 32];
 
     return idx;
 }
