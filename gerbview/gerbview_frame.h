@@ -38,7 +38,6 @@
 #include <class_gbr_layout.h>
 #include <class_gbr_screen.h>
 #include <class_page_info.h>
-#include "class_gerber_image_list.h"
 #include <class_board_printout_controller.h>
 
 #define NO_AVAILABLE_LAYERS UNDEFINED_LAYER
@@ -172,7 +171,6 @@ public:
     wxTextCtrl*             m_TextInfo;         // a wxTextCtrl used to display some info about
                                                 // gerber data (format..)
     wxArrayString           m_DCodesList;       // an array string containing all decodes Id (10 to 999)
-    GERBER_IMAGE_LIST*      m_GERBER_List;
 private:
     // list of PARAM_CFG_xxx to read/write parameters saved in config
     PARAM_CFG_ARRAY         m_configSettings;

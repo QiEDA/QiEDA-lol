@@ -36,7 +36,6 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
 #include <pcbplot.h>
 
 static double s_ScaleList[] =
@@ -147,7 +146,7 @@ void DIALOG_PRINT_USING_PRINTER::InitValues()
 
     s_Parameters.m_PageSetupData = s_pageSetupData;
 
-    for (std::vector<GERBER_IMAGE*>::iterator it=m_Parent->m_GERBER_List->m_Gerbers.begin(); it != m_Parent->m_GERBER_List->m_Gerbers.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::const_iterator it=m_Parent->GetGerberLayout()->GetGerbers().begin(); it != m_Parent->GetGerberLayout()->GetGerbers().end(); ++it)
     {
         GERBER_IMAGE* gerber = *it;
 

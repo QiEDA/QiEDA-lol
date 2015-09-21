@@ -56,8 +56,11 @@ private:
     EDA_RECT            m_BoundingBox;
     TITLE_BLOCK         m_titles;
     wxPoint             m_originAxisPosition;
-    std::bitset <GERBER_DRAWLAYERS_COUNT> m_printLayersMask; // When printing: the list of layers to print
     GERBVIEW_FRAME*     m_Parent;
+
+    // the list of loaded images (1 image = 1 gerber file)
+    std::vector<GERBER_IMAGE*> m_Gerbers;
+    int m_nextLayerId;
 public:
     GERBVIEW_FRAME* GetParent() const { return m_Parent; }
 
@@ -111,7 +114,7 @@ public:
      *        useful only to print/plot gebview layers
      */
     void Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC,
-               std::vector<GERBER_IMAGE*>& layers,
+               const std::vector<GERBER_IMAGE*>& layers,
                GERBER_IMAGE* selectedLayer,
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
                EDA_COLOR_T aBGColor,
@@ -119,8 +122,23 @@ public:
 
 #if defined(DEBUG)
     void    Show( int nestLevel, std::ostream& os ) const;  // overload
-
 #endif
+
+    int AddGerber( GERBER_IMAGE* aGbrImage );
+    void MoveLayerUp( int aIdx );
+    void MoveLayerDown( int aIdx );
+    void SortGerbersByZOrder();
+    void DeleteGerber( int aIdx );
+    GERBER_IMAGE* GetGerberByListIndex( int aIdx );
+
+    const std::vector<GERBER_IMAGE*>& GetGerbers()
+    {
+        return m_Gerbers;
+    }
+
+    GERBER_IMAGE* GetGerberById( int layerID );
+    int GetGerberIndexByLayer( int layerID );
+    void DeleteAllGerbers( void );
 };
 
 #endif      // #ifndef CLASS_GBR_LAYOUT_H

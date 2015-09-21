@@ -41,7 +41,6 @@
 #include <gerbview_frame.h>
 #include <class_gerber_draw_item.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
 
 
 GERBER_DRAW_ITEM::GERBER_DRAW_ITEM( GBR_LAYOUT* aParent, GERBER_IMAGE* aGerberparams ) :
@@ -231,7 +230,7 @@ D_CODE* GERBER_DRAW_ITEM::GetDcodeDescr()
 
     GERBVIEW_FRAME* frame = ((GBR_LAYOUT*)m_Parent)->GetParent();
 
-    GERBER_IMAGE* gerber = frame->m_GERBER_List->GetGerberById( m_Layer );
+    GERBER_IMAGE* gerber = frame->GetGerberLayout()->GetGerberById( m_Layer );
 
     if( gerber == NULL )
         return NULL;
@@ -328,7 +327,8 @@ void GERBER_DRAW_ITEM::Draw( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDra
     if( d_codeDescr == NULL )
         d_codeDescr = &dummyD_CODE;
 
-    color = gerbFrame->GetLayerColor( gerbFrame->m_GERBER_List->GetGerberIndexByLayer(GetLayer()) );
+    // TODO MARK FIX THIS REFERENCING
+    color = gerbFrame->GetLayerColor( gerbFrame->GetGerberLayout()->GetGerberIndexByLayer(GetLayer()) );
 
     if( aDrawMode & GR_HIGHLIGHT )
         ColorChangeHighlightFlag( &color, !(aDrawMode & GR_AND) );

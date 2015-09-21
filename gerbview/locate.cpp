@@ -34,7 +34,6 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
 
 
 /* localize a gerber item and return a pointer to it.
@@ -48,7 +47,7 @@ GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition )
 
     int layer = getActiveLayer();
 
-    GERBER_IMAGE* gerber = m_GERBER_List->GetGerberByListIndex( layer );
+    GERBER_IMAGE* gerber = GetGerberLayout()->GetGerberByListIndex( layer );
 
     GERBER_DRAW_ITEM* gerb_item = NULL;
 
@@ -71,9 +70,9 @@ GERBER_DRAW_ITEM* GERBVIEW_FRAME::Locate( const wxPoint& aPosition )
 
     if( !found ) // Search on all layers
     {
-        for( int layer = 0; layer <  m_GERBER_List->GetImageCount(); layer++ )
+        for( int layer = 0; layer < GetGerberLayout()->GetGerbers().size(); layer++ )
         {
-            gerber = m_GERBER_List->GetGerberByListIndex( layer );
+            gerber = GetGerberLayout()->GetGerberByListIndex( layer );
             for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
             {
                 gerb_item = *it;

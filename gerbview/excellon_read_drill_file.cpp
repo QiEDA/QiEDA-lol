@@ -76,7 +76,6 @@
 #include <class_excellon.h>
 #include <kicad_string.h>
 #include <class_X2_gerber_attributes.h>
-#include <class_gerber_image_list.h>
 
 #include <html_messagebox.h>
 
@@ -174,15 +173,10 @@ static EXCELLON_CMD excellon_G_CmdList[] =
 bool GERBVIEW_FRAME::Read_EXCELLON_File( const wxString& aFullFileName )
 {
     wxString msg;
-    int layerId = getActiveLayer();      // current layer used in GerbView
-    EXCELLON_IMAGE* drill_Layer = (EXCELLON_IMAGE*) m_GERBER_List->GetGerberByListIndex( layerId );
 
-    if( drill_Layer == NULL )
-    {
-        drill_Layer = new EXCELLON_IMAGE( this );
-        layerId = m_GERBER_List->AddGbrImage( drill_Layer );
-        drill_Layer->SetLayerNumber(layerId);
-    }
+    EXCELLON_IMAGE* drill_Layer = new EXCELLON_IMAGE( this );
+    int layerId = GetGerberLayout()->AddGerber( drill_Layer );
+    drill_Layer->SetLayerNumber(layerId);
 
     if( layerId < 0 )
     {

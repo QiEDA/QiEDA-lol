@@ -43,7 +43,6 @@
 #include <class_gerber_image.h>
 #include <layer_widget.h>
 #include <class_gerbview_layer_widget.h>
-#include <class_gerber_image_list.h>
 
 
 /*
@@ -170,7 +169,7 @@ void GERBER_LAYER_WIDGET::onRightDownLayerRow( wxMouseEvent& event )
     wxWindow* w = (wxWindow*) event.GetEventObject();
     int rowId = getDecodedId( w->GetId() );
 
-    if( myframe->m_GERBER_List->GetImageCount() > 1) //are there more than 1 layer?
+    if( myframe->GetGerberLayout()->GetGerbers().size() > 1) //are there more than 1 layer?
     {
         if( rowId != 0 ) // layer id 0 is "top"
         {
@@ -179,7 +178,7 @@ void GERBER_LAYER_WIDGET::onRightDownLayerRow( wxMouseEvent& event )
 
         }
 
-        if( rowId != myframe->m_GERBER_List->GetImageCount()-1 ) // not end of layer list
+        if( rowId != myframe->GetGerberLayout()->GetGerbers().size()-1 ) // not end of layer list
         {
             menu.Append( new wxMenuItem( &menu, ID_LAYER_MOVE_DOWN,
                                          _("Move down") ) );
@@ -278,7 +277,7 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
 
             cb->SetValue( loc_visible );
 
-            GERBER_IMAGE* gerber = myframe->m_GERBER_List->GetGerberByListIndex(layer);
+            GERBER_IMAGE* gerber = myframe->GetGerberLayout()->GetGerberByListIndex(layer);
             gerber->m_Visible = loc_visible;
         }
 
@@ -291,9 +290,9 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
             LAYER_WIDGT_ROW* const layerRowData = (LAYER_WIDGT_ROW*)menu->GetRefData();
 
             if( menuId == ID_LAYER_MOVE_UP )
-                myframe->m_GERBER_List->MoveLayerUp(layerRowData->m_row);
+                myframe->GetGerberLayout()->MoveLayerUp(layerRowData->m_row);
             else
-                myframe->m_GERBER_List->MoveLayerDown(layerRowData->m_row);
+                myframe->GetGerberLayout()->MoveLayerDown(layerRowData->m_row);
 
             myframe->ReFillLayerWidget();
             myframe->syncLayerBox();
@@ -304,7 +303,7 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
         {
             wxMenu* menu = (wxMenu*) event.GetEventObject();
             LAYER_WIDGT_ROW* const layerRowData = (LAYER_WIDGT_ROW*)menu->GetRefData();
-            myframe->m_GERBER_List->RemoveImage(layerRowData->m_row);
+            myframe->GetGerberLayout()->DeleteGerber(layerRowData->m_row);
 
             myframe->ReFillLayerWidget();
             myframe->syncLayerBox();
@@ -312,7 +311,7 @@ void GERBER_LAYER_WIDGET::onPopupSelection( wxCommandEvent& event )
         }
             break;
     case ID_SORT_GBR_LAYERS:
-        myframe->m_GERBER_List->SortImagesByZOrder();
+        myframe->GetGerberLayout()->SortGerbersByZOrder();
         myframe->ReFillLayerWidget();
         myframe->syncLayerBox();
         myframe->GetCanvas()->Refresh();
@@ -341,12 +340,12 @@ void GERBER_LAYER_WIDGET::ReFill()
 
     ClearLayerRows();
 
-    for (std::vector<GERBER_IMAGE*>::iterator git = myframe->m_GERBER_List->m_Gerbers.begin(); git != myframe->m_GERBER_List->m_Gerbers.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::const_iterator git = myframe->GetGerberLayout()->GetGerbers().begin(); git != myframe->GetGerberLayout()->GetGerbers().end(); ++git)
     {
         GERBER_IMAGE* gerber = *git;
         wxString msg = gerber->GetDisplayName();
 
-        int layer = git-myframe->m_GERBER_List->m_Gerbers.begin();
+        int layer = git-myframe->GetGerberLayout()->GetGerbers().begin();
 
         AppendLayerRow( LAYER_WIDGET::ROW( msg, layer,
                         myframe->GetLayerColor( layer ), wxEmptyString, gerber->m_Visible ) );
@@ -385,7 +384,7 @@ bool GERBER_LAYER_WIDGET::OnLayerSelect( int aLayer )
 
 void GERBER_LAYER_WIDGET::OnLayerVisible( int aLayer, bool isVisible, bool isFinal )
 {
-    GERBER_IMAGE* gerber = myframe->m_GERBER_List->GetGerberByListIndex(aLayer);
+    GERBER_IMAGE* gerber = myframe->GetGerberLayout()->GetGerberByListIndex(aLayer);
 
     gerber->m_Visible = isVisible;
 
@@ -414,7 +413,8 @@ void GERBER_LAYER_WIDGET::OnRenderEnable( int aId, bool isEnabled )
  */
 bool GERBER_LAYER_WIDGET::useAlternateBitmap(int aRow)
 {
-    return myframe->m_GERBER_List->IsUsed( aRow );
+    //TODO MARK ELIMINATE THIS
+    return false;
 }
 
 /*

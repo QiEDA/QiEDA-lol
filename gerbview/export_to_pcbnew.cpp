@@ -42,7 +42,6 @@
 #include <select_layers_to_pcb.h>
 #include <build_version.h>
 #include <wildcards_and_files_ext.h>
-#include <class_gerber_image_list.h>
 
 
 // Imported function
@@ -156,7 +155,7 @@ GBR_TO_PCB_EXPORTER::~GBR_TO_PCB_EXPORTER()
  */
 void GERBVIEW_FRAME::ExportDataInPcbnewFormat( wxCommandEvent& event )
 {
-    int layercount = m_GERBER_List->GetImageCount();
+    int layercount = GetGerberLayout()->GetGerbers().size();
 
     if( layercount == 0 )
     {
@@ -218,11 +217,10 @@ bool GBR_TO_PCB_EXPORTER::ExportPcb( LAYER_NUM* aLayerLookUpTable, int aCopperLa
 
     int pcbCopperLayerMax = 31;
 
-    for (std::vector<GERBER_IMAGE*>::iterator git = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin(); git != m_gerbview_frame->m_GERBER_List->m_Gerbers.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::const_iterator git = m_gerbview_frame->GetGerberLayout()->GetGerbers().begin(); git != m_gerbview_frame->GetGerberLayout()->GetGerbers().end(); ++git)
     {
-        int layer = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin() - git;
+        int layer = git-m_gerbview_frame->GetGerberLayout()->GetGerbers().begin();
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
-
 
         if( !IsPcbLayer( pcb_layer_number ) )
             continue;
@@ -236,11 +234,10 @@ bool GBR_TO_PCB_EXPORTER::ExportPcb( LAYER_NUM* aLayerLookUpTable, int aCopperLa
     }
 
     // Copper layers
-    for (std::vector<GERBER_IMAGE*>::iterator git = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin(); git != m_gerbview_frame->m_GERBER_List->m_Gerbers.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::const_iterator git = m_gerbview_frame->GetGerberLayout()->GetGerbers().begin(); git != m_gerbview_frame->GetGerberLayout()->GetGerbers().end(); ++git)
     {
-        int layer = m_gerbview_frame->m_GERBER_List->m_Gerbers.begin() - git;
+        int layer = git-m_gerbview_frame->GetGerberLayout()->GetGerbers().begin();
         LAYER_NUM pcb_layer_number = aLayerLookUpTable[layer];
-
 
         if( pcb_layer_number < 0 || pcb_layer_number > pcbCopperLayerMax ) {
             continue;

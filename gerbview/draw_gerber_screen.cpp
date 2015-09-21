@@ -43,7 +43,6 @@
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
 #include <class_board_printout_controller.h>
-#include <class_gerber_image_list.h>
 
 
 void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage )
@@ -107,8 +106,8 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
 
     // Draw according to the current setting.  This needs to be GR_COPY or GR_OR.
     GetGerberLayout()->Draw( m_canvas, DC,
-                             m_GERBER_List->m_Gerbers,
-                             m_GERBER_List->GetGerberByListIndex( getActiveLayer() ),
+                             GetGerberLayout()->GetGerbers(),
+                             GetGerberLayout()->GetGerberByListIndex( getActiveLayer() ),
                              drawMode, wxPoint( 0, 0 ),GetDrawBgColor() );
 
     // Draw the "background" now, i.e. grid and axis after gerber layers
@@ -150,7 +149,7 @@ void GERBVIEW_FRAME::DrawItemsDCodeID( wxDC* aDC, GR_DRAWMODE aDrawMode )
 
     GRSetDrawMode( aDC, aDrawMode );
 
-    for (std::vector<GERBER_IMAGE*>::reverse_iterator git = m_GERBER_List->m_Gerbers.rbegin() ; git != m_GERBER_List->m_Gerbers.rend(); ++git)
+    for (std::vector<GERBER_IMAGE*>::const_reverse_iterator git = GetGerberLayout()->GetGerbers().rbegin() ; git != GetGerberLayout()->GetGerbers().rend(); ++git)
     {
         GERBER_IMAGE* gerber = *git;
 

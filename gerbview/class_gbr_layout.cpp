@@ -31,15 +31,18 @@
 #include <algorithm>
 
 #include <common.h>
+
 #include <class_gbr_layout.h>
 #include <class_drawpanel.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
+#include <class_X2_gerber_attributes.h>
+
+static bool sortZorder( const GERBER_IMAGE* const& ref, const GERBER_IMAGE* const& test );
 
 GBR_LAYOUT::GBR_LAYOUT( GERBVIEW_FRAME* aParent ) :
-        m_Parent( aParent )
+        m_Parent( aParent ),
+        m_nextLayerId( 0 )
 {
-    m_printLayersMask.set();
 }
 
 
@@ -52,9 +55,10 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
 {
     EDA_RECT bbox;
 
-    for (std::vector<GERBER_IMAGE*>::iterator it=m_Parent->m_GERBER_List->m_Gerbers.begin(); it != m_Parent->m_GERBER_List->m_Gerbers.end(); ++it)
+    for (std::vector<GERBER_IMAGE*>::iterator it=m_Gerbers.begin(); it != m_Gerbers.end(); ++it)
     {
         GERBER_IMAGE *gerber = *it;
+
         for (std::list<GERBER_DRAW_ITEM *>::iterator jt = gerber->m_Drawings.begin();
              jt != gerber->m_Drawings.end(); ++jt)
         {
@@ -74,7 +78,7 @@ EDA_RECT GBR_LAYOUT::ComputeBoundingBox()
  */
 void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
                        wxDC* aDC,
-                       std::vector<GERBER_IMAGE*>& aLayers,
+                       const std::vector<GERBER_IMAGE*>& aLayers,
                        GERBER_IMAGE* aSelectedLayer,
                        GR_DRAWMODE aDrawMode,
                        const wxPoint& aOffset,
@@ -318,3 +322,119 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
     }
 }
 
+void GBR_LAYOUT::MoveLayerUp( int aIdx )
+{
+    if( aIdx > 0 )
+    {
+        std::iter_swap(m_Gerbers.begin() + aIdx-1, m_Gerbers.begin() + aIdx);
+    }
+}
+
+void GBR_LAYOUT::MoveLayerDown( int aIdx )
+{
+    if( aIdx < (int)m_Gerbers.size()-1 )
+    {
+        std::iter_swap(m_Gerbers.begin() + aIdx, m_Gerbers.begin() + aIdx+1);
+    }
+}
+void GBR_LAYOUT::SortGerbersByZOrder()
+{
+    std::sort( m_Gerbers.begin(), m_Gerbers.end(), sortZorder );
+}
+
+// Helper function, for std::sort.
+// Sort loaded images by Z order priority, if they have the X2 FileFormat info
+// returns true if the first argument (ref) is ordered before the second (test).
+static bool sortZorder( const GERBER_IMAGE* const& ref, const GERBER_IMAGE* const& test )
+{
+    if( !ref && !test )
+        return false;        // do not change order: no criteria to sort items
+
+    if( !ref || !ref->m_InUse )
+        return false;       // Not used: ref ordered after
+
+    if( !test || !test->m_InUse )
+        return true;        // Not used: ref ordered before
+
+    if( !ref->m_FileFunction && !test->m_FileFunction )
+        return false;        // do not change order: no criteria to sort items
+
+    if( !ref->m_FileFunction )
+        return false;
+
+    if( !test->m_FileFunction )
+        return true;
+
+    if( ref->m_FileFunction->GetZOrder() != test->m_FileFunction->GetZOrder() )
+        return ref->m_FileFunction->GetZOrder() > test->m_FileFunction->GetZOrder();
+
+    return ref->m_FileFunction->GetZSubOrder() > test->m_FileFunction->GetZSubOrder();
+}
+
+
+
+// remove the loaded data of image aIdx, but do not delete it
+void GBR_LAYOUT::DeleteGerber( int aIdx )
+{
+    if( aIdx >= 0 && aIdx < (int)m_Gerbers.size() )
+    {
+        delete m_Gerbers[aIdx];
+        m_Gerbers.erase (m_Gerbers.begin()+aIdx);
+    }
+}
+
+GERBER_IMAGE* GBR_LAYOUT::GetGerberByListIndex( int aIdx )
+{
+    if( aIdx < m_Gerbers.size() && aIdx >= 0 )
+        return m_Gerbers[aIdx];
+
+    return NULL;
+}
+
+GERBER_IMAGE* GBR_LAYOUT::GetGerberById( int layerID )
+{
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
+    {
+        if( (*it)->m_GraphicLayer == layerID )
+        {
+            return *it;
+        }
+    }
+
+    return NULL;
+}
+
+int GBR_LAYOUT::GetGerberIndexByLayer( int layerID )
+{
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
+    {
+        if( (*it)->m_GraphicLayer == layerID )
+        {
+            int result = it - m_Gerbers.begin();
+            return result;
+        }
+    }
+
+    return 0;
+}
+
+int GBR_LAYOUT::AddGerber( GERBER_IMAGE* aGbrImage )
+{
+    m_Gerbers.push_back(aGbrImage);
+    int idx = m_nextLayerId++;
+
+    return idx;
+}
+
+
+void GBR_LAYOUT::DeleteAllGerbers( void )
+{
+    for (std::vector<GERBER_IMAGE*>::iterator it = m_Gerbers.begin() ; it != m_Gerbers.end(); ++it)
+    {
+        delete (*it);
+    }
+
+    m_Gerbers.clear();
+
+    m_nextLayerId = 0;
+}

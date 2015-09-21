@@ -33,7 +33,6 @@
 #include <colors_selection.h>
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
 
 #include <class_gbr_layer_box_selector.h>
 
@@ -44,11 +43,11 @@ void GBR_LAYER_BOX_SELECTOR::Resync()
 
     GERBVIEW_FRAME* gerbviewFrame = (GERBVIEW_FRAME*)m_parent->GetParent(); //we are child of toolbar which is child of frame
 
-    for (std::vector<GERBER_IMAGE*>::iterator git = gerbviewFrame->m_GERBER_List->m_Gerbers.begin(); git != gerbviewFrame->m_GERBER_List->m_Gerbers.end(); ++git)
+    for (std::vector<GERBER_IMAGE*>::const_iterator git = gerbviewFrame->GetGerberLayout()->GetGerbers().begin(); git != gerbviewFrame->GetGerberLayout()->GetGerbers().end(); ++git)
     {
         GERBER_IMAGE* gerber = *git;
 
-        int layerid = git-gerbviewFrame->m_GERBER_List->m_Gerbers.begin();
+        int layerid = git-gerbviewFrame->GetGerberLayout()->GetGerbers().begin();
 
         if( !IsLayerEnabled( layerid ) )
             continue;
@@ -78,7 +77,7 @@ wxString GBR_LAYER_BOX_SELECTOR::GetLayerName( int aLayer ) const
 {
     GERBVIEW_FRAME* gerbviewFrame = (GERBVIEW_FRAME*)m_parent->GetParent(); //we are child of toolbar which is child of frame
 
-    GERBER_IMAGE* gerber = gerbviewFrame->m_GERBER_List->GetGerberByListIndex(aLayer);
+    GERBER_IMAGE* gerber = gerbviewFrame->GetGerberLayout()->GetGerberByListIndex(aLayer);
     wxString name = gerber->GetDisplayName();
 
     return name;

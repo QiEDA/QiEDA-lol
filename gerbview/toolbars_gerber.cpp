@@ -41,7 +41,6 @@
 #include <class_gbr_layer_box_selector.h>
 #include <class_DCodeSelectionbox.h>
 #include <dialog_helpers.h>
-#include <class_gerber_image_list.h>
 
 void GERBVIEW_FRAME::ReCreateHToolbar( void )
 {
@@ -295,7 +294,7 @@ void GERBVIEW_FRAME::OnUpdateShowLayerManager( wxUpdateUIEvent& aEvent )
 void GERBVIEW_FRAME::OnUpdateSelectDCode( wxUpdateUIEvent& aEvent )
 {
     int layer = getActiveLayer();
-    GERBER_IMAGE* gerber = m_GERBER_List->GetGerberByListIndex( layer );
+    GERBER_IMAGE* gerber = GetGerberLayout()->GetGerberByListIndex( layer );
     int selected = ( gerber ) ? gerber->m_Selected_Tool : 0;
 
     if( m_DCodeSelector && m_DCodeSelector->GetSelectedDCodeId() != selected )

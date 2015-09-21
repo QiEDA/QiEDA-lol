@@ -31,8 +31,6 @@
 #include <gerbview.h>
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
-#include <class_gerber_image_list.h>
-
 #include <html_messagebox.h>
 #include <macros.h>
 
@@ -55,7 +53,7 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
     if( replace )
     {
         layer = getActiveLayer();
-        gerber = m_GERBER_List->GetGerberByListIndex( layer );
+        gerber = GetGerberLayout()->GetGerberByListIndex( layer );
 
         if( gerber == NULL )
         {
@@ -64,12 +62,13 @@ bool GERBVIEW_FRAME::Read_GERBER_File( const wxString& GERBER_FullFileName,
             return false;
         }
 
-        m_GERBER_List->ReplaceGbrImage( layer, gerber );
+        // TODO rethink this option
+        //m_GERBER_List->ReplaceGbrImage( layer, gerber );
     }
     else
     {
         gerber = new GERBER_IMAGE( this );
-        layer = m_GERBER_List->AddGbrImage( gerber );
+        layer = GetGerberLayout()->AddGerber( gerber );
         gerber->SetLayerNumber(layer);
     }
 

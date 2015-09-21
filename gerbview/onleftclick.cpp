@@ -30,7 +30,6 @@
 #include <gerbview_frame.h>
 #include <class_gerber_image.h>
 #include <dialog_helpers.h>
-#include <class_gerber_image_list.h>
 
 /* Process the command triggered by the left button of the mouse
  * currently: just display info in the message panel.
@@ -43,7 +42,7 @@ void GERBVIEW_FRAME::OnLeftClick( wxDC* DC, const wxPoint& aPosition )
 
     if( DrawStruct == NULL )
     {
-        GERBER_IMAGE* gerber = m_GERBER_List->GetGerberByListIndex( getActiveLayer() );
+        GERBER_IMAGE* gerber = GetGerberLayout()->GetGerberByListIndex( getActiveLayer() );
 
         if( gerber )
             gerber->DisplayImageInfo( );

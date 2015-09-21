@@ -34,7 +34,6 @@
 
 #include <gerbview_frame.h>
 #include <class_gerbview_layer_widget.h>
-#include <class_gerber_image_list.h>
 
 bool GERBVIEW_FRAME::Clear_DrawLayers( bool query )
 {
@@ -47,7 +46,7 @@ bool GERBVIEW_FRAME::Clear_DrawLayers( bool query )
             return false;
     }
 
-    m_GERBER_List->ClearList();
+    GetGerberLayout()->DeleteAllGerbers();
 
     GetGerberLayout()->SetBoundingBox( EDA_RECT() );
 
