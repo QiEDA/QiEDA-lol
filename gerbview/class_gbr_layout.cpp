@@ -83,8 +83,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
                        const std::vector<GERBER_IMAGE*>& aLayers,
                        GERBER_IMAGE* aSelectedLayer,
                        GR_DRAWMODE aDrawMode,
-                       const wxPoint& aOffset,
-                       bool aPrintBlackAndWhite )
+                       const wxPoint& aOffset )
 {
     // Because Images can be negative (i.e with background filled in color) items are drawn
     // graphic layer per graphic layer, after the background is filled
@@ -186,7 +185,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
         EDA_COLOR_T color = gerber->m_DrawColor;
 
         // Force black and white draw mode on request:
-        if( aPrintBlackAndWhite )
+        if( aDisplayOptions.m_DrawBlackAndWhite )
             gerber->m_DrawColor = (aDisplayOptions.m_BackgroundColor == BLACK ? WHITE : BLACK);
 
         if( useBufferBitmap )
@@ -269,7 +268,7 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
             doBlit = true;
         }
 
-        if( aPrintBlackAndWhite )
+        if( aDisplayOptions.m_DrawBlackAndWhite )
             gerber->m_DrawColor = color;
     }
 

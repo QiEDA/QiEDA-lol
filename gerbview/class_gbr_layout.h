@@ -119,8 +119,8 @@ public:
                GERBER_DISPLAY_OPTIONS& aDisplayOptions,
                const std::vector<GERBER_IMAGE*>& aLayers,
                GERBER_IMAGE* selectedLayer,
-               GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
-               bool aPrintBlackAndWhite = false );
+               GR_DRAWMODE aDrawMode,
+               const wxPoint& aOffset );
 
     void DrawItemsDCodeID( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode, EDA_COLOR_T aColor );
 

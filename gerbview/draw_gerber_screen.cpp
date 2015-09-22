@@ -57,6 +57,7 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage 
     imgDisplayOptions.m_IsPrinting = true;
     imgDisplayOptions.m_NegativeObjectColor = GetVisibleElementColor( NEGATIVE_OBJECTS_VISIBLE );
     imgDisplayOptions.m_BackgroundColor = WHITE;
+    imgDisplayOptions.m_DrawBlackAndWhite = aParams.m_Print_Black_and_White;
 
     m_canvas->SetPrintMirrored( aParams.m_PrintMirror );
 
@@ -70,8 +71,8 @@ void GERBVIEW_FRAME::PrintPage( wxDC* aDC, PRINT_PARAMETERS& aParams, int aPage 
                              printLayer,
                              NULL,
                              (GR_DRAWMODE) 0,
-                             wxPoint( 0, 0 ),
-                             aParams.m_Print_Black_and_White );
+                             wxPoint( 0, 0 )
+    );
 
     m_canvas->SetPrintMirrored( false );
 }

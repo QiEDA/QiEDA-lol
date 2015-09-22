@@ -43,6 +43,7 @@ public:
     bool    m_IsPrinting;
     EDA_COLOR_T m_NegativeObjectColor;
     EDA_COLOR_T m_BackgroundColor;
+    bool    m_DrawBlackAndWhite;
 
 public:
     GERBER_DISPLAY_OPTIONS()
@@ -54,6 +55,7 @@ public:
         m_DisplayDCodes = false;
         m_IsPrinting = false;
         m_DisplayNegativeObjects = false;
+        m_DrawBlackAndWhite = false;
     }
 };
 
