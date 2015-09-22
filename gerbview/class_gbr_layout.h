@@ -122,6 +122,8 @@ public:
                GR_DRAWMODE aDrawMode, const wxPoint& aOffset,
                bool aPrintBlackAndWhite = false );
 
+    void DrawItemsDCodeID( EDA_DRAW_PANEL* aPanel, wxDC* aDC, GR_DRAWMODE aDrawMode, EDA_COLOR_T aColor );
+
 #if defined(DEBUG)
     void    Show( int nestLevel, std::ostream& os ) const;  // overload
 #endif

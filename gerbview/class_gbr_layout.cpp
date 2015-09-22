@@ -36,6 +36,7 @@
 #include <class_drawpanel.h>
 #include <class_gerber_image.h>
 #include <class_X2_gerber_attributes.h>
+#include <drawtxt.h>
 
 static bool sortZorder( const GERBER_IMAGE* const& ref, const GERBER_IMAGE* const& test );
 
@@ -319,6 +320,80 @@ void GBR_LAYOUT::Draw( EDA_DRAW_PANEL* aPanel,
         delete screenBitmap;
     }
 }
+
+
+void GBR_LAYOUT::DrawItemsDCodeID( EDA_DRAW_PANEL* aPanel,
+                                   wxDC* aDC,
+                                   GR_DRAWMODE aDrawMode,
+                                   EDA_COLOR_T aColor )
+{
+    wxPoint     pos;
+    int         width;
+    double      orient;
+    wxString    Line;
+
+    GRSetDrawMode( aDC, aDrawMode );
+
+    EDA_RECT drawBox = *aPanel->GetClipBox();
+
+    for (std::vector<GERBER_IMAGE*>::const_reverse_iterator git = m_Gerbers.rbegin() ; git != m_Gerbers.rend(); ++git)
+    {
+        GERBER_IMAGE* gerber = *git;
+
+        if( !gerber->m_Visible )
+            continue;
+
+        for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
+        {
+            GERBER_DRAW_ITEM* item = *it;
+
+            if (item->m_DCode <= 0)
+                continue;
+
+            if (item->m_Flashed || item->m_Shape == GBR_ARC) {
+                pos = item->m_Start;
+            }
+            else {
+                pos.x = (item->m_Start.x + item->m_End.x) / 2;
+                pos.y = (item->m_Start.y + item->m_End.y) / 2;
+            }
+
+            pos = item->GetABPosition(pos);
+
+            Line.Printf(wxT("D%d"), item->m_DCode);
+
+            if (item->GetDcodeDescr())
+                width = item->GetDcodeDescr()->GetShapeDim(item);
+            else
+                width = std::min(item->m_Size.x, item->m_Size.y);
+
+            orient = TEXT_ORIENT_HORIZ;
+
+            if (item->m_Flashed) {
+                // A reasonable size for text is width/3 because most of time this text has 3 chars.
+                width /= 3;
+            }
+            else        // this item is a line
+            {
+                wxPoint delta = item->m_Start - item->m_End;
+
+                if (abs(delta.x) < abs(delta.y))
+                    orient = TEXT_ORIENT_VERT;
+
+                // A reasonable size for text is width/2 because text needs margin below and above it.
+                // a margin = width/4 seems good
+                width /= 2;
+            }
+
+
+            DrawGraphicText(&drawBox, aDC, pos, (EDA_COLOR_T) aColor, Line,
+                            orient, wxSize(width, width),
+                            GR_TEXT_HJUSTIFY_CENTER, GR_TEXT_VJUSTIFY_CENTER,
+                            0, false, false);
+        }
+    }
+}
+
 
 void GBR_LAYOUT::MoveLayerUp( int aIdx )
 {

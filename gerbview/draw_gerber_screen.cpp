@@ -36,7 +36,6 @@
 #include <gr_basic.h>
 #include <common.h>
 #include <class_drawpanel.h>
-#include <drawtxt.h>
 #include <base_units.h>
 
 #include <gerbview.h>
@@ -113,7 +112,9 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
                              m_DisplayOptions,
                              GetGerberLayout()->GetGerbers(),
                              GetGerberLayout()->GetGerberByListIndex( getActiveLayer() ),
-                             drawMode, wxPoint( 0, 0 ) );
+                             drawMode,
+                             wxPoint( 0, 0 )
+                            );
 
     // Draw the "background" now, i.e. grid and axis after gerber layers
     // because most of time the actual background is erased by successive drawings of each gerber
@@ -121,7 +122,9 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
     m_canvas->DrawBackGround( DC );
 
     if( IsElementVisible( DCODES_VISIBLE ) )
-        DrawItemsDCodeID( DC, GR_COPY );
+    {
+        GetGerberLayout()->DrawItemsDCodeID( m_canvas, DC, GR_COPY, GetVisibleElementColor(DCODES_VISIBLE) );
+    }
 
     DrawWorkSheet( DC, screen, 0, IU_PER_MILS, wxEmptyString );
 
@@ -142,73 +145,4 @@ void GERBVIEW_FRAME::RedrawActiveWindow( wxDC* DC, bool EraseBg )
     // Display the filename and the layer name (found in the gerber files, if any)
     // relative to the active layer
     UpdateTitleAndInfo();
-}
-
-
-void GERBVIEW_FRAME::DrawItemsDCodeID( wxDC* aDC, GR_DRAWMODE aDrawMode )
-{
-    wxPoint     pos;
-    int         width;
-    double      orient;
-    wxString    Line;
-
-    GRSetDrawMode( aDC, aDrawMode );
-
-    for (std::vector<GERBER_IMAGE*>::const_reverse_iterator git = GetGerberLayout()->GetGerbers().rbegin() ; git != GetGerberLayout()->GetGerbers().rend(); ++git)
-    {
-        GERBER_IMAGE* gerber = *git;
-
-        if( !gerber->m_Visible )
-            continue;
-
-        for (std::list<GERBER_DRAW_ITEM*>::iterator it=gerber->m_Drawings.begin(); it != gerber->m_Drawings.end(); ++it)
-        {
-            GERBER_DRAW_ITEM* item = *it;
-
-            if (item->m_DCode <= 0)
-                continue;
-
-            if (item->m_Flashed || item->m_Shape == GBR_ARC) {
-                pos = item->m_Start;
-            }
-            else {
-                pos.x = (item->m_Start.x + item->m_End.x) / 2;
-                pos.y = (item->m_Start.y + item->m_End.y) / 2;
-            }
-
-            pos = item->GetABPosition(pos);
-
-            Line.Printf(wxT("D%d"), item->m_DCode);
-
-            if (item->GetDcodeDescr())
-                width = item->GetDcodeDescr()->GetShapeDim(item);
-            else
-                width = std::min(item->m_Size.x, item->m_Size.y);
-
-            orient = TEXT_ORIENT_HORIZ;
-
-            if (item->m_Flashed) {
-                // A reasonable size for text is width/3 because most of time this text has 3 chars.
-                width /= 3;
-            }
-            else        // this item is a line
-            {
-                wxPoint delta = item->m_Start - item->m_End;
-
-                if (abs(delta.x) < abs(delta.y))
-                    orient = TEXT_ORIENT_VERT;
-
-                // A reasonable size for text is width/2 because text needs margin below and above it.
-                // a margin = width/4 seems good
-                width /= 2;
-            }
-
-            int color = GetVisibleElementColor(DCODES_VISIBLE);
-
-            DrawGraphicText(m_canvas->GetClipBox(), aDC, pos, (EDA_COLOR_T) color, Line,
-                            orient, wxSize(width, width),
-                            GR_TEXT_HJUSTIFY_CENTER, GR_TEXT_VJUSTIFY_CENTER,
-                            0, false, false);
-        }
-    }
 }
