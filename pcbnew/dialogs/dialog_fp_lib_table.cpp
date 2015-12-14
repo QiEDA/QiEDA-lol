@@ -39,7 +39,6 @@
 #include <3d_viewer.h>      // for KISYS3DMOD
 #include <dialog_fp_lib_table_base.h>
 #include <fp_lib_table.h>
-#include <fp_lib_table_lexer.h>
 #include <invoke_pcb_dialog.h>
 #include <grid_tricks.h>
 #include <confirm.h>
@@ -236,17 +235,12 @@ protected:
 
         if( ndx != std::string::npos )
         {
-            // paste the ROWs of s-expression (fp_lib_table), starting
-            // at column 0 regardless of current cursor column.
-
-            STRING_LINE_READER  slr( TO_UTF8( cb_text ), wxT( "Clipboard" ) );
-            FP_LIB_TABLE_LEXER  lexer( &slr );
             FP_LIB_TABLE        tmp_tbl;
             bool                parsed = true;
 
             try
             {
-                tmp_tbl.Parse( &lexer );
+                tmp_tbl.Parse( cb_text.ToStdString() );
             }
             catch( PARSE_ERROR& pe )
             {

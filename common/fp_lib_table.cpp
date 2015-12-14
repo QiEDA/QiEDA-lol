@@ -39,15 +39,11 @@
 #include <footprint_info.h>
 #include <wildcards_and_files_ext.h>
 #include <fpid.h>
-#include <fp_lib_table_lexer.h>
 #include <fp_lib_table.h>
 #include <class_module.h>
-
-using namespace FP_LIB_TABLE_T;
-
+#include "sexpr/sexpr_syntax_exception.h"
 
 static const wxChar global_tbl_name[] = wxT( "fp-lib-table" );
-
 
 void FP_LIB_TABLE::ROW::SetType( const wxString& aType )
 {
@@ -127,7 +123,6 @@ bool FP_LIB_TABLE::ROW::operator==( const ROW& r ) const
         && description == r.description
         ;
 }
-
 
 FP_LIB_TABLE::FP_LIB_TABLE( FP_LIB_TABLE* aFallBackTable ) :
     fallBack( aFallBackTable )
@@ -247,159 +242,173 @@ const wxString FP_LIB_TABLE::GetDescription( const wxString& aNickname )
         return wxEmptyString;
 }
 
-
-void FP_LIB_TABLE::Parse( FP_LIB_TABLE_LEXER* in ) throw( IO_ERROR, PARSE_ERROR )
+void FP_LIB_TABLE::Parse( const std::string& sexpr )
 {
-    /*
-        (fp_lib_table
-            (lib (name NICKNAME)(descr DESCRIPTION)(type TYPE)(full_uri FULL_URI)(options OPTIONS))
-            :
-        )
-
-        Elements after (name) are order independent.
-    */
-
-    T       tok;
-
-    // This table may be nested within a larger s-expression, or not.
-    // Allow for parser of that optional containing s-epression to have looked ahead.
-    if( in->CurTok() != T_fp_lib_table )
+    SEXPR::PARSER parser;
+    std::unique_ptr<SEXPR::SEXPR> fplibroot( parser.Parse( sexpr ) );
+    
+    if( !fplibroot->IsList() )
     {
-        in->NeedLEFT();
-        if( ( tok = in->NextTok() ) != T_fp_lib_table )
-            in->Expecting( T_fp_lib_table );
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), fplibroot->GetLineNumber() );
     }
-
-    while( ( tok = in->NextTok() ) != T_RIGHT )
+    
+    if( !fplibroot->GetChild(0)->IsSymbol() ||  fplibroot->GetChild(0)->GetSymbol() != "fp_lib_table")
     {
-        ROW     row;        // reconstructed for each row in input stream.
-
-        if( tok == T_EOF )
-            in->Expecting( T_RIGHT );
-
-        if( tok != T_LEFT )
-            in->Expecting( T_LEFT );
-
-        // in case there is a "row integrity" error, tell where later.
-        int lineNum = in->CurLineNumber();
-        int offset  = in->CurOffset();
-
-        if( ( tok = in->NextTok() ) != T_lib )
-            in->Expecting( T_lib );
-
-        // (name NICKNAME)
-        in->NeedLEFT();
-
-        if( ( tok = in->NextTok() ) != T_name )
-            in->Expecting( T_name );
-
-        in->NeedSYMBOLorNUMBER();
-
-        row.SetNickName( in->FromUTF8() );
-
-        in->NeedRIGHT();
-
-        // After (name), remaining (lib) elements are order independent, and in
-        // some cases optional.
-        bool    sawType = false;
-        bool    sawOpts = false;
-        bool    sawDesc = false;
-        bool    sawUri  = false;
-
-        while( ( tok = in->NextTok() ) != T_RIGHT )
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("fp_lib_table symbol not found"), fplibroot->GetChild(0)->GetLineNumber() );
+    }
+    
+    for(size_t i = 1; i < fplibroot->GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* libList = fplibroot->GetChild(i);
+        
+        if( !libList->IsList() )
         {
-            if( tok == T_EOF )
-                in->Unexpected( T_EOF );
-
-            if( tok != T_LEFT )
-                in->Expecting( T_LEFT );
-
-            tok = in->NeedSYMBOLorNUMBER();
-
-            switch( tok )
-            {
-            case T_uri:
-                if( sawUri )
-                    in->Duplicate( tok );
-                sawUri = true;
-                in->NeedSYMBOLorNUMBER();
-                row.SetFullURI( in->FromUTF8() );
-                break;
-
-            case T_type:
-                if( sawType )
-                    in->Duplicate( tok );
-                sawType = true;
-                in->NeedSYMBOLorNUMBER();
-                row.SetType( in->FromUTF8() );
-                break;
-
-            case T_options:
-                if( sawOpts )
-                    in->Duplicate( tok );
-                sawOpts = true;
-                in->NeedSYMBOLorNUMBER();
-                row.SetOptions( in->FromUTF8() );
-                break;
-
-            case T_descr:
-                if( sawDesc )
-                    in->Duplicate( tok );
-                sawDesc = true;
-                in->NeedSYMBOLorNUMBER();
-                row.SetDescr( in->FromUTF8() );
-                break;
-
-            default:
-                in->Unexpected( tok );
-            }
-
-            in->NeedRIGHT();
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), libList->GetChild(0)->GetLineNumber() );
         }
-
-        if( !sawType )
-            in->Expecting( T_type );
-
-        if( !sawUri )
-            in->Expecting( T_uri );
-
-        // all nickNames within this table fragment must be unique, so we do not
-        // use doReplace in InsertRow().  (However a fallBack table can have a
-        // conflicting nickName and ours will supercede that one since in
-        // FindLib() we search this table before any fall back.)
-        if( !InsertRow( row ) )
+        
+        if( !libList->GetChild(0)->IsSymbol() ||  libList->GetChild(0)->GetSymbol() != "lib")
         {
-            wxString msg = wxString::Format(
-                                _( "'%s' is a duplicate footprint library nickName" ),
-                                GetChars( row.nickName ) );
-            THROW_PARSE_ERROR( msg, in->CurSource(), in->CurLine(), lineNum, offset );
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("lib symbol not found"), libList->GetChild(0)->GetLineNumber() );
         }
+        
+        parseLibList( libList );
     }
 }
 
+
+void FP_LIB_TABLE::parseLibList( SEXPR::SEXPR* aLibList )
+{
+    ROW     row;
+    
+    for(size_t i = 1; i < aLibList->GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* pairList = aLibList->GetChild(i);
+        
+        if( !pairList->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), pairList->GetLineNumber() );
+        }
+        
+        if( !pairList->GetChild(0)->IsSymbol() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("lib symbol not found"), pairList->GetLineNumber() );
+        }
+        
+        std::string key = pairList->GetChild(0)->GetSymbol();
+        
+        if( key == "name" )
+        {
+            if( !pairList->GetChild(1)->IsSymbol() )
+            {
+                THROW_SEXPR_SYNTAX_EXCEPTION( _T("expected symbol"), pairList->GetLineNumber() );
+            }
+        
+            row.SetNickName( pairList->GetChild(1)->GetSymbol() );
+        }
+        else if ( key == "uri" )
+        {
+            if( !pairList->GetChild(1)->IsSymbol() )
+            {
+                THROW_SEXPR_SYNTAX_EXCEPTION( _T("expected symbol"), pairList->GetLineNumber() );
+            }
+        
+            row.SetFullURI( pairList->GetChild(1)->GetSymbol() );
+        }
+        else if ( key == "type" )
+        {
+            if( !pairList->GetChild(1)->IsSymbol() )
+            {
+                THROW_SEXPR_SYNTAX_EXCEPTION( _T("expected symbol"), pairList->GetLineNumber() );
+            }
+        
+            row.SetType( pairList->GetChild(1)->GetSymbol() );
+        }
+        else if ( key == "options" )
+        {
+            if( !pairList->GetChild(1)->IsString() )
+            {
+                THROW_SEXPR_SYNTAX_EXCEPTION( _T("expected string"), pairList->GetLineNumber() );
+            }
+        
+            row.SetOptions( pairList->GetChild(1)->GetString() );
+        }
+        else if ( key == "descr" )
+        {
+            /* STUPID MODE FALLBACK...
+            why? some cases of fpliblist created a keyword isntead of quoted string....
+            seriously */
+            if( pairList->GetChild(1)->IsString() )
+            {
+                row.SetDescr( pairList->GetChild(1)->GetString() );
+            }
+            else if( pairList->GetChild(1)->IsSymbol() )
+            {
+                row.SetDescr( pairList->GetChild(1)->GetSymbol() );
+            }
+            else
+            {
+                THROW_SEXPR_SYNTAX_EXCEPTION( _T("expected string or symbol"), pairList->GetLineNumber() );
+            }
+        }
+    }
+
+    if( !InsertRow( row ) )
+    {
+        wxString msg = wxString::Format(
+                            _( "'%s' is a duplicate footprint library nickName" ),
+                            GetChars( row.nickName ) );
+        THROW_SEXPR_SYNTAX_EXCEPTION( msg, aLibList->GetLineNumber() );
+    }
+}
 
 void FP_LIB_TABLE::Format( OUTPUTFORMATTER* out, int nestLevel ) const
     throw( IO_ERROR, boost::interprocess::lock_exception )
 {
-    out->Print( nestLevel, "(fp_lib_table\n" );
-
+    SEXPR::SEXPR_LIST list;
+    
+    list << SEXPR::AsSymbol("fp_lib_table");
+    
     for( ROWS_CITER it = rows.begin();  it != rows.end();  ++it )
-        it->Format( out, nestLevel+1 );
+    {
+        list << *it;
+    }
+    
+    std::string sexprString = list.AsString();
+    out->Print( 0, sexprString.c_str() );
 
-    out->Print( nestLevel, ")\n" );
 }
 
-
-void FP_LIB_TABLE::ROW::Format( OUTPUTFORMATTER* out, int nestLevel ) const
-    throw( IO_ERROR, boost::interprocess::lock_exception )
+SEXPR::SEXPR* FP_LIB_TABLE::ROW::SerializeSEXPR() const
 {
-    out->Print( nestLevel, "(lib (name %s)(type %s)(uri %s)(options %s)(descr %s))\n",
-                out->Quotew( GetNickName() ).c_str(),
-                out->Quotew( GetType() ).c_str(),
-                out->Quotew( GetFullURI() ).c_str(),
-                out->Quotew( GetOptions() ).c_str(),
-                out->Quotew( GetDescr() ).c_str()
-                );
+    SEXPR::SEXPR_LIST* nameList = new SEXPR::SEXPR_LIST();
+    *nameList << SEXPR::AsSymbol("name");
+    *nameList << SEXPR::AsSymbol( GetNickName().ToStdString() );
+    
+    SEXPR::SEXPR_LIST* typeList = new SEXPR::SEXPR_LIST();
+    *typeList << SEXPR::AsSymbol("type");
+    *typeList << SEXPR::AsSymbol( GetType().ToStdString() );
+    
+    SEXPR::SEXPR_LIST* uriList = new SEXPR::SEXPR_LIST();
+    *uriList << SEXPR::AsSymbol("uri");
+    *uriList << SEXPR::AsSymbol( GetFullURI().ToStdString() );
+    
+    SEXPR::SEXPR_LIST* optionsList = new SEXPR::SEXPR_LIST();
+    *optionsList << SEXPR::AsSymbol("options");
+    *optionsList << SEXPR::AsString( GetOptions().ToStdString() );
+    
+    SEXPR::SEXPR_LIST* descrList = new SEXPR::SEXPR_LIST();
+    *descrList << SEXPR::AsSymbol("descr");
+    *descrList << SEXPR::AsString( GetDescr().ToStdString() );
+    
+    SEXPR::SEXPR_LIST* libList = new SEXPR::SEXPR_LIST();
+    *libList << SEXPR::AsSymbol("lib");
+    *libList << nameList;
+    *libList << typeList;
+    *libList << uriList;
+    *libList << optionsList;
+    *libList << descrList;
+    
+    return libList;
 }
 
 #define OPT_SEP     '|'         ///< options separator character
@@ -739,10 +748,8 @@ void FP_LIB_TABLE::Load( const wxString& aFileName )
     // It's OK if footprint library tables are missing.
     if( wxFileName::IsFileReadable( aFileName ) )
     {
-        FILE_LINE_READER    reader( aFileName );
-        FP_LIB_TABLE_LEXER  lexer( &reader );
-
-        Parse( &lexer );
+        std::string sexpr = SEXPR::PARSER::GetFileContents( aFileName.ToStdString() );
+        Parse( sexpr );
     }
 }
 

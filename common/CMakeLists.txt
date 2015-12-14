@@ -291,6 +291,9 @@ set( COMMON_SRCS
     geometry/shape_poly_set.cpp
     geometry/shape_collisions.cpp
     geometry/shape_file_io.cpp
+
+    sexpr/sexpr.cpp
+    sexpr/sexpr_parser.cpp
     )
 add_library( common STATIC ${COMMON_SRCS} )
 add_dependencies( common lib-dependencies )
@@ -349,7 +352,6 @@ set( PCB_COMMON_SRCS
     pcb_plot_params_keywords.cpp
     pcb_keywords.cpp
     ../pcbnew/pcb_parser.cpp
-    fp_lib_table_keywords.cpp
     fpid.cpp
     fp_lib_table.cpp
 )
@@ -447,23 +449,6 @@ add_custom_target(
     )
 
 add_dependencies( pcbcommon pcb_lexer_source_files )
-
-# auto-generate pcbnew s-expression footprint library table code.
-make_lexer(
-    ${CMAKE_CURRENT_SOURCE_DIR}/fp_lib_table.keywords
-    ${PROJECT_SOURCE_DIR}/include/fp_lib_table_lexer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/fp_lib_table_keywords.cpp
-    FP_LIB_TABLE_T
-    )
-
-add_custom_target(
-    fp_lib_table_lexer_source_files ALL
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/include/fp_lib_table_lexer.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/fp_lib_table_keywords.cpp
-    )
-
-add_dependencies( pcbcommon fp_lib_table_lexer_source_files )
 
 # auto-generate page layout reader s-expression page_layout_reader_lexer.h
 # and title_block_reader_keywords.cpp.

@@ -33,12 +33,14 @@
 #include <project.h>
 #include <boost/interprocess/exceptions.hpp>
 
+#include "sexpr/sexpr.h"
+#include "sexpr/sexpr_parser.h"
+
 #define FP_LATE_ENVVAR  1           ///< late=1/early=0 environment variable expansion
 
 class wxFileName;
 class OUTPUTFORMATTER;
 class MODULE;
-class FP_LIB_TABLE_LEXER;
 class FPID;
 
 /**
@@ -93,7 +95,7 @@ public:
      * holds a record identifying a footprint library accessed by the appropriate #PLUGIN
      * object in the #FP_LIB_TABLE.
      */
-    class ROW
+    class ROW : public SEXPR::ISEXPRABLE
     {
         friend class FP_LIB_TABLE;
         friend class DIALOG_FP_LIB_TABLE;
@@ -213,19 +215,10 @@ public:
 
         //-----</accessors>-----------------------------------------------------
 
-        /**
-         * Function Format
-         * serializes this object as utf8 text to an OUTPUTFORMATTER, and tries to
-         * make it look good using multiple lines and indentation.
-         * @param out is an #OUTPUTFORMATTER
-         * @param nestLevel is the indentation level to base all lines of the output.
-         *   Actual indentation will be 2 spaces for each nestLevel.
-         */
-        void Format( OUTPUTFORMATTER* out, int nestLevel ) const
-            throw( IO_ERROR, boost::interprocess::lock_exception );
+        SEXPR::SEXPR_LIST* Format() const;
 
+        SEXPR::SEXPR* SerializeSEXPR() const override;
     private:
-
         /**
          * Function setProperties
          * sets this ROW's PROPERTIES by taking ownership of @a aProperties.
@@ -297,30 +290,6 @@ public:
     int     GetCount()                              { return rows.size(); }
 
     ROW&    At( int aIndex )                        { return rows[aIndex]; }
-
-    /**
-     * Function Parse
-     * fills this table fragment from information in the input stream \a aParser, which
-     * is a DSNLEXER customized for the grammar needed to describe instances of this object.
-     * The entire textual element spec is <br>
-     *
-     * <pre>
-     * (fp_lib_table
-     *   (lib (name LOGICAL)(descr DESCRIPTION)(uri FULL_URI)(type TYPE)(options OPTIONS))
-     *   (lib (name LOGICAL)(descr DESCRIPTION)(uri FULL_URI)(type TYPE)(options OPTIONS))
-     *   (lib (name LOGICAL)(descr DESCRIPTION)(uri FULL_URI)(type TYPE)(options OPTIONS))
-     *  )
-     * </pre>
-     *
-     * When this function is called, the input token stream given by \a aParser
-     * is assumed to be positioned at the '^' in the following example, i.e. just
-     * after the identifying keyword and before the content specifying stuff.
-     * <br>
-     * (lib_table ^ (....) )
-     *
-     * @param aParser is the input token stream of keywords and symbols.
-     */
-    void Parse( FP_LIB_TABLE_LEXER* aParser ) throw( IO_ERROR, PARSE_ERROR );
 
     /**
      * Function ParseOptions
@@ -577,7 +546,9 @@ public:
     void Save( const wxString& aFileName ) const
         throw( IO_ERROR, boost::interprocess::lock_exception );
 
+    void Parse( const std::string& sexpr );
 protected:
+    void parseLibList( SEXPR::SEXPR* aLibList );
 
     /**
      * Function findRow
