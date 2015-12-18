@@ -1,3 +1,0 @@
-icon_pcbnew ICON "../bitmaps_png/icons/icon_pcbnew.ico"
-
-#include "wx/msw/wx.rc"

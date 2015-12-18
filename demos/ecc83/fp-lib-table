@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name Valves)(type KiCad)(uri ${KISYSMOD}/Valves.pretty)(options "")(descr ""))
-)
