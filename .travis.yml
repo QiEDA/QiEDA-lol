@@ -1,18 +1,47 @@
 language: cpp
-compiler:
-    - gcc
 sudo: required
 dist: trusty
-branches:
-  only:
-    - master
+
+addons:
+  apt:
+    packages:
+      - doxygen
+      - libboost-context-dev
+      - libboost-system-dev
+      - libboost-thread-dev
+      - libcairo2-dev
+      - libglew-dev
+      - libglm-dev
+      - libpotrace-dev
+# TODO: https://github.com/travis-ci/apt-package-whitelist/issues/417
+#     - libwxgtk3.0-0
+
+matrix:
+  include:
+    - compiler: gcc
+    - compiler: clang
+    - os: osx
+      compiler: clang
+
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libbz2-dev libcairo2-dev libglew-dev libwxgtk3.0-dev libglm-dev libboost-all-dev libpotrace-dev
-install: true
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update;
+        brew install cairo glew glm potrace wxmac;
+      fi
+    # TODO: Remove once packages are whitelisted to use containerized env.
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-get update -qq;
+        sudo apt-get install -y libwxgtk3.0-dev;
+      fi
+
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make -j4
+    # TODO: cmake should contain default version and override if needed
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        export EXTRA_ARGS=-DCMAKE_OSX_DEPLOYMENT_TARGET=10.10;
+      fi
+    - mkdir build && cd build && cmake $EXTRA_ARGS .. && make
+
+install: true
+
+notifications:
+    email: false
