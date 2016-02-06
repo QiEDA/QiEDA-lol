@@ -243,6 +243,12 @@ namespace SEXPR
         return list;
     }
 
+    SEXPR_LIST& operator<< (SEXPR_LIST& list, SEXPR* obj)
+    {
+        list.AddChild(obj);
+        return list;
+    }
+    
     SEXPR_LIST& operator<< (SEXPR_LIST& list, const _OUT_STRING setting)
     {
         SEXPR *res;

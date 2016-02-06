@@ -151,6 +151,7 @@ namespace SEXPR
         friend SEXPR_LIST& operator<< (SEXPR_LIST& list, const _OUT_STRING setting);
         friend SEXPR_LIST& operator<< (SEXPR_LIST& list, const ISEXPRABLE& obj);
         friend SEXPR_LIST& operator<< (SEXPR_LIST& list, SEXPR_LIST* list2);
+        friend SEXPR_LIST& operator<< (SEXPR_LIST& list, SEXPR* obj);
         friend SEXPR_LIST& operator>> (SEXPR_LIST& input, ISEXPRABLE& obj);
         friend SEXPR_LIST& operator>> (SEXPR_LIST& input, std::string& str);
         friend SEXPR_LIST& operator>> (SEXPR_LIST& input, int& inte);
