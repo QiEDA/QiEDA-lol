@@ -30,12 +30,13 @@
 #include <eda_text.h>
 #include <class_bitmap_base.h>
 #include "page_layout/worksheet_dataitem.h"
+#include "sexpr/sexpr.h"
 
 /**
  * WORKSHEET_LAYOUT handles the graphic items list to draw/plot
  * the title block and other items (page references ...
  */
-class WORKSHEET_LAYOUT
+class WORKSHEET_LAYOUT : public SEXPR::ISEXPRABLE
 {
     std::vector <WORKSHEET_DATAITEM*> m_list;
     bool m_allowVoidList;   // If false, the default page layout
@@ -47,6 +48,7 @@ class WORKSHEET_LAYOUT
     double m_topMargin;     // the top page margin in mm
     double m_bottomMargin;  // the bottom page margin in mm
 
+    void deserializeSetup( SEXPR::SEXPR& root );
 public:
     WORKSHEET_LAYOUT();
     ~WORKSHEET_LAYOUT() {ClearList(); }
@@ -66,10 +68,10 @@ public:
     static void SetAltInstance( WORKSHEET_LAYOUT* aLayout = NULL );
 
     // Accessors:
-    double GetLeftMargin() { return m_leftMargin; }
-    double GetRightMargin() { return m_rightMargin; }
-    double GetTopMargin() { return m_topMargin; }
-    double GetBottomMargin() { return m_bottomMargin; }
+    double GetLeftMargin() const { return m_leftMargin; }
+    double GetRightMargin() const { return m_rightMargin; }
+    double GetTopMargin() const { return m_topMargin; }
+    double GetBottomMargin() const { return m_bottomMargin; }
 
     void SetLeftMargin( double aMargin );
     void SetRightMargin( double aMargin );
@@ -169,6 +171,12 @@ public:
      *               the existing one.
      */
     void SetPageLayout( const char* aPageLayout, bool Append = false );
+
+    SEXPR::SEXPR* SerializeSEXPR() const override;
+
+    void Parse( std::string layout );
+
+    void DeserializeSEXPR( SEXPR::SEXPR& sexp ) override;
 
     /**
      * @return a short filename  from a full filename:

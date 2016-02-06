@@ -33,6 +33,7 @@
 #include <math/vector2d.h>
 #include <eda_text.h>
 #include <class_bitmap_base.h>
+#include "sexpr/sexpr.h"
 
 class WS_DRAW_ITEM_TEXT;            // Forward declaration
 
@@ -93,7 +94,7 @@ public:
 // * poly polygon defined by a coordinate, and a set of list of corners
 //   ( because we use it for logos, there are more than one polygon
 //   in this description
-class WORKSHEET_DATAITEM
+class WORKSHEET_DATAITEM : public SEXPR::ISEXPRABLE
 {
 public:
     enum WS_ItemType {
@@ -171,6 +172,12 @@ public:
     void SetFlags( int aMask ) { m_flags |= aMask; }
     void ClearFlags( int aMask ) { m_flags &= ~aMask; }
 
+    SEXPR::SEXPR* SerializeSEXPR() const override;
+
+    void DeserializeSEXPR( SEXPR::SEXPR& sexp ) override;
+    void deserializeSEXPRCoordinate( SEXPR::SEXPR_LIST* list, POINT_COORD & aCoord );
+    void deserializeSEXPROption( SEXPR::SEXPR_LIST* list );
+
     /**
      * @return true if the item has a end point (segment; rect)
      * of false (text, polugon)
@@ -182,7 +189,7 @@ public:
      * 1  if the item is only on page 1
      * -1  if the item is not on page 1
      */
-    int GetPage1Option();
+    int GetPage1Option() const;
 
     /**
      * Set the option for page 1
@@ -289,6 +296,12 @@ public:
 
         return m_Color;
     }
+
+protected:
+    SEXPR::SEXPR* serializeSEXPRCoordinate( const std::string aToken, const POINT_COORD & aCoord ) const;
+    void serializeSEXPROptions( SEXPR::SEXPR_LIST* root ) const;
+
+    void serializeSEXPRRepeatParameters( SEXPR::SEXPR_LIST* root ) const;
 };
 
 
@@ -306,6 +319,9 @@ private:
 public:
     WORKSHEET_DATAITEM_POLYPOLYGON( );
 
+    SEXPR::SEXPR* SerializeSEXPR() const override;;
+    void DeserializeSEXPR( SEXPR::SEXPR& sexp ) override;
+
     virtual int GetPenSizeUi()
     {
         return KiROUND( m_LineWidth * m_WSunits2Iu );
@@ -315,6 +331,7 @@ public:
      * @return false  (no end point)
      */
     virtual bool HasEndPoint() { return false; };
+    
 
     /**
      * add a corner in corner list
@@ -402,6 +419,11 @@ public:
 public:
     WORKSHEET_DATAITEM_TEXT( const wxString& aTextBase );
 
+    SEXPR::SEXPR* SerializeSEXPR() const override;
+    void DeserializeSEXPR( SEXPR::SEXPR& sexp ) override;
+    void deserializeSEXPRJustify( SEXPR::SEXPR_LIST* list );
+    void deserializeSEXPRFont( SEXPR::SEXPR_LIST* list );
+
     /**
      * @return false  (no end point)
      */
@@ -414,6 +436,7 @@ public:
         else
             return KiROUND( m_DefaultTextThickness * m_WSunits2Iu );
     }
+    
 
     /**
      * move item to a new position
@@ -459,7 +482,7 @@ public:
     /**
      * @return true is a bold font should be selected
      */
-    bool IsBold() { return (m_flags & USE_BOLD) != 0; }
+    bool IsBold() const { return (m_flags & USE_BOLD) != 0; }
 
     /**
      * Function SetBold
@@ -506,6 +529,10 @@ public:
     {
         m_ImageBitmap = aImage;
     }
+
+    SEXPR::SEXPR* SerializeSEXPR() const override;
+    void DeserializeSEXPR( SEXPR::SEXPR& sexp ) override;
+    void deserializeSEXPRPNGData( SEXPR::SEXPR* root );
 
     /**
      * @return false  (no end point)

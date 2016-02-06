@@ -28,7 +28,6 @@ set( PL_EDITOR_SRCS
     files.cpp
     onleftclick.cpp
     onrightclick.cpp
-    page_layout_writer.cpp
     pl_editor_config.cpp
     pl_editor_frame.cpp
     pl_editor_undo_redo.cpp

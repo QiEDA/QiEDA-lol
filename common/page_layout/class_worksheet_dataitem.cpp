@@ -62,6 +62,7 @@
 #include <class_title_block.h>
 #include <worksheet_shape_builder.h>
 #include "page_layout/worksheet_dataitem.h"
+#include "sexpr/sexpr_syntax_exception.h"
 
 
 // Static members of class WORKSHEET_DATAITEM:
@@ -328,7 +329,7 @@ const wxString WORKSHEET_DATAITEM::GetClassName() const
  * 1  if the item is only on page 1
  * -1  if the item is not on page 1
  */
-int WORKSHEET_DATAITEM::GetPage1Option()
+int WORKSHEET_DATAITEM::GetPage1Option() const
 {
     if(( m_flags & PAGE1OPTION) == PAGE1OPTION_NOTONPAGE1 )
         return -1;
@@ -354,6 +355,273 @@ void WORKSHEET_DATAITEM::SetPage1Option( int aChoice )
     else if( aChoice < 0)
         SetFlags( PAGE1OPTION_NOTONPAGE1 );
 
+}
+
+
+SEXPR::SEXPR* WORKSHEET_DATAITEM::SerializeSEXPR() const
+{
+    SEXPR::SEXPR_LIST* root = new SEXPR::SEXPR_LIST();
+    
+    if( GetType() == WORKSHEET_DATAITEM::WS_RECT )
+        *root << SEXPR::AsSymbol("rect");
+    else
+        *root << SEXPR::AsSymbol("line");
+
+    
+    SEXPR::SEXPR_LIST* name = new SEXPR::SEXPR_LIST();
+    *name << SEXPR::AsSymbol( "name" );
+    *name << m_Name.ToStdString();
+    
+    *root << name;
+    
+    *root << serializeSEXPRCoordinate( "start", m_Pos );
+    *root << serializeSEXPRCoordinate( "end", m_End );
+    
+
+    if( m_LineWidth && m_LineWidth != m_DefaultLineWidth )
+    {
+        SEXPR::SEXPR_LIST* linewidth = new SEXPR::SEXPR_LIST();
+        *linewidth << SEXPR::AsSymbol( "linewidth" );
+        *linewidth << m_LineWidth;
+        *root << linewidth;
+    }
+    
+    serializeSEXPRRepeatParameters(root);
+    
+    return root;
+}
+
+SEXPR::SEXPR* WORKSHEET_DATAITEM::serializeSEXPRCoordinate( const std::string aToken, const POINT_COORD & aCoord ) const
+{
+    SEXPR::SEXPR_LIST* coord = new SEXPR::SEXPR_LIST();
+    *coord << SEXPR::AsSymbol( aToken );
+    *coord << aCoord.m_Pos.x;
+    *coord << aCoord.m_Pos.y;
+
+    switch( aCoord.m_Anchor )
+    {
+        case RB_CORNER:
+            break;
+
+        case LT_CORNER:
+            *coord << SEXPR::AsSymbol("ltcorner");
+            break;
+
+        case LB_CORNER:
+            *coord << SEXPR::AsSymbol("lbcorner");
+            break;
+
+        case RT_CORNER:
+            *coord << SEXPR::AsSymbol("rtcorner");
+            break;
+    }
+
+    return coord;
+}
+
+void WORKSHEET_DATAITEM::serializeSEXPRRepeatParameters( SEXPR::SEXPR_LIST* root ) const
+{
+    if( m_RepeatCount <= 1 )
+        return;
+    
+    SEXPR::SEXPR_LIST* repeat = new SEXPR::SEXPR_LIST();
+    *repeat << SEXPR::AsSymbol("repeat");
+    *repeat << m_RepeatCount;
+    
+    *root << repeat;
+    
+    if( m_IncrementVector.x )
+    {
+        SEXPR::SEXPR_LIST* incrx = new SEXPR::SEXPR_LIST();
+        *incrx << SEXPR::AsSymbol("incrx");
+        *incrx << m_IncrementVector.x;
+        *root << incrx;
+    }
+    
+    if( m_IncrementVector.y )
+    {
+        SEXPR::SEXPR_LIST* incry = new SEXPR::SEXPR_LIST();
+        *incry << SEXPR::AsSymbol("incry");
+        *incry << m_IncrementVector.y;
+        *root << incry;
+    }
+
+    if( m_IncrementLabel != 1 && GetType() == WORKSHEET_DATAITEM::WS_TEXT )
+    {
+        SEXPR::SEXPR_LIST* incrlabel = new SEXPR::SEXPR_LIST();
+        *incrlabel << SEXPR::AsSymbol("incrlabel");
+        *incrlabel << m_IncrementLabel;
+        *root << incrlabel;
+    }
+}
+
+void WORKSHEET_DATAITEM::serializeSEXPROptions( SEXPR::SEXPR_LIST* root ) const
+{   
+    switch( GetPage1Option() )
+    {
+        default:
+        case 0:
+            break;
+
+        case 1:
+            {
+                SEXPR::SEXPR_LIST* option = new SEXPR::SEXPR_LIST();
+                *option << SEXPR::AsSymbol("option");
+                *option << SEXPR::AsSymbol("page1only");
+                *root << option;
+            }
+            break;
+
+        case -1:
+            {
+                SEXPR::SEXPR_LIST* option = new SEXPR::SEXPR_LIST();
+                *option << SEXPR::AsSymbol("option");
+                *option << SEXPR::AsSymbol("notonpage1");
+                *root << option;
+            }
+            break;
+    }
+}
+
+void WORKSHEET_DATAITEM::DeserializeSEXPR( SEXPR::SEXPR& root )
+{
+    if( !root.GetChild(0)->IsSymbol() )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("page_layout symbol not found"), root.GetChild(0)->GetLineNumber() );
+    } 
+    
+    std::string rootSym = root.GetChild(0)->GetSymbol();
+    if( rootSym != "rect" && rootSym != "line" )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("rect or line symbol not found"), root.GetChild(0)->GetLineNumber() );
+    }
+    
+    for(size_t i = 1; i < root.GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* child = root.GetChild(i);
+
+        if( !child->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), child->GetLineNumber() );
+        }
+        
+        
+        SEXPR::SEXPR_LIST* childList = child->GetList();
+        
+        if( !childList->GetChild(0)->IsSymbol() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("symbol not found"), childList->GetChild(0)->GetLineNumber() );
+        }
+
+        std::string sym = childList->GetChild(0)->GetSymbol();
+
+        if( sym == "comment" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Info = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Info = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "name" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Name = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Name = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "option" )
+        {
+            deserializeSEXPROption( childList );
+        }
+        else if( sym == "start" )
+        {
+            deserializeSEXPRCoordinate( childList, m_Pos );
+        }
+        else if( sym == "end" )
+        {
+            deserializeSEXPRCoordinate( childList, m_End );
+        }
+        else if( sym == "repeat" )
+        {
+            m_RepeatCount = childList->GetChild(1)->GetInteger();
+        }
+        else if( sym == "incrx" )
+        {
+            m_IncrementVector.x = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "incry" )
+        {
+            m_IncrementVector.y = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "linewidth" )
+        {
+            m_LineWidth = childList->GetChild(1)->GetDouble();
+        }
+    }
+}
+
+
+void WORKSHEET_DATAITEM::deserializeSEXPRCoordinate( SEXPR::SEXPR_LIST* list, POINT_COORD & aCoord )
+{
+    //kicad compat
+    aCoord.m_Pos.x = list->GetChild(1)->GetDouble();
+    aCoord.m_Pos.y = list->GetChild(2)->GetDouble();
+
+    if( list->GetNumberOfChildren() > 3 )
+    {
+        std::string token = list->GetChild(3)->GetSymbol();
+        if( token == "ltcorner" )
+        {
+            aCoord.m_Anchor = LT_CORNER;   // left top corner
+        }
+        else if( token == "lbcorner" )
+        {
+            aCoord.m_Anchor = LB_CORNER;      // left bottom corner
+        }
+        else if( token == "rbcorner" )
+        {
+            aCoord.m_Anchor = RB_CORNER;      // right bottom corner
+        }
+        else if( token == "rtcorner" )
+        {
+            aCoord.m_Anchor = RT_CORNER;      // right top corner
+        }
+        else
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("unsupported symbol"), list->GetChild(3)->GetLineNumber() );
+        }
+    }
+}
+
+
+void WORKSHEET_DATAITEM::deserializeSEXPROption( SEXPR::SEXPR_LIST* list )
+{
+    for(size_t i = 1; i < list->GetNumberOfChildren(); i++ )
+    {
+        std::string token = list->GetChild(i)->GetSymbol();
+        if( token == "page1only" )
+        {
+            SetPage1Option( 1 );
+        }
+        else if( token == "lbcorner" )
+        {
+            SetPage1Option( -1 );
+        }
+        else
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("unsupported symbol"), list->GetChild(i)->GetLineNumber() );
+        }
+    }
 }
 
 
@@ -430,6 +698,156 @@ const wxPoint WORKSHEET_DATAITEM_POLYPOLYGON::GetCornerPositionUi( unsigned aIdx
     DPOINT pos = GetCornerPosition( aIdx, aRepeat );
     pos = pos * m_WSunits2Iu;
     return wxPoint( int(pos.x), int(pos.y) );
+}
+
+SEXPR::SEXPR* WORKSHEET_DATAITEM_POLYPOLYGON::SerializeSEXPR() const
+{
+    SEXPR::SEXPR_LIST* root = new SEXPR::SEXPR_LIST();
+
+    *root << SEXPR::AsSymbol("polygon");
+
+    SEXPR::SEXPR_LIST* name = new SEXPR::SEXPR_LIST();
+    *name << SEXPR::AsSymbol( "name" );
+    *name << m_Name.ToStdString();
+
+    *root << name;
+
+    *root << serializeSEXPRCoordinate( "pos", m_Pos );
+
+
+    serializeSEXPROptions(root);
+    serializeSEXPRRepeatParameters(root);
+    
+    if( m_Orient )
+    {
+        SEXPR::SEXPR_LIST* rotate = new SEXPR::SEXPR_LIST();
+        *rotate << SEXPR::AsSymbol( "rotate" );
+        *rotate << m_Orient;
+        *root << rotate;
+    }
+
+    if( m_LineWidth )
+    {
+        SEXPR::SEXPR_LIST* linewidth = new SEXPR::SEXPR_LIST();
+        *linewidth << SEXPR::AsSymbol( "linewidth" );
+        *linewidth << m_LineWidth;
+        *root << linewidth;
+    }
+
+    for( int kk = 0; kk < GetPolyCount(); kk++ )
+    {
+        SEXPR::SEXPR_LIST* polylist = new SEXPR::SEXPR_LIST();
+        *polylist << SEXPR::AsSymbol( "pts" );
+        
+        // Create current polygon corners list
+        unsigned ist = GetPolyIndexStart( kk );
+        unsigned iend = GetPolyIndexEnd( kk );
+        
+        while( ist <= iend )
+        {
+            DPOINT pos = m_Corners[ist++];
+            
+            SEXPR::SEXPR_LIST* xy = new SEXPR::SEXPR_LIST();
+            *xy << SEXPR::AsSymbol( "xy" );
+            *xy << pos.x;
+            *xy << pos.y;
+            *polylist << xy;
+        }
+        
+        *root << polylist;
+    }
+    
+    return root;
+}
+
+void WORKSHEET_DATAITEM_POLYPOLYGON::DeserializeSEXPR( SEXPR::SEXPR& root )
+{
+    if( !root.GetChild(0)->IsSymbol() )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("polygon symbol not found"), root.GetChild(0)->GetLineNumber() );
+    } 
+    
+    std::string rootSym = root.GetChild(0)->GetSymbol();
+    if( rootSym != "polygon" )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("polygon symbol not found"), root.GetChild(0)->GetLineNumber() );
+    }
+    
+    for(size_t i = 2; i < root.GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* child = root.GetChild(i);
+
+        if( !child->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), child->GetLineNumber() );
+        }
+        
+        SEXPR::SEXPR_LIST* childList = child->GetList();
+        
+        if( !childList->GetChild(0)->IsSymbol() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("symbol not found"), childList->GetChild(0)->GetLineNumber() );
+        }
+
+        std::string sym = childList->GetChild(0)->GetSymbol();
+
+        if( sym == "comment" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Info = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Info = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "name" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Name = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Name = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "option" )
+        {
+            deserializeSEXPROption( childList );
+        }
+        else if( sym == "pos" )
+        {
+            deserializeSEXPRCoordinate( childList, m_Pos );
+        }
+        else if( sym == "repeat" )
+        {
+            m_RepeatCount = childList->GetChild(1)->GetInteger();
+        }
+        else if( sym == "incrx" )
+        {
+            m_IncrementVector.x = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "incry" )
+        {
+            m_IncrementVector.y = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "incrlabel" )
+        {
+            m_IncrementLabel = childList->GetChild(1)->GetInteger();
+        }
+        else if( sym == "linewidth" )
+        {
+            m_LineWidth = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "rotate" )
+        {
+            m_Orient = childList->GetChild(1)->GetDouble();
+        }
+    }
 }
 
 WORKSHEET_DATAITEM_TEXT::WORKSHEET_DATAITEM_TEXT( const wxString& aTextBase ) :
@@ -542,6 +960,277 @@ void WORKSHEET_DATAITEM_TEXT::SetConstrainedTextSize()
     }
 }
 
+
+SEXPR::SEXPR* WORKSHEET_DATAITEM_TEXT::SerializeSEXPR() const
+{
+    SEXPR::SEXPR_LIST* root = new SEXPR::SEXPR_LIST();
+
+    *root << SEXPR::AsSymbol("tbtext");
+    *root << m_TextBase.ToStdString();
+
+    SEXPR::SEXPR_LIST* name = new SEXPR::SEXPR_LIST();
+    *name << SEXPR::AsSymbol( "name" );
+    *name << m_Name.ToStdString();
+    *root << name;
+
+    *root << serializeSEXPRCoordinate( "pos", m_Pos );
+
+    serializeSEXPROptions(root);
+    
+    if( m_Orient )
+    {
+        SEXPR::SEXPR_LIST* rotate = new SEXPR::SEXPR_LIST();
+        *rotate << SEXPR::AsSymbol( "rotate" );
+        *rotate << m_Orient;
+        *root << rotate;
+    }
+    
+    // Write font info
+    bool write_size = m_TextSize.x != 0.0 && m_TextSize.y != 0.0;
+    if( write_size || IsBold() || IsItalic() )
+    {
+        SEXPR::SEXPR_LIST* font = new SEXPR::SEXPR_LIST();
+        *font << SEXPR::AsSymbol( "font" );
+
+        if( write_size )
+        {
+            SEXPR::SEXPR_LIST* size = new SEXPR::SEXPR_LIST();
+            *size << SEXPR::AsSymbol( "size" );
+            *size << m_TextSize.x << m_TextSize.y;
+            *font << size;
+        }
+
+        if( IsBold() )
+            *font << SEXPR::AsSymbol( "bold" );
+
+        if( IsItalic() )
+            *font << SEXPR::AsSymbol( "italic" );
+
+        *root << font;
+    }
+
+    // Write text justification
+    if( m_Hjustify != GR_TEXT_HJUSTIFY_LEFT ||
+        m_Vjustify != GR_TEXT_VJUSTIFY_CENTER )
+    {
+        SEXPR::SEXPR_LIST* justify = new SEXPR::SEXPR_LIST();
+        *justify << SEXPR::AsSymbol( "justify" );
+
+        // Write T_center opt first, because it is
+        // also a center for both m_Hjustify and m_Vjustify
+        if( m_Hjustify == GR_TEXT_HJUSTIFY_CENTER )
+            *justify << SEXPR::AsSymbol( "center" );
+
+        if( m_Hjustify == GR_TEXT_HJUSTIFY_RIGHT )
+            *justify << SEXPR::AsSymbol( "right" );
+
+        if( m_Vjustify == GR_TEXT_VJUSTIFY_TOP )
+            *justify << SEXPR::AsSymbol( "top" );
+
+        if( m_Vjustify == GR_TEXT_VJUSTIFY_BOTTOM )
+            *justify << SEXPR::AsSymbol( "bottom" );
+
+        *root << justify;
+    }
+    
+    // write constraints
+    if( m_BoundingBoxSize.x )
+    {
+        SEXPR::SEXPR_LIST* maxlen = new SEXPR::SEXPR_LIST();
+        *maxlen << SEXPR::AsSymbol( "maxlen" ) << m_BoundingBoxSize.x;
+        *root << maxlen;
+    }
+
+    if( m_BoundingBoxSize.y )
+    {
+        SEXPR::SEXPR_LIST* maxheight = new SEXPR::SEXPR_LIST();
+        *maxheight << SEXPR::AsSymbol( "maxheight" ) << m_BoundingBoxSize.y;
+        *root << maxheight;
+    }
+                      
+    serializeSEXPRRepeatParameters(root);
+    
+    return root;
+}
+
+void WORKSHEET_DATAITEM_TEXT::DeserializeSEXPR( SEXPR::SEXPR& root )
+{
+    if( !root.GetChild(0)->IsSymbol() )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("page_layout symbol not found"), root.GetChild(0)->GetLineNumber() );
+    } 
+    
+    std::string rootSym = root.GetChild(0)->GetSymbol();
+    if( rootSym != "tbtext" )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("rect or line symbol not found"), root.GetChild(0)->GetLineNumber() );
+    }
+    
+    if( root.GetChild(1)->IsSymbol() )
+    {
+        m_TextBase = root.GetChild(1)->GetSymbol();
+    }
+    else if( root.GetChild(1)->IsString() )
+    {
+        m_TextBase = root.GetChild(1)->GetString();
+    }
+    
+    for(size_t i = 2; i < root.GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* child = root.GetChild(i);
+
+        if( !child->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), child->GetLineNumber() );
+        }
+        
+        SEXPR::SEXPR_LIST* childList = child->GetList();
+        
+        if( !childList->GetChild(0)->IsSymbol() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("symbol not found"), childList->GetChild(0)->GetLineNumber() );
+        }
+
+        std::string sym = childList->GetChild(0)->GetSymbol();
+
+        if( sym == "comment" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Info = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Info = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "name" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Name = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Name = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "option" )
+        {
+            deserializeSEXPROption( childList );
+        }
+        else if( sym == "pos" )
+        {
+            deserializeSEXPRCoordinate( childList, m_Pos );
+        }
+        else if( sym == "repeat" )
+        {
+            m_RepeatCount = childList->GetChild(1)->GetInteger();
+        }
+        else if( sym == "incrx" )
+        {
+            m_IncrementVector.x = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "incry" )
+        {
+            m_IncrementVector.y = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "incrlabel" )
+        {
+            m_IncrementLabel = childList->GetChild(1)->GetInteger();
+        }
+        else if( sym == "maxlen" )
+        {
+            m_BoundingBoxSize.x = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "maxheight" )
+        {
+            m_BoundingBoxSize.y = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "font" )
+        {
+            deserializeSEXPRFont( childList );
+        }
+        else if( sym == "justify" )
+        {
+            deserializeSEXPRJustify( childList );
+        }
+        else if( sym == "rotate" )
+        {
+            m_Orient = childList->GetChild(1)->GetDouble();
+        }
+    }
+}
+
+void WORKSHEET_DATAITEM_TEXT::deserializeSEXPRFont( SEXPR::SEXPR_LIST* list )
+{
+    for(size_t i = 1; i < list->GetNumberOfChildren(); i++ )
+    {
+        if(list->GetChild(i)->IsSymbol())
+        {
+            std::string token = list->GetChild(i)->GetSymbol();
+            if( token == "bold" )
+            {
+                SetBold( true );
+            }
+            else if( token == "italic" )
+            {
+                SetItalic( true );
+            }
+        }
+        else if(list->GetChild(i)->IsList())
+        {
+            SEXPR::SEXPR_LIST* childList = list->GetChild(i)->GetList();
+            std::string token = childList->GetChild(0)->GetSymbol();
+            
+            if( token == "size" )
+            {
+                m_TextSize.x = childList->GetChild(1)->GetDouble();
+                m_TextSize.y = childList->GetChild(2)->GetDouble();
+            }
+        }
+        else
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("unsupported"), list->GetChild(i)->GetLineNumber() );
+        }
+    }
+}
+
+void WORKSHEET_DATAITEM_TEXT::deserializeSEXPRJustify( SEXPR::SEXPR_LIST* list )
+{
+    for(size_t i = 1; i < list->GetNumberOfChildren(); i++ )
+    {
+        std::string token = list->GetChild(i)->GetSymbol();
+        if( token == "center" )
+        {
+            m_Hjustify = GR_TEXT_HJUSTIFY_CENTER;
+            m_Vjustify = GR_TEXT_VJUSTIFY_CENTER;
+        }
+        else if( token == "left" )
+        {
+            m_Hjustify = GR_TEXT_HJUSTIFY_LEFT;
+        }
+        else if( token == "right" )
+        {
+            m_Hjustify = GR_TEXT_HJUSTIFY_RIGHT;
+        }
+        else if (token == "top")
+        {
+            m_Vjustify = GR_TEXT_VJUSTIFY_TOP;
+        }
+        else if (token == "bottom")
+        {
+            m_Vjustify = GR_TEXT_VJUSTIFY_BOTTOM;
+        }
+        else
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("unsupported"), list->GetChild(i)->GetLineNumber() );
+        }
+    }
+}
+
 /* set the pixel scale factor of the bitmap
  * this factor depend on the application internal unit
  * and the PPI bitmap factor
@@ -577,3 +1266,131 @@ void WORKSHEET_DATAITEM_BITMAP::SetPPI( int aBitmapPPI )
         m_ImageBitmap->m_Scale = (double) m_ImageBitmap->GetPPI() / aBitmapPPI;
 }
 
+
+SEXPR::SEXPR* WORKSHEET_DATAITEM_BITMAP::SerializeSEXPR() const
+{
+    SEXPR::SEXPR_LIST* root = new SEXPR::SEXPR_LIST();
+
+    *root << SEXPR::AsSymbol("bitmap");
+
+    SEXPR::SEXPR_LIST* name = new SEXPR::SEXPR_LIST();
+    *name << SEXPR::AsSymbol( "name" );
+    *name << m_Name.ToStdString();
+    *root << name;
+
+    *root << serializeSEXPRCoordinate( "pos", m_Pos );
+
+    serializeSEXPROptions(root);
+    
+    SEXPR::SEXPR_LIST* scale = new SEXPR::SEXPR_LIST();
+    *scale << SEXPR::AsSymbol( "scale" ) << m_ImageBitmap->m_Scale;
+    *root << scale;
+        
+    serializeSEXPRRepeatParameters(root);
+    
+    SEXPR::SEXPR_LIST* pngdata = new SEXPR::SEXPR_LIST();
+    *pngdata << SEXPR::AsSymbol( "pngdata" );
+
+    wxArrayString pngStrings;
+    m_ImageBitmap->SaveData( pngStrings );
+
+    for( unsigned ii = 0; ii < pngStrings.GetCount(); ii++ )
+    {
+        SEXPR::SEXPR_LIST* data = new SEXPR::SEXPR_LIST();
+        *data << SEXPR::AsSymbol( "data" ) << pngStrings[ii].ToStdString();
+        *pngdata << data;
+    }
+    
+    *root << pngdata;
+
+    return root;
+}
+
+
+void WORKSHEET_DATAITEM_BITMAP::DeserializeSEXPR( SEXPR::SEXPR& root )
+{
+    if( !root.GetChild(0)->IsSymbol() )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("bitmap symbol not found"), root.GetChild(0)->GetLineNumber() );
+    } 
+    
+    std::string rootSym = root.GetChild(0)->GetSymbol();
+    if( rootSym != "bitmap" )
+    {
+        THROW_SEXPR_SYNTAX_EXCEPTION( _T("bitmap symbol not found"), root.GetChild(0)->GetLineNumber() );
+    }
+    
+    for(size_t i = 2; i < root.GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* child = root.GetChild(i);
+
+        if( !child->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), child->GetLineNumber() );
+        }
+        
+        SEXPR::SEXPR_LIST* childList = child->GetList();
+        
+        if( !childList->GetChild(0)->IsSymbol() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("symbol not found"), childList->GetChild(0)->GetLineNumber() );
+        }
+
+        std::string sym = childList->GetChild(0)->GetSymbol();
+
+        if( sym == "name" )
+        {
+            //kicad compat
+            if( childList->GetChild(1)->IsSymbol() )
+            {
+                m_Name = childList->GetChild(1)->GetSymbol();
+            }
+            else if( childList->GetChild(1)->IsString() )
+            {
+                m_Name = childList->GetChild(1)->GetString();
+            }
+        }
+        else if( sym == "pos" )
+        {
+            deserializeSEXPRCoordinate( childList, m_Pos );
+        }
+        else if( sym == "scale" )
+        {
+            m_RepeatCount = childList->GetChild(1)->GetDouble();
+        }
+        else if( sym == "pngdata" )
+        {
+            deserializeSEXPRPNGData( childList );
+        }
+    }
+}
+
+
+void WORKSHEET_DATAITEM_BITMAP::deserializeSEXPRPNGData( SEXPR::SEXPR* root )
+{
+    std::string tmp;
+    
+    for(size_t i = 1; i < root->GetNumberOfChildren(); i++ )
+    {
+        SEXPR::SEXPR* child = root->GetChild(i);
+
+        if( !child->IsList() )
+        {
+            THROW_SEXPR_SYNTAX_EXCEPTION( _T("Expected list"), child->GetLineNumber() );
+        }
+        
+        SEXPR::SEXPR_LIST* childList = child->GetList();
+        
+        tmp += childList->GetChild(1)->GetString();
+    }
+    
+
+    tmp += "EndData";
+
+    wxString msg;
+    STRING_LINE_READER reader( tmp, wxT("Png kicad_wks data") );
+    if( !m_ImageBitmap->LoadData( reader, msg ) )
+    {
+        wxLogMessage(msg);
+    }
+}

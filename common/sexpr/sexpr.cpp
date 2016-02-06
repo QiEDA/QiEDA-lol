@@ -109,12 +109,20 @@ namespace SEXPR
 
     double SEXPR::GetDouble() const
     {
-        if (m_type != SEXPR_TYPE_ATOM_DOUBLE)
+        // we may end up parsing "intended" floats/doubles as ints
+        // so here we allow silent casting back to doubles
+        if (m_type == SEXPR_TYPE_ATOM_DOUBLE )
+        {
+            return static_cast<SEXPR_DOUBLE const *>(this)->m_value;
+        }
+        else if( m_type == SEXPR_TYPE_ATOM_INTEGER )
+        {
+            return static_cast<SEXPR_INTEGER const *>(this)->m_value;
+        }
+        else
         {
             throw new std::invalid_argument("SEXPR is not a double type!");
         }
-
-        return static_cast<SEXPR_DOUBLE const *>(this)->m_value;
     }
 
     float SEXPR::GetFloat() const
