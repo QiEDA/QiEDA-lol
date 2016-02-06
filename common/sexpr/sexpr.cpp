@@ -25,6 +25,7 @@
 #include <cctype>
 #include <iterator>
 #include <stdexcept>
+#include <iomanip>
 #include <sstream>
 
 namespace SEXPR
@@ -187,7 +188,7 @@ namespace SEXPR
         else if (IsDouble())
         {
             std::stringstream out;
-            out << GetDouble();
+            out << std::setprecision(16) << GetDouble();
             result += out.str();
         }
 
