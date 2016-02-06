@@ -35,9 +35,9 @@
 #include <base_struct.h>
 #include <worksheet.h>
 #include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_dataitem.h"
 #include <page_layout_reader_lexer.h>
-
+#include "page_layout/worksheet_layout.h"
 
 using namespace TB_READER_T;
 

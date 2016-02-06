@@ -56,7 +56,7 @@
 #include <worksheet.h>
 #include <class_title_block.h>
 #include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_layout.h"
 
 
 // The layout shape used in the application

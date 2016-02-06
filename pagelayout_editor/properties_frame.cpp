@@ -29,8 +29,8 @@
 #include <wx/wx.h>
 #include <wxstruct.h>
 #include <class_drawpanel.h>
-#include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_layout.h"
+#include "page_layout/worksheet_dataitem.h"
 #include <properties_frame.h>
 
 PROPERTIES_FRAME::PROPERTIES_FRAME( PL_EDITOR_FRAME* aParent ):

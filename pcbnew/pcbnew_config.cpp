@@ -45,7 +45,7 @@
 #include <worksheet.h>
 #include <dialog_hotkeys_editor.h>
 #include <fp_lib_table.h>
-#include <worksheet_shape_builder.h>
+#include "page_layout/worksheet_layout.h"
 
 #include <class_board.h>
 #include <class_module.h>

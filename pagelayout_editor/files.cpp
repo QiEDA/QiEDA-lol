@@ -32,7 +32,7 @@
 #include <confirm.h>
 #include <gestfich.h>
 #include <macros.h>
-#include <worksheet_shape_builder.h>
+#include "page_layout/worksheet_layout.h"
 
 #include <pl_editor_frame.h>
 #include <properties_frame.h>

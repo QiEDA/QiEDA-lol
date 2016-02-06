@@ -42,7 +42,7 @@
 #include <hotkeys.h>
 #include <sch_sheet.h>
 #include <class_libentry.h>
-#include <worksheet_shape_builder.h>
+#include "page_layout/worksheet_layout.h"
 #include <class_library.h>
 
 #include <dialog_hotkeys_editor.h>

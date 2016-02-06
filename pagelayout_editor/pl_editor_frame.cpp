@@ -38,8 +38,8 @@
 #include <pl_editor_id.h>
 #include <hotkeys.h>
 #include <class_pl_editor_screen.h>
-#include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_layout.h"
+#include "worksheet_shape_builder.h"
 #include <design_tree_frame.h>
 #include <properties_frame.h>
 

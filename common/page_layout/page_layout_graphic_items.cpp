@@ -59,7 +59,7 @@
 #include <worksheet.h>
 #include <class_title_block.h>
 #include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_dataitem.h"
 
 /* a helper function to draw graphic symbols at start point or end point of
  * an item.

@@ -31,7 +31,7 @@
 #include <class_drawpanel.h>
 
 #include <pl_editor_frame.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_dataitem.h"
 #include <dialog_new_dataitem_base.h>
 
 class DIALOG_NEW_DATAITEM : public DIALOG_NEW_DATAITEM_BASE

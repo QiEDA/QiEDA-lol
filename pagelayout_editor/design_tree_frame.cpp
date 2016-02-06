@@ -29,10 +29,9 @@
 #include <wx/wx.h>
 #include <wx/imaglist.h>
 #include <wx/wupdlock.h>
-#include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
 #include <pl_editor_id.h>
 #include <design_tree_frame.h>
+#include "page_layout/worksheet_layout.h"
 
 /* XPM
  * This bitmap is used to show item types

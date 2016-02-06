@@ -39,7 +39,7 @@
 #include <dialog_helpers.h>
 #include <menus_helpers.h>
 #include <worksheet_shape_builder.h>
-#include <class_worksheet_dataitem.h>
+#include "page_layout/worksheet_layout.h"
 #include <design_tree_frame.h>
 #include <properties_frame.h>
 #include <dialog_page_settings.h>

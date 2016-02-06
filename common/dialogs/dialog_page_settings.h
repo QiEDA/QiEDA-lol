@@ -25,6 +25,7 @@
 #define _DIALOG_PAGES_SETTINGS_H_
 
 #include <dialog_page_settings_base.h>
+#include "page_layout/worksheet_layout.h"
 
 #define MAX_PAGE_EXAMPLE_SIZE 200
 
