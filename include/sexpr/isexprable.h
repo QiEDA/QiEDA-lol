@@ -24,7 +24,7 @@
 #ifndef ISEXPRABLE_H_
 #define ISEXPRABLE_H_
 
-#include "sexpr\sexpr.h"
+#include "sexpr/sexpr.h"
 
 namespace SEXPR
 {

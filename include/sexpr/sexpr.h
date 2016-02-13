@@ -26,7 +26,7 @@
 
 #include <string>
 #include <vector>
-#include "sexpr\isexprable.h"
+#include "sexpr/isexprable.h"
 
 namespace SEXPR
 {

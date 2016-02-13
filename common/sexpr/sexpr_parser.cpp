@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-#include "sexpr\sexpr_parser.h"
-#include "sexpr\sexpr_exception.h"
+#include "sexpr/sexpr_parser.h"
+#include "sexpr/sexpr_exception.h"
 #include <cctype>
 #include <iterator>
 #include <stdexcept>
