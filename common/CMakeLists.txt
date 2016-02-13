@@ -173,8 +173,6 @@ set( COMMON_PAGE_LAYOUT_SRCS
     page_layout/class_worksheet_layout.cpp
     page_layout/page_layout_default_description.cpp
     page_layout/page_layout_graphic_items.cpp
-    page_layout/page_layout_reader_keywords.cpp
-    page_layout/page_layout_reader.cpp
     )
 
 set( COMMON_SRCS
@@ -450,24 +448,6 @@ add_custom_target(
     )
 
 add_dependencies( pcbcommon pcb_lexer_source_files )
-
-# auto-generate page layout reader s-expression page_layout_reader_lexer.h
-# and title_block_reader_keywords.cpp.
-make_lexer(
-    ${CMAKE_CURRENT_SOURCE_DIR}/page_layout/page_layout_reader.keywords
-    ${PROJECT_SOURCE_DIR}/include/page_layout_reader_lexer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/page_layout/page_layout_reader_keywords.cpp
-    TB_READER_T
-    )
-
-add_custom_target(
-    page_layout_lexer_source_files ALL
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/include/page_layout_reader_lexer.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/page_layout/page_layout_reader_keywords.cpp
-    )
-
-add_dependencies( common page_layout_lexer_source_files )
 
 # This one gets made only when testing.
 # to build it, first enable #define STAND_ALONE at top of dsnlexer.cpp
