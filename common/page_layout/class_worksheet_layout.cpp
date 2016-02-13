@@ -361,7 +361,7 @@ void WORKSHEET_LAYOUT::SetDefaultLayout()
 void WORKSHEET_LAYOUT::Parse( std::string layout )
 {
     SEXPR::PARSER parser;
-    SEXPR::SEXPR* parsedRoot = parser.Parse( defaultPageLayout );
+    SEXPR::SEXPR* parsedRoot = parser.Parse( layout );
     
     if( !parsedRoot->IsList() )
     {

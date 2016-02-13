@@ -1369,6 +1369,7 @@ void WORKSHEET_DATAITEM_BITMAP::DeserializeSEXPR( SEXPR::SEXPR& root )
 void WORKSHEET_DATAITEM_BITMAP::deserializeSEXPRPNGData( SEXPR::SEXPR* root )
 {
     std::string tmp;
+    m_ImageBitmap = new BITMAP_BASE;
     
     for(size_t i = 1; i < root->GetNumberOfChildren(); i++ )
     {
@@ -1382,6 +1383,7 @@ void WORKSHEET_DATAITEM_BITMAP::deserializeSEXPRPNGData( SEXPR::SEXPR* root )
         SEXPR::SEXPR_LIST* childList = child->GetList();
         
         tmp += childList->GetChild(1)->GetString();
+        tmp += "\n";
     }
     
 
