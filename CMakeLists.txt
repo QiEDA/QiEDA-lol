@@ -174,7 +174,7 @@ if( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     # Establish -Wall early, so specialized relaxations of this may come
     # subsequently on the command line, such as in pcbnew/github/CMakeLists.txt
     set( CMAKE_C_FLAGS   "-Wall ${CMAKE_C_FLAGS}" )
-    set( CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set( CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}" )
 
     set( CMAKE_C_FLAGS_DEBUG   "-g3 -ggdb3 -DDEBUG" )
     set( CMAKE_CXX_FLAGS_DEBUG "-g3 -ggdb3 -DDEBUG -Wno-deprecated-declarations" )
