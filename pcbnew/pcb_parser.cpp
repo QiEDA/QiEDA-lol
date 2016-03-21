@@ -1684,7 +1684,13 @@ MODULE* PCB_PARSER::parseMODULE( wxArrayString* aInitialComments ) throw( IO_ERR
             break;
 
         case T_layer:
-            module->SetLayer( parseBoardItemLayer() );
+        {
+            // Footprints can be only on the front side or the back side.
+            // but because we can find some stupid layer in file, ensure a
+            // acceptable layer is set for the footprint
+            LAYER_ID layer = parseBoardItemLayer();
+            module->SetLayer( layer == B_Cu ? B_Cu : F_Cu );
+        }
             NeedRIGHT();
             break;
 
@@ -2686,11 +2692,13 @@ ZONE_CONTAINER* PCB_PARSER::parseZONE_CONTAINER() throw( IO_ERROR, PARSE_ERROR )
                         break;
 
                     case T_chamfer:
-                        zone->SetCornerSmoothingType( ZONE_SETTINGS::SMOOTHING_CHAMFER );
+                        if( !zone->GetIsKeepout() ) // smoothing has meaning only for filled zones
+                            zone->SetCornerSmoothingType( ZONE_SETTINGS::SMOOTHING_CHAMFER );
                         break;
 
                     case T_fillet:
-                        zone->SetCornerSmoothingType( ZONE_SETTINGS::SMOOTHING_FILLET );
+                        if( !zone->GetIsKeepout() ) // smoothing has meaning only for filled zones
+                            zone->SetCornerSmoothingType( ZONE_SETTINGS::SMOOTHING_FILLET );
                         break;
 
                     default:
@@ -2700,7 +2708,9 @@ ZONE_CONTAINER* PCB_PARSER::parseZONE_CONTAINER() throw( IO_ERROR, PARSE_ERROR )
                     break;
 
                 case T_radius:
-                    zone->SetCornerRadius( parseBoardUnits( "corner radius" ) );
+                    tmp = parseBoardUnits( "corner radius" );
+                    if( !zone->GetIsKeepout() ) // smoothing has meaning only for filled zones
+                       zone->SetCornerRadius( tmp );
                     NeedRIGHT();
                     break;
 

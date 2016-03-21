@@ -41,7 +41,7 @@
 #include <sch_base_frame.h>
 #include <class_library.h>
 #include <sch_component.h>
-#include <sch_sheet_path.h>
+#include <dialog_helpers.h>
 #include <dialog_edit_component_in_schematic_fbp.h>
 
 #include "widgets/widget_graphic_text_ctrl.h"
@@ -342,7 +342,7 @@ void DIALOG_EDIT_COMPONENT_IN_SCHEMATIC::copyPanelToOptions()
     {
         int unit_selection = unitChoice->GetCurrentSelection() + 1;
 
-        m_cmp->SetUnitSelection( m_parent->GetCurrentSheet().Last(), unit_selection );
+        m_cmp->SetUnitSelection( &m_parent->GetCurrentSheet(), unit_selection );
         m_cmp->SetUnit( unit_selection );
     }
 
@@ -461,7 +461,7 @@ void DIALOG_EDIT_COMPONENT_IN_SCHEMATIC::OnOKButtonClick( wxCommandEvent& event 
     // Reference has a specific initialization, depending on the current active sheet
     // because for a given component, in a complex hierarchy, there are more than one
     // reference.
-    m_cmp->SetRef( m_parent->GetCurrentSheet().Last(), m_FieldsBuf[REFERENCE].GetText() );
+    m_cmp->SetRef( &m_parent->GetCurrentSheet(), m_FieldsBuf[REFERENCE].GetText() );
 
     m_parent->OnModify();
     m_parent->GetScreen()->TestDanglingEnds();
@@ -721,7 +721,7 @@ void DIALOG_EDIT_COMPONENT_IN_SCHEMATIC::InitBuffers( SCH_COMPONENT* aComponent 
     }
 #endif
 
-    m_FieldsBuf[REFERENCE].SetText( m_cmp->GetRef( m_parent->GetCurrentSheet().Last() ) );
+    m_FieldsBuf[REFERENCE].SetText( m_cmp->GetRef( &m_parent->GetCurrentSheet() ) );
 
     for( unsigned i = 0;  i<m_FieldsBuf.size();  ++i )
     {

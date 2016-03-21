@@ -248,7 +248,7 @@ class HelpfulFootprintWizardPlugin(pcbnew.FootprintWizardPlugin,
     def GetValue(self):
         raise NotImplementedError
 
-    # this value come from our KiCad Library Convention 0.11
+    # this value come from our KiCad Library Convention 1.0
     def GetReferencePrefix(self):
         return "REF"
 
@@ -259,7 +259,7 @@ class HelpfulFootprintWizardPlugin(pcbnew.FootprintWizardPlugin,
         """
         IPC nominal
         """
-        return pcbnew.FromMM(1.2)
+        return pcbnew.FromMM(1.0)
 
     def GetTextThickness(self):
         """
@@ -278,6 +278,24 @@ class HelpfulFootprintWizardPlugin(pcbnew.FootprintWizardPlugin,
         FIXME: This doesn't seem to be enabled yet?
         """
         pass
+
+    def PutOnGridMM(self, value, gridSizeMM=0.05):
+        """
+        Round the value (in KiCAD internal units 1nm) according to the 
+        provided gridSize in mm.
+        """
+        thresh = pcbnew.FromMM(gridSizeMM)
+        res = round(value/thresh)*thresh
+        return res
+
+    def PutOnGridMils(self, value, gridSizeMil=2):
+        """
+        Round the value (in KiCAD internal units 1nm) according to the 
+        provided gridSize in mil.
+        """
+        thresh = pcbnew.FromMils(gridSizeMil)
+        res = round(value/thresh)*thresh
+        return res
 
     def BuildThisFootprint(self):
         """

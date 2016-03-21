@@ -28,20 +28,15 @@
  * @brief (Re)Create the main menubar for the schematic frame
  */
 
-#include <wx/menu.h>
-#include <wx/string.h>
-
 #include <kiface_i.h>
-#include <pgm_base.h>
-#include <schframe.h>
-
-#include <general.h>
-#include <eeschema_id.h>
-#include <hotkeys.h>
 #include <menus_helpers.h>
+#include <pgm_base.h>
 
-#include <help_common_strings.h>
-
+#include "eeschema_id.h"
+#include "general.h"
+#include "help_common_strings.h"
+#include "hotkeys.h"
+#include "schframe.h"
 
 void SCH_EDIT_FRAME::ReCreateMenuBar()
 {
@@ -102,8 +97,8 @@ void SCH_EDIT_FRAME::ReCreateMenuBar()
     }
 
     AddMenuItem( fileMenu,
-                 ID_APPEND_PROJECT, _( "App&end Schematic Sheet" ),
-                 _( "Append schematic sheet to current project" ),
+                 ID_APPEND_PROJECT, _( "Imp&ort Schematic Sheet Content" ),
+                 _( "Import a schematic sheet content from an other project in the current sheet" ),
                  KiBitmap( open_document_xpm ) );
 
     fileMenu->AppendSeparator();
@@ -429,6 +424,22 @@ void SCH_EDIT_FRAME::ReCreateMenuBar()
     // Menu Tools:
     wxMenu* toolsMenu = new wxMenu;
 
+    text = AddHotkeyName( _( "Update PCB from Schematics" ), g_Schematic_Hokeys_Descr, HK_UPDATE_PCB_FROM_SCH );
+
+    AddMenuItem( toolsMenu,
+                 ID_UPDATE_PCB_FROM_SCH,
+                 text, _( "Updates the PCB design with the current schematic (forward annotation)." ),
+                 KiBitmap( pcbnew_xpm ) );
+
+    // Run Pcbnew
+    AddMenuItem( toolsMenu,
+                 ID_RUN_PCB,
+                 _( "&Open PCB Editor" ),
+                 _( "Run Pcbnew" ),
+                 KiBitmap( pcbnew_xpm ) );
+
+    toolsMenu->AppendSeparator();
+
     AddMenuItem( toolsMenu,
                  ID_RUN_LIBRARY,
                  _( "Library &Editor" ), HELP_RUN_LIB_EDITOR,
@@ -476,22 +487,12 @@ void SCH_EDIT_FRAME::ReCreateMenuBar()
     // Run CvPcb
     AddMenuItem( toolsMenu,
                  ID_RUN_CVPCB,
-                 _( "A&ssign Component Footprint" ),
+                 _( "A&ssign Component Footprints" ),
                  _( "Run CvPcb" ),
                  KiBitmap( cvpcb_xpm ) );
 
-    // Run Pcbnew
-    AddMenuItem( toolsMenu,
-                 ID_RUN_PCB,
-                 _( "&Layout Printed Circuit Board" ),
-                 _( "Run Pcbnew" ),
-                 KiBitmap( pcbnew_xpm ) );
-
     // Help Menu:
     wxMenu* helpMenu = new wxMenu;
-
-    // Version info
-    AddHelpVersionInfoMenuEntry( helpMenu );
 
     AddMenuItem( helpMenu,
                  wxID_HELP,

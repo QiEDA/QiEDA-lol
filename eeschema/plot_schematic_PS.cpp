@@ -4,7 +4,7 @@
 /*
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
- * Copyright (C) 1992-2010 KiCad Developers, see change_log.txt for contributors.
+ * Copyright (C) 1992-2016 KiCad Developers, see change_log.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,7 +32,6 @@
 #include <class_sch_screen.h>
 #include <schframe.h>
 #include <base_units.h>
-#include <sch_sheet.h>
 #include <sch_sheet_path.h>
 #include <project.h>
 #include <reporter.h>
@@ -43,10 +42,9 @@
 void DIALOG_PLOT_SCHEMATIC::createPSFile( bool aPlotAll, bool aPlotFrameRef )
 {
     SCH_SCREEN*     screen = m_parent->GetScreen();
-    SCH_SHEET_PATH* sheetpath;
-    SCH_SHEET_PATH  oldsheetpath = m_parent->GetCurrentSheet();     // sheetpath is saved here
-    PAGE_INFO       actualPage;                                     // page size selected in schematic
-    PAGE_INFO       plotPage;                                       // page size selected to plot
+    SCH_SHEET_PATH  oldsheetpath = m_parent->GetCurrentSheet();  // sheetpath is saved here
+    PAGE_INFO       actualPage;                                  // page size selected in schematic
+    PAGE_INFO       plotPage;                                    // page size selected to plot
 
     /* When printing all pages, the printed page is not the current page.
      * In complex hierarchies, we must update component references
@@ -54,33 +52,19 @@ void DIALOG_PLOT_SCHEMATIC::createPSFile( bool aPlotAll, bool aPlotFrameRef )
      *  because in complex hierarchies a SCH_SCREEN (a drawing )
      *  is shared between many sheets and component references depend on the actual sheet path used
      */
-    SCH_SHEET_LIST  SheetList( NULL );
+    SCH_SHEET_LIST  sheetList;
 
-    sheetpath = SheetList.GetFirst();
-    SCH_SHEET_PATH  list;
+    if( aPlotAll )
+        sheetList.BuildSheetList( g_RootSheet );
+    else
+        sheetList.push_back( m_parent->GetCurrentSheet() );
 
-    while( true )
+    for( unsigned i = 0; i < sheetList.size(); i++ )
     {
-        if( aPlotAll )
-        {
-            if( sheetpath == NULL )
-                break;
-
-            list.Clear();
-
-            if( list.BuildSheetPathInfoFromSheetPathValue( sheetpath->Path() ) )
-            {
-                m_parent->SetCurrentSheet( list );
-                m_parent->GetCurrentSheet().Last()->UpdateAllScreenReferences();
-                m_parent->SetSheetNumberAndCount();
-                screen = m_parent->GetCurrentSheet().LastScreen();
-            }
-            else // Should not happen
-                return;
-
-            sheetpath = SheetList.GetNext();
-        }
-
+        m_parent->SetCurrentSheet( sheetList[i] );
+        m_parent->GetCurrentSheet().UpdateAllScreenReferences();
+        m_parent->SetSheetNumberAndCount();
+        screen = m_parent->GetCurrentSheet().LastScreen();
         actualPage = screen->GetPageSettings();
 
         switch( m_pageSizeSelect )
@@ -129,7 +113,8 @@ void DIALOG_PLOT_SCHEMATIC::createPSFile( bool aPlotAll, bool aPlotFrameRef )
             else
             {
                 // Error
-                msg.Printf( _( "Unable to create file '%s'.\n" ), GetChars( plotFileName.GetFullPath() ) );
+                msg.Printf( _( "Unable to create file '%s'.\n" ),
+                            GetChars( plotFileName.GetFullPath() ) );
                 reporter.Report( msg, REPORTER::RPT_ERROR );
             }
 
@@ -139,13 +124,10 @@ void DIALOG_PLOT_SCHEMATIC::createPSFile( bool aPlotAll, bool aPlotFrameRef )
             msg.Printf( wxT( "PS Plotter exception: %s"), GetChars( e.errorText ) );
             reporter.Report( msg, REPORTER::RPT_ERROR );
         }
-
-        if( !aPlotAll )
-            break;
     }
 
     m_parent->SetCurrentSheet( oldsheetpath );
-    m_parent->GetCurrentSheet().Last()->UpdateAllScreenReferences();
+    m_parent->GetCurrentSheet().UpdateAllScreenReferences();
     m_parent->SetSheetNumberAndCount();
 }
 

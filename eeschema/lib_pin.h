@@ -32,44 +32,13 @@
 
 #include <lib_draw_item.h>
 
+#include "pin_shape.h"
+#include "pin_type.h"
 
 #define TARGET_PIN_RADIUS   12  // Circle diameter drawn at the active end of pins
 
-/**
- * The component library pin object electrical types used in ERC tests.
- */
-enum ElectricPinType {
-    PIN_INPUT,
-    PIN_OUTPUT,
-    PIN_BIDI,
-    PIN_TRISTATE,
-    PIN_PASSIVE,
-    PIN_UNSPECIFIED,
-    PIN_POWER_IN,
-    PIN_POWER_OUT,
-    PIN_OPENCOLLECTOR,
-    PIN_OPENEMITTER,
-    PIN_NC,             /* No connect */
-    PIN_NMAX            /* End of List (no used as pin type) */
-};
-
-
 /* Pin visibility flag bit. */
 #define PIN_INVISIBLE 1    /* Set makes pin invisible */
-
-
-/**
- * The component library pin object drawing shapes.
- */
-enum DrawPinShape {
-    NONE         = 0,
-    INVERT       = 1,
-    CLOCK        = 2,
-    LOWLEVEL_IN  = 4,
-    LOWLEVEL_OUT = 8,
-    CLOCK_FALL   = 0x10, /* this is common form for inverted clock in Eastern Block */
-    NONLOGIC     = 0x20
-};
 
 
 /**
@@ -94,9 +63,9 @@ class LIB_PIN : public LIB_ITEM
     wxPoint  m_position;     ///< Position of the pin.
     int      m_length;       ///< Length of the pin.
     int      m_orientation;  ///< Pin orientation (Up, Down, Left, Right)
-    int      m_shape;        ///< Bitwise ORed of pin shapes (see enum DrawPinShape)
+    GRAPHIC_PINSHAPE m_shape;        ///< Shape drawn around pin
     int      m_width;        ///< Line width of the pin.
-    int      m_type;         ///< Electrical type of the pin.  See enum ElectricPinType.
+    ELECTRICAL_PINTYPE m_type;  ///< Electrical type of the pin.  See enum ELECTRICAL_PINTYPE.
     int      m_attributes;   ///< Set bit 0 to indicate pin is invisible.
     wxString m_name;
     long     m_number;       ///< Pin number defined as 4 ASCII characters like "12", "anod",
@@ -263,31 +232,31 @@ public:
 
     void Rotate();
 
-    int GetShape() const { return m_shape; }
+    GRAPHIC_PINSHAPE GetShape() const { return m_shape; }
 
     /**
      * Set the shape of the pin to \a aShape.
      *
      * This will also update the draw style of the pins marked by EnableEditMode().
      *
-     * @param aShape - The draw shape of the pin.  See enum DrawPinShape.
+     * @param aShape - The draw shape of the pin.  See enum GRAPHIC_PINSHAPE.
      */
-    void SetShape( int aShape );
+    void SetShape( GRAPHIC_PINSHAPE aShape );
 
     /**
      * Get the electrical type of the pin.
      *
-     * @return The electrical type of the pin (see enun ElectricPinType for values).
+     * @return The electrical type of the pin (see enum ELECTRICAL_PINTYPE for values).
      */
-    int GetType() const { return m_type; }
+    ELECTRICAL_PINTYPE GetType() const { return m_type; }
 
     /**
      * return a string giving the electrical type of a pin.
      * Can be used when a known, not translated name is needed (for instance in net lists)
-     * @param aType is the electrical type (see enum ElectricPinType )
+     * @param aType is the electrical type (see enum ELECTRICAL_PINTYPE )
      * @return The electrical name for a pin type (see enun MsgPinElectricType for names).
      */
-    static const wxString GetCanonicalElectricalTypeName( unsigned aType );
+    static const wxString GetCanonicalElectricalTypeName( ELECTRICAL_PINTYPE aType );
 
     /**
      * return a string giving the electrical type of the pin.
@@ -300,19 +269,12 @@ public:
     }
 
     /**
-     * return a translated string for messages giving the electrical type of a pin.
-     * @param aType is the electrical type (see enum ElectricPinType )
-     * @return The electrical name of the pin (see enun MsgPinElectricType for names).
-     */
-    static const wxString GetElectricalTypeName( unsigned aType );
-
-    /**
      * return a translated string for messages giving the electrical type of the pin.
      * @return The electrical name of the pin.
      */
     wxString const GetElectricalTypeName() const
     {
-        return GetElectricalTypeName( m_type );
+        return GetText( m_type );
     }
 
     /**
@@ -321,9 +283,9 @@ public:
      * This will also update the electrical type of the pins marked by
      * EnableEditMode().
      *
-     * @param aType - The electrical type of the pin(see enun ElectricPinType for values).
+     * @param aType - The electrical type of the pin(see enun ELECTRICAL_PINTYPE for values).
      */
-    void SetType( int aType );
+    void SetType( ELECTRICAL_PINTYPE aType );
 
     /**
      * Set the pin length.
@@ -477,52 +439,6 @@ public:
      *          return wxNOT_FOUND.
      */
     static int GetOrientationCodeIndex( int aCode );
-
-    /**
-     * Get a list of pin draw style names.
-     *
-     * @return  List of valid pin draw style names.
-     */
-    static wxArrayString GetStyleNames();
-
-    /**
-     * Get a list of pin styles bitmaps for menus and dialogs.
-     *
-     * @return  List of valid pin electrical type bitmaps symbols in .xpm format.
-     */
-    static const BITMAP_DEF* GetStyleSymbols();
-
-    /**
-     * Get the pin draw style code by index used to set the pin draw style.
-     *
-     * @param aIndex - The index of the pin draw style code to look up.
-     * @return  Pin draw style code if index is valid.  Returns NONE
-     *          style on index error.
-     */
-    static int GetStyleCode( int aIndex );
-
-    /**
-     * Get the index of the pin draw style code.
-     *
-     * @param aCode - The pin draw style code to look up.
-     * @return The index of the pin draw style code if found.  Otherwise,
-     *         return wxNOT_FOUND.
-     */
-    static int GetStyleCodeIndex( int aCode );
-
-    /**
-     * Get a list of pin electrical type names.
-     *
-     * @return  List of valid pin electrical type names.
-     */
-    static wxArrayString GetElectricalTypeNames();
-
-    /**
-     * Get a list of pin electrical bitmaps for menus and dialogs.
-     *
-     * @return  List of valid pin electrical type bitmaps symbols in .xpm format
-     */
-    static const BITMAP_DEF* GetElectricalTypeSymbols();
 
     void SetOffset( const wxPoint& aOffset );
 

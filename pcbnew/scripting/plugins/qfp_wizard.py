@@ -113,7 +113,15 @@ class QFPWizard(HelpfulFootprintWizardPlugin.HelpfulFootprintWizardPlugin):
         self.draw.SetLayer(pcbnew.F_CrtYd)
         sizex = (lim_x + cmargin) * 2 + pad_length
         sizey = (lim_y + cmargin) * 2 + pad_length
+        # round size to nearest 0.1mm, rectangle will thus land on a 0.05mm grid
+        sizex = self.PutOnGridMM(sizex, 0.1)
+        sizey = self.PutOnGridMM(sizey, 0.1)
+        # set courtyard line thickness to the one defined in KLC
+        thick = self.draw.GetLineThickness()
+        self.draw.SetLineThickness(pcbnew.FromMM(0.05))
         self.draw.Box(0, 0, sizex, sizey)
+        # restore line thickness to previous value
+        self.draw.SetLineThickness(pcbnew.FromMM(thick))
 
         #reference and value
         text_size = self.GetTextSize()  # IPC nominal
@@ -121,5 +129,8 @@ class QFPWizard(HelpfulFootprintWizardPlugin.HelpfulFootprintWizardPlugin):
 
         self.draw.Value(0, text_offset, text_size)
         self.draw.Reference(0, -text_offset, text_size)
+
+        # set SMD attribute
+        self.module.SetAttributes(pcbnew.MOD_CMS)
 
 QFPWizard().register()

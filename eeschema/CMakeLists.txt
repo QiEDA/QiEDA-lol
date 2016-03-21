@@ -1,18 +1,10 @@
-# the map generation creates on Windows/gcc a lot of useless warnings
-# so disable it on windows
-if( WIN32 AND NOT CMAKE_CROSSCOMPILING )
-    set( MAKE_LINK_MAPS false )
-else()
-    set( MAKE_LINK_MAPS true )
-endif()
-
 add_definitions( -DEESCHEMA )
-
 
 include_directories( BEFORE ${INC_BEFORE} )
 include_directories(
     ./dialogs
     ./netlist_exporters
+    ./widgets
     ../common
     ../common/dialogs
     ${INC_AFTER}
@@ -72,6 +64,8 @@ set( EESCHEMA_DLGS
 
 set( EESCHEMA_WIDGETS
     widgets/widget_eeschema_color_config.cpp
+    widgets/pin_shape_combobox.cpp
+    widgets/pin_type_combobox.cpp
     )
 
 
@@ -137,6 +131,8 @@ set( EESCHEMA_SRCS
     operations_on_items_lists.cpp
     pinedit.cpp
     pin_number.cpp
+    pin_shape.cpp
+    pin_type.cpp
     plot_schematic_DXF.cpp
     plot_schematic_HPGL.cpp
     plot_schematic_PS.cpp
@@ -197,6 +193,8 @@ set( EESCHEMA_COMMON_SRCS
 if( MINGW )
     # EESCHEMA_RESOURCES variable is set by the macro.
     mingw_resource_compiler( eeschema )
+else()
+    set( EESCHEMA_RESOURCES eeschema.rc )
 endif()
 
 # Create a C++ compilable string initializer containing html text into a *.h file:
@@ -256,6 +254,7 @@ target_link_libraries( eeschema_kiface
     common
     bitmaps
     polygon
+    gal
     ${wxWidgets_LIBRARIES}
     ${GDI_PLUS_LIBRARIES}
     )
@@ -301,6 +300,7 @@ if( APPLE )
         DESTINATION ${KICAD_BIN}
         COMPONENT binary
         )
+
     install( CODE "
             # override default embedded path settings
             ${OSX_BUNDLE_OVERRIDE_PATHS}

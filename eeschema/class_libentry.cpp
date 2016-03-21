@@ -1652,6 +1652,8 @@ void LIB_PART::SetConversion( bool aSetConvert )
     // Duplicate items to create the converted shape
     if( aSetConvert )
     {
+        std::vector< LIB_ITEM* > tmp;     // Temporarily store the duplicated pins here.
+
         for( LIB_ITEM& item : drawings )
         {
             // Only pins are duplicated.
@@ -1662,9 +1664,13 @@ void LIB_PART::SetConversion( bool aSetConvert )
             {
                 LIB_ITEM* newItem = (LIB_ITEM*) item.Clone();
                 newItem->m_Convert = 2;
-                drawings.push_back( newItem );
+                tmp.push_back( newItem );
             }
         }
+
+        // Transfer the new pins to the LIB_PART.
+        for( unsigned i = 0;  i < tmp.size();  i++ )
+            drawings.push_back( tmp[i] );
     }
     else
     {
@@ -1734,16 +1740,16 @@ void LIB_PART::SetAliases( const wxArrayString& aAliasList )
     }
 
     // Remove names in the current component that are not in the new alias list.
-    LIB_ALIASES::iterator it;
+    LIB_ALIASES::iterator it = m_aliases.begin();
 
-    for( it = m_aliases.begin(); it != m_aliases.end(); it++ )
+    while( it != m_aliases.end() )
     {
         int index = aAliasList.Index( (*it)->GetName(), false );
 
         if( index != wxNOT_FOUND || (*it)->IsRoot() )
-            continue;
-
-        it = m_aliases.erase( it );
+            ++it;
+        else
+            it = m_aliases.erase( it );
     }
 }
 

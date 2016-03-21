@@ -262,7 +262,9 @@ the following commands:
               mingw-w64-x86_64-cairo \
               mingw-w64-x86_64-glew \
               mingw-w64-x86_64-wxPython \
-              mingw-w64-x86_64-wxWidgets
+              mingw-w64-x86_64-wxWidgets \
+              mingw-w64-x86_64-toolchain \
+              mingw-w64-x86_64-glm
     cd kicad-source
     mkdir -p build/release
     mkdir build/debug               # Optional for debug build.

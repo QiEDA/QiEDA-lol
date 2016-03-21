@@ -87,7 +87,7 @@ void PCB_EDIT_FRAME::ReadPcbNetlist( const wxString& aNetlistFileName,
 
         SetLastNetListRead( aNetlistFileName );
         netlistReader->LoadNetlist();
-        loadFootprints( netlist, aReporter );
+        LoadFootprints( netlist, aReporter );
     }
     catch( const IO_ERROR& ioe )
     {
@@ -115,7 +115,6 @@ void PCB_EDIT_FRAME::ReadPcbNetlist( const wxString& aNetlistFileName,
 
     netlist.SortByReference();
     board->ReplaceNetlist( netlist, aDeleteSinglePadNets, &newFootprints, aReporter );
-   
 
     // If it was a dry run, nothing has changed so we're done.
     if( netlist.IsDryRun() )
@@ -125,11 +124,14 @@ void PCB_EDIT_FRAME::ReadPcbNetlist( const wxString& aNetlistFileName,
     {
         SpreadFootprints( &newFootprints, false, false );
 
-        for( MODULE* footprint : newFootprints )
+        if( !newFootprints.empty() )
         {
-            m_toolManager->RunAction( COMMON_ACTIONS::selectItem, true, footprint );
+            for( MODULE* footprint : newFootprints )
+            {
+                m_toolManager->RunAction( COMMON_ACTIONS::selectItem, true, footprint );
+            }
+            m_toolManager->InvokeTool( "pcbnew.InteractiveEdit" );
         }
-        m_toolManager->InvokeTool( "pcbnew.InteractiveEdit" );
     }
 
     OnModify();
@@ -205,7 +207,7 @@ MODULE* PCB_EDIT_FRAME::ListAndSelectModuleName()
 
 #define ALLOW_PARTIAL_FPID      1
 
-void PCB_EDIT_FRAME::loadFootprints( NETLIST& aNetlist, REPORTER* aReporter )
+void PCB_EDIT_FRAME::LoadFootprints( NETLIST& aNetlist, REPORTER* aReporter )
     throw( IO_ERROR, PARSE_ERROR )
 {
     wxString   msg;
@@ -329,4 +331,3 @@ void PCB_EDIT_FRAME::loadFootprints( NETLIST& aNetlist, REPORTER* aReporter )
             component->SetModule( module );
     }
 }
-

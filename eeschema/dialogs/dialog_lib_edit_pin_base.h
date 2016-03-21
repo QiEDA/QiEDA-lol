@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar  9 2015)
+// C++ code generated with wxFormBuilder (version Mar 28 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -12,6 +12,8 @@
 #include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
 class DIALOG_SHIM;
+class PinShapeComboBox;
+class PinTypeComboBox;
 class wxBitmapComboBox;
 
 #include "dialog_shim.h"
@@ -64,9 +66,9 @@ class DIALOG_LIB_EDIT_PIN_BASE : public DIALOG_SHIM
 		wxStaticText* m_staticTextOrient;
 		wxBitmapComboBox* m_choiceOrientation;
 		wxStaticText* m_staticTextEType;
-		wxBitmapComboBox* m_choiceElectricalType;
+		PinTypeComboBox* m_choiceElectricalType;
 		wxStaticText* m_staticTextGstyle;
-		wxBitmapComboBox* m_choiceStyle;
+		PinShapeComboBox* m_choiceStyle;
 		wxCheckBox* m_checkApplyToAllParts;
 		wxCheckBox* m_checkApplyToAllConversions;
 		wxCheckBox* m_checkShow;

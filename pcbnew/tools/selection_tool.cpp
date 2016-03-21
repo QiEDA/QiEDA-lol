@@ -311,9 +311,14 @@ const SELECTION& SELECTION_TOOL::GetSelection()
         BOARD_ITEM* item = m_selection.Item<BOARD_ITEM>( i );
 
         if( !modifiable( item ) )
+        {
             m_selection.items.RemovePicker( i );
+            m_selection.group->Remove( item );
+        }
         else
+        {
             ++i;
+        }
     }
 
     return m_selection;
@@ -744,6 +749,9 @@ int SELECTION_TOOL::findMove( const TOOL_EVENT& aEvent )
 
 void SELECTION_TOOL::clearSelection()
 {
+    if( m_selection.Empty() )
+        return;
+
     KIGFX::VIEW_GROUP::const_iter it, it_end;
 
     // Restore the initial properties

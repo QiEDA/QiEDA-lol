@@ -1,8 +1,3 @@
-/**
- * @file commandframe.cpp
- * @brief Frame showing fast launch buttons and messages box
- */
-
 /*
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
@@ -27,18 +22,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+/**
+ * @file commandframe.cpp
+ * @brief Frame showing fast launch buttons and messages box
+ */
 
-#include <wx/wx.h>
-#include <macros.h>
 
-#include <kicad.h>
-#include <menus_helpers.h>
+#include "common/kibitmap.h"
+
+#include "kicad.h"
 
 
 LAUNCHER_PANEL::LAUNCHER_PANEL( wxWindow* parent ) :
     wxPanel( parent, wxID_ANY )
 {
-    m_bitmapButtons_maxHeigth = 0;
+    m_bitmapButtons_maxHeight = 0;
     m_buttonSeparation = 10;        // control of command buttons position
     m_buttonsListPosition.x = m_buttonSeparation;
     m_buttonsListPosition.y = m_buttonSeparation;
@@ -50,7 +48,7 @@ LAUNCHER_PANEL::LAUNCHER_PANEL( wxWindow* parent ) :
 
 int LAUNCHER_PANEL::GetPanelHeight() const
 {
-    int height = m_buttonsListPosition.y + m_bitmapButtons_maxHeigth
+    int height = m_buttonsListPosition.y + m_bitmapButtons_maxHeight
                  + m_buttonSeparation;
     return height;
 }
@@ -106,8 +104,8 @@ wxBitmapButton* LAUNCHER_PANEL::AddBitmapButton( wxWindowID aId, const wxBitmap&
     buttSize.x = aBitmap.GetWidth() + btn_margin;
     buttSize.y = aBitmap.GetHeight() + btn_margin;
 
-    if( m_bitmapButtons_maxHeigth < buttSize.y )
-        m_bitmapButtons_maxHeigth = buttSize.y;
+    if( m_bitmapButtons_maxHeight < buttSize.y )
+        m_bitmapButtons_maxHeight = buttSize.y;
 
     wxBitmapButton* btn = new wxBitmapButton( this, aId, aBitmap, buttPos, buttSize );
     m_buttonLastPosition.x += buttSize.x + m_buttonSeparation;

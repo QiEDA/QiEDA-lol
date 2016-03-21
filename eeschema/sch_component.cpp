@@ -120,22 +120,22 @@ SCH_COMPONENT::SCH_COMPONENT( const wxPoint& aPos, SCH_ITEM* aParent ) :
     SCH_ITEM( aParent, SCH_COMPONENT_T )
 {
     Init( aPos );
-    m_currentSheet = NULL;
+    m_currentSheetPath = NULL;
     m_fieldsAutoplaced = AUTOPLACED_NO;
 }
 
 
-SCH_COMPONENT::SCH_COMPONENT( LIB_PART& aPart, SCH_SHEET* aSheet, int unit,
+SCH_COMPONENT::SCH_COMPONENT( LIB_PART& aPart, SCH_SHEET_PATH* sheet, int unit,
                               int convert, const wxPoint& pos, bool setNewItemFlag ) :
     SCH_ITEM( NULL, SCH_COMPONENT_T )
 {
     Init( pos );
 
-    m_unit         = unit;
-    m_convert      = convert;
-    m_part_name    = aPart.GetName();
-    m_part         = aPart.SharedPtr();
-    m_currentSheet = aSheet;
+    m_unit      = unit;
+    m_convert   = convert;
+    m_part_name = aPart.GetName();
+    m_part      = aPart.SharedPtr();
+    m_currentSheetPath = NULL;
     m_fieldsAutoplaced = AUTOPLACED_NO;
 
     SetTimeStamp( GetNewTimeStamp() );
@@ -188,7 +188,7 @@ SCH_COMPONENT::SCH_COMPONENT( LIB_PART& aPart, SCH_SHEET* aSheet, int unit,
 
     // update the reference -- just the prefix for now.
     msg += wxT( "?" );
-    SetRef( aSheet, msg );
+    SetRef( sheet, msg );
 
     // Use the schematic component name instead of the library value field
     // name.
@@ -199,13 +199,13 @@ SCH_COMPONENT::SCH_COMPONENT( LIB_PART& aPart, SCH_SHEET* aSheet, int unit,
 SCH_COMPONENT::SCH_COMPONENT( const SCH_COMPONENT& aComponent ) :
     SCH_ITEM( aComponent )
 {
-    m_currentSheet = NULL;
-    m_Parent       = aComponent.m_Parent;
-    m_Pos          = aComponent.m_Pos;
-    m_unit         = aComponent.m_unit;
-    m_convert      = aComponent.m_convert;
-    m_part_name    = aComponent.m_part_name;
-    m_part         = aComponent.m_part;
+    m_currentSheetPath = NULL;
+    m_Parent    = aComponent.m_Parent;
+    m_Pos       = aComponent.m_Pos;
+    m_unit      = aComponent.m_unit;
+    m_convert   = aComponent.m_convert;
+    m_part_name = aComponent.m_part_name;
+    m_part      = aComponent.m_part;
 
     SetTimeStamp( aComponent.m_TimeStamp );
 
@@ -413,21 +413,21 @@ void SCH_COMPONENT::AddHierarchicalReference( const wxString& aPath,
 }
 
 
-wxString SCH_COMPONENT::GetPath( const SCH_SHEET* aSheet ) const
+wxString SCH_COMPONENT::GetPath( const SCH_SHEET_PATH* sheet ) const
 {
-    wxCHECK_MSG( aSheet != NULL, wxEmptyString,
+    wxCHECK_MSG( sheet != NULL, wxEmptyString,
                  wxT( "Cannot get component path with invalid sheet object." ) );
 
     wxString str;
 
     str.Printf( wxT( "%8.8lX" ), (long unsigned) m_TimeStamp );
-    return aSheet->GetPath() + str;
+    return sheet->Path() + str;
 }
 
 
-const wxString SCH_COMPONENT::GetRef( const SCH_SHEET* aSheet )
+const wxString SCH_COMPONENT::GetRef( const SCH_SHEET_PATH* sheet )
 {
-    wxString          path = GetPath( aSheet );
+    wxString          path = GetPath( sheet );
     wxString          h_path, h_ref;
     wxStringTokenizer tokenizer;
     wxString          separators( wxT( " " ) );
@@ -454,7 +454,7 @@ const wxString SCH_COMPONENT::GetRef( const SCH_SHEET* aSheet )
     // all have the same component references, but perhaps this is best.
     if( !GetField( REFERENCE )->GetText().IsEmpty() )
     {
-        SetRef( aSheet, GetField( REFERENCE )->GetText() );
+        SetRef( sheet, GetField( REFERENCE )->GetText() );
         return GetField( REFERENCE )->GetText();
     }
 
@@ -462,6 +462,12 @@ const wxString SCH_COMPONENT::GetRef( const SCH_SHEET* aSheet )
 }
 
 
+/* Function IsReferenceStringValid (static function)
+ * Tests for an acceptable reference string
+ * An acceptable reference string must support unannotation
+ * i.e starts by letter
+ * returns true if OK
+ */
 bool SCH_COMPONENT::IsReferenceStringValid( const wxString& aReferenceString )
 {
     wxString text = aReferenceString;
@@ -481,9 +487,9 @@ bool SCH_COMPONENT::IsReferenceStringValid( const wxString& aReferenceString )
 }
 
 
-void SCH_COMPONENT::SetRef( const SCH_SHEET* aSheet, const wxString& ref )
+void SCH_COMPONENT::SetRef( const SCH_SHEET_PATH* sheet, const wxString& ref )
 {
-    wxString          path = GetPath( aSheet );
+    wxString          path = GetPath( sheet );
 
     bool              notInArray = true;
 
@@ -559,7 +565,7 @@ void SCH_COMPONENT::SetTimeStamp( time_t aNewTimeStamp )
 }
 
 
-int SCH_COMPONENT::GetUnitSelection( SCH_SHEET* aSheet )
+int SCH_COMPONENT::GetUnitSelection( SCH_SHEET_PATH* aSheet )
 {
     wxString          path = GetPath( aSheet );
     wxString          h_path, h_multi;
@@ -587,7 +593,7 @@ int SCH_COMPONENT::GetUnitSelection( SCH_SHEET* aSheet )
 }
 
 
-void SCH_COMPONENT::SetUnitSelection( SCH_SHEET* aSheet, int aUnitSelection )
+void SCH_COMPONENT::SetUnitSelection( SCH_SHEET_PATH* aSheet, int aUnitSelection )
 {
     wxString          path = GetPath( aSheet );
 
@@ -726,7 +732,7 @@ void SCH_COMPONENT::SwapData( SCH_ITEM* aItem )
 }
 
 
-void SCH_COMPONENT::ClearAnnotation( SCH_SHEET* aSheet )
+void SCH_COMPONENT::ClearAnnotation( SCH_SHEET_PATH* aSheetPath )
 {
     bool           keepMulti = false;
     wxArrayString  reference_fields;
@@ -749,7 +755,7 @@ void SCH_COMPONENT::ClearAnnotation( SCH_SHEET* aSheet )
     }
     else
     {   // This is a malformed reference: reinit this reference
-        m_prefix = defRef = wxT( "U" );        // Set to default ref prefix
+        m_prefix = defRef = wxT("U");        // Set to default ref prefix
     }
 
     defRef.Append( wxT( "?" ) );
@@ -758,22 +764,22 @@ void SCH_COMPONENT::ClearAnnotation( SCH_SHEET* aSheet )
 
     // For components with units locked,
     // we cannot remove all annotations: part selection must be kept
-    // For all components: if aSheet is not NULL,
+    // For all components: if aSheetPath is not NULL,
     // remove annotation only for the given path
-    if( keepMulti || aSheet )
+    if( keepMulti || aSheetPath )
     {
         wxString NewHref;
         wxString path;
 
-        if( aSheet )
-            path = GetPath( aSheet );
+        if( aSheetPath )
+            path = GetPath( aSheetPath );
 
         for( unsigned int ii = 0; ii < m_PathsAndReferences.GetCount(); ii++ )
         {
             // Break hierarchical reference in path, ref and multi selection:
             reference_fields = wxStringTokenize( m_PathsAndReferences[ii], separators );
 
-            if( aSheet == NULL || reference_fields[0].Cmp( path ) == 0 )
+            if( aSheetPath == NULL || reference_fields[0].Cmp( path ) == 0 )
             {
                 if( keepMulti )  // Get and keep part selection
                     multi = reference_fields[2];
@@ -1048,7 +1054,7 @@ bool SCH_COMPONENT::Save( FILE* f ) const
         return false;
 
     // Generate unit number, convert and time stamp
-    if( fprintf( f, "U %d %d %8.8lX\n", m_unit, m_convert, m_TimeStamp ) == EOF )
+    if( fprintf( f, "U %d %d %8.8lX\n", m_unit, m_convert, (unsigned long)m_TimeStamp ) == EOF )
         return false;
 
     // Save the position
@@ -1132,13 +1138,13 @@ bool SCH_COMPONENT::Load( LINE_READER& aLine, wxString& aErrorMsg )
     // Remark: avoid using sscanf to read texts entered by user
     // which are UTF8 encoded, because sscanf does not work well on Windows
     // with some UTF8 values.
-    int         ii;
-    char        name1[256],
-                char1[256], char2[256], char3[256];
-    int         newfmt = 0;
-    char*       ptcar;
-    wxString    fieldName;
-    char*       line = aLine.Line();
+    int           ii;
+    char          name1[256], char1[256], char2[256], char3[256];
+    int           newfmt = 0;
+    char*         ptcar;
+    wxString      fieldName;
+    char*         line = aLine.Line();
+    unsigned long timeStamp;
 
     m_convert = 1;
 
@@ -1239,7 +1245,8 @@ bool SCH_COMPONENT::Load( LINE_READER& aLine, wxString& aErrorMsg )
 
         if( line[0] == 'U' )
         {
-            sscanf( line + 1, "%d %d %lX", &m_unit, &m_convert, &m_TimeStamp );
+            sscanf( line + 1, "%d %d %lX", &m_unit, &m_convert, &timeStamp );
+            m_TimeStamp = (time_t)timeStamp;
         }
         else if( line[0] == 'P' )
         {
@@ -1509,8 +1516,9 @@ void SCH_COMPONENT::GetMsgPanelInfo( MSG_PANEL_ITEMS& aList )
         if( !alias )
             return;
 
-        if( m_currentSheet )
-            aList.push_back( MSG_PANEL_ITEM( _( "Reference" ), GetRef( m_currentSheet ),
+        if( m_currentSheetPath )
+            aList.push_back( MSG_PANEL_ITEM( _( "Reference" ),
+                                             GetRef( m_currentSheetPath ),
                                              DARKCYAN ) );
 
         wxString msg = part->IsPower() ? _( "Power symbol" ) : _( "Value" );
@@ -1860,7 +1868,7 @@ void SCH_COMPONENT::GetNetListItem( NETLIST_OBJECT_LIST& aNetListItems,
         {
             wxASSERT( pin->Type() == LIB_PIN_T );
 
-            if( pin->GetUnit() && ( pin->GetUnit() != GetUnitSelection( aSheetPath->Last() ) ) )
+            if( pin->GetUnit() && ( pin->GetUnit() != GetUnitSelection( aSheetPath ) ) )
                 continue;
 
             if( pin->GetConvert() && ( pin->GetConvert() != GetConvert() ) )
@@ -1874,7 +1882,7 @@ void SCH_COMPONENT::GetNetListItem( NETLIST_OBJECT_LIST& aNetListItems,
             item->m_SheetPath = *aSheetPath;
             item->m_Type = NET_PIN;
             item->m_Link = (SCH_ITEM*) this;
-            item->m_ElectricalType = pin->GetType();
+            item->m_ElectricalPinType = pin->GetType();
             item->m_PinNum = pin->GetNumber();
             item->m_Label = pin->GetName();
             item->m_Start = item->m_End = pos;

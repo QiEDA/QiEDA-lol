@@ -27,12 +27,14 @@
  * @file kicad/menubar.cpp
  * @brief (Re)Create the project manager menubar for KiCad
  */
-#include <wx/wx.h>
-#include <pgm_kicad.h>
-#include <kicad.h>
-#include <menus_helpers.h>
-#include <tree_project_frame.h>
+ 
+#include "common/kibitmap.h"
 #include <hotkeys_basic.h>
+#include <menus_helpers.h>
+
+#include "kicad.h"
+#include "pgm_kicad.h"
+
 
 // Menubar and toolbar event table
 BEGIN_EVENT_TABLE( KICAD_MANAGER_FRAME, EDA_BASE_FRAME )
@@ -388,9 +390,6 @@ void KICAD_MANAGER_FRAME::ReCreateMenuBar()
 
     // Menu Help:
     wxMenu* helpMenu = new wxMenu;
-
-    // Version info
-    AddHelpVersionInfoMenuEntry( helpMenu );
 
     // Contents
     AddMenuItem( helpMenu, wxID_HELP,

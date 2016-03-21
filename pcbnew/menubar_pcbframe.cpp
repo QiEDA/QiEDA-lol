@@ -28,23 +28,21 @@
  * @file menubar_pcbframe.cpp
  * Pcbnew editor menu bar
  */
-#include <config.h>
-#include <wx/wx.h>
-#include <pgm_base.h>
-#include <kiface_i.h>
-#include <pcbnew.h>
-#include <wxPcbStruct.h>
-#include <hotkeys.h>
-#include <pcbnew_id.h>
-
-#include <help_common_strings.h>
 #include <menus_helpers.h>
+#include <kiface_i.h>
+#include <pgm_base.h>
+#include <wxPcbStruct.h>
+
+#include "help_common_strings.h"
+#include "hotkeys.h"
+#include "pcbnew.h"
+#include "pcbnew_id.h"
+
 
 void PCB_EDIT_FRAME::ReCreateMenuBar()
 {
     wxString    text;
     wxMenuBar*  menuBar = GetMenuBar();
-    wxMenuItem * menutitem;
 
     wxFileHistory&  fhist = Kiface().GetFileHistory();
 
@@ -66,11 +64,11 @@ void PCB_EDIT_FRAME::ReCreateMenuBar()
     if( Kiface().IsSingle() )   // not when under a project mgr
     {
         AddMenuItem( filesMenu, ID_NEW_BOARD,
-                _( "&New" ),
+                _( "&New Board" ),
                 _( "Clear current board and initialize a new one" ),
                 KiBitmap( new_pcb_xpm ) );
 
-        text = AddHotkeyName( _( "&Open" ), m_hotkeysDescrList, HK_LOAD_BOARD );
+        text = AddHotkeyName( _( "&Open Board" ), m_hotkeysDescrList, HK_LOAD_BOARD );
         AddMenuItem( filesMenu, ID_LOAD_FILE, text,
                 _( "Delete current board and load new board" ),
                 KiBitmap( open_brd_file_xpm ) );
@@ -95,15 +93,18 @@ void PCB_EDIT_FRAME::ReCreateMenuBar()
                      -1, _( "Open &Recent" ),
                      _( "Open a recent opened board" ),
                      KiBitmap( open_project_xpm ) );
+        AddMenuItem( filesMenu, ID_APPEND_FILE,
+                     _( "&Append Board" ),
+                     _( "Append another Pcbnew board to the current loaded board. Available only when Pcbnew runs in stand alone mode" ),
+                     KiBitmap( import_xpm ) );
+
+        filesMenu->AppendSeparator();
+
+        AddMenuItem( filesMenu, ID_IMPORT_NON_KICAD_BOARD,
+                _( "Import Non Kicad Board File" ),
+                _( "Load a non KiCad board file and convert it to a .kicad_pcb file" ),
+                KiBitmap( import_brd_file_xpm ) );
     }
-
-    menutitem = AddMenuItem( filesMenu, ID_APPEND_FILE,
-                 _( "&Append Board" ),
-                 _( "Append another Pcbnew board to the current loaded board. Available only when Pcbnew runs in stand alone mode" ),
-                 KiBitmap( import_xpm ) );
-    if( ! Kiface().IsSingle() )      // disable when under a project mgr
-        menutitem->Enable( false );
-
 
     filesMenu->AppendSeparator();
 
@@ -606,6 +607,14 @@ void PCB_EDIT_FRAME::ReCreateMenuBar()
     //----- Tools menu ----------------------------------------------------------
     wxMenu* toolsMenu = new wxMenu;
 
+    AddMenuItem( toolsMenu,
+                 ID_UPDATE_PCB_FROM_SCH,
+                 _( "Update PCB from Schematics" ),
+                 _( "Updates the PCB design with the current schematic (forward annotation)." ),
+                 KiBitmap( libedit_xpm ) );
+
+    toolsMenu->AppendSeparator( );
+
     AddMenuItem( toolsMenu, ID_GET_NETLIST,
                  _( "&Netlist" ),
                  _( "Read the netlist and update board connectivity" ),
@@ -642,8 +651,6 @@ void PCB_EDIT_FRAME::ReCreateMenuBar()
                  KiBitmap( copper_layers_setup_xpm ) );
 
     wxMenu* helpMenu = new wxMenu;
-
-    AddHelpVersionInfoMenuEntry( helpMenu );
 
     AddMenuItem( helpMenu, wxID_HELP,
                  _( "Pcbnew &Manual" ),

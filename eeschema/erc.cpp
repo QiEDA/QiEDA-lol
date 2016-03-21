@@ -2,8 +2,8 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2015 Jean-Pierre Charras, jp.charras at wanadoo.fr
- * Copyright (C) 2011 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 1992-2015 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2011-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -122,7 +122,7 @@ const wxString CommentERC_V[] =
  *  at start up: must be loaded by DefaultDiagErc
  *  Can be modified in dialog ERC
  */
-int  DiagErc[PIN_NMAX][PIN_NMAX];
+int  DiagErc[PINTYPE_COUNT][PINTYPE_COUNT];
 
 /**
  * Default Look up table which gives the ERC error level for a pair of connected pins
@@ -131,7 +131,7 @@ int  DiagErc[PIN_NMAX][PIN_NMAX];
  *  note also, to avoid inconsistancy:
  *    DefaultDiagErc[i][j] = DefaultDiagErc[j][i]
  */
-int DefaultDiagErc[PIN_NMAX][PIN_NMAX] =
+int DefaultDiagErc[PINTYPE_COUNT][PINTYPE_COUNT] =
 {
 /*         I,   O,    Bi,   3S,   Pas,  UnS,  PwrI, PwrO, OC,   OE,   NC */
 /* I */  { OK,  OK,   OK,   OK,   OK,   WAR,  OK,   OK,   OK,   OK,   ERR },
@@ -158,7 +158,7 @@ int DefaultDiagErc[PIN_NMAX][PIN_NMAX] =
  * in net.  Nets are OK when their final state is NET_NC or DRV.   Nets with the state
  * NOD have no valid source signal.
  */
-static int MinimalReq[PIN_NMAX][PIN_NMAX] =
+static int MinimalReq[PINTYPE_COUNT][PINTYPE_COUNT] =
 {
 /*         In   Out, Bi,  3S,  Pas, UnS, PwrI,PwrO,OC,  OE,  NC */
 /* In*/  { NOD, DRV, DRV, DRV, DRV, DRV, NOD, DRV, DRV, DRV, NPI },
@@ -229,9 +229,9 @@ int TestDuplicateSheetNames( bool aCreateMarker )
 void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
                int aMinConn, int aDiag )
 {
-    SCH_MARKER* marker = NULL;
-    SCH_SCREEN* screen;
-    int         ii, jj;
+    SCH_MARKER*     marker = NULL;
+    SCH_SCREEN*     screen;
+    ELECTRICAL_PINTYPE ii, jj;
 
     if( aDiag == OK )
         return;
@@ -280,7 +280,7 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
         return;
     }
 
-    ii = aNetItemRef->m_ElectricalType;
+    ii = aNetItemRef->m_ElectricalPinType;
 
     wxString string_pinnum, cmp_ref;
     char     ascii_buf[5];
@@ -290,7 +290,7 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
     cmp_ref = wxT( "?" );
 
     if( aNetItemRef->m_Type == NET_PIN && aNetItemRef->m_Link )
-        cmp_ref = aNetItemRef->GetComponentParent()->GetRef( aNetItemRef->m_SheetPath.Last() );
+        cmp_ref = aNetItemRef->GetComponentParent()->GetRef( &aNetItemRef->m_SheetPath );
 
     if( aNetItemTst == NULL )
     {
@@ -298,7 +298,7 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
         {
             msg.Printf( _( "Pin %s (%s) of component %s is unconnected." ),
                         GetChars( string_pinnum ),
-                        GetChars( LIB_PIN::GetElectricalTypeName( ii ) ),
+                        GetChars( GetText( ii ) ),
                         GetChars( cmp_ref ) );
             marker->SetData( ERCE_PIN_NOT_CONNECTED,
                              aNetItemRef->m_Start,
@@ -311,11 +311,11 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
         {
             if( aNetItemRef->m_Type == NET_PIN && aNetItemRef->m_Link )
                 cmp_ref = aNetItemRef->GetComponentParent()->GetRef(
-                    aNetItemRef->m_SheetPath.Last() );
+                    &aNetItemRef->m_SheetPath );
 
             msg.Printf( _( "Pin %s (%s) of component %s is not driven (Net %d)." ),
                         GetChars( string_pinnum ),
-                        GetChars( LIB_PIN::GetElectricalTypeName( ii ) ),
+                        GetChars( GetText( ii ) ),
                         GetChars( cmp_ref ),
                         aNetItemRef->GetNet() );
             marker->SetData( ERCE_PIN_NOT_DRIVEN,
@@ -338,7 +338,7 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
 
     if( aNetItemTst )         /* Error between 2 pins */
     {
-        jj = aNetItemTst->m_ElectricalType;
+        jj = aNetItemTst->m_ElectricalPinType;
         int errortype = ERCE_PIN_TO_PIN_WARNING;
 
         if( aDiag == ERR )
@@ -353,16 +353,16 @@ void Diagnose( NETLIST_OBJECT* aNetItemRef, NETLIST_OBJECT* aNetItemTst,
         alt_cmp = wxT( "?" );
 
         if( aNetItemTst->m_Type == NET_PIN && aNetItemTst->m_Link )
-            alt_cmp = aNetItemTst->GetComponentParent()->GetRef( aNetItemTst->m_SheetPath.Last() );
+            alt_cmp = aNetItemTst->GetComponentParent()->GetRef( &aNetItemTst->m_SheetPath );
 
         msg.Printf( _( "Pin %s (%s) of component %s is connected to " ),
                     GetChars( string_pinnum ),
-                    GetChars( LIB_PIN::GetElectricalTypeName( ii ) ),
+                    GetChars( GetText( ii ) ),
                     GetChars( cmp_ref ) );
         marker->SetData( errortype, aNetItemRef->m_Start, msg, aNetItemRef->m_Start );
         msg.Printf( _( "pin %s (%s) of component %s (net %d)." ),
                     GetChars( alt_string_pinnum ),
-                    GetChars( LIB_PIN::GetElectricalTypeName( jj ) ),
+                    GetChars( GetText( jj ) ),
                     GetChars( alt_cmp ),
                     aNetItemRef->GetNet() );
         marker->SetAuxiliaryData( msg, aNetItemTst->m_Start );
@@ -375,11 +375,11 @@ void TestOthersItems( NETLIST_OBJECT_LIST* aList,
                       int* aMinConnexion )
 {
     unsigned netItemTst = aNetStart;
-    int jj;
+    ELECTRICAL_PINTYPE jj;
     int erc = OK;
 
     /* Analysis of the table of connections. */
-    int ref_elect_type = aList->GetItem( aNetItemRef )->m_ElectricalType;
+    ELECTRICAL_PINTYPE ref_elect_type = aList->GetItem( aNetItemRef )->m_ElectricalPinType;
     int local_minconn = NOC;
 
     if( ref_elect_type == PIN_NC )
@@ -426,9 +426,9 @@ void TestOthersItems( NETLIST_OBJECT_LIST* aList,
                             continue;
 
                         if( ( (SCH_COMPONENT*) aList->GetItem( aNetItemRef )->
-                              m_Link )->GetRef( aList->GetItem( aNetItemRef )->m_SheetPath.Last() ) !=
+                             m_Link )->GetRef( &aList->GetItem( aNetItemRef )-> m_SheetPath ) !=
                             ( (SCH_COMPONENT*) aList->GetItem( duplicate )->m_Link )
-                          ->GetRef( aList->GetItem( duplicate )->m_SheetPath.Last() ) )
+                           ->GetRef( &aList->GetItem( duplicate )->m_SheetPath ) )
                             continue;
 
                         // Same component and same pin. Do dot create error for this pin
@@ -477,7 +477,7 @@ void TestOthersItems( NETLIST_OBJECT_LIST* aList,
             break;
 
         case NET_PIN:
-            jj = aList->GetItem( netItemTst )->m_ElectricalType;
+            jj = aList->GetItem( netItemTst )->m_ElectricalPinType;
             local_minconn = std::max( MinimalReq[ref_elect_type][jj], local_minconn );
 
             if( netItemTst <= aNetItemRef )
@@ -539,15 +539,14 @@ bool WriteDiagnosticERC( const wxString& aFullFileName )
     int err_count = 0;
     int warn_count = 0;
     int total_count = 0;
-    SCH_SHEET_LIST sheetList;
-    SCH_SHEET_PATH* sheet;
+    SCH_SHEET_LIST sheetList( g_RootSheet );
 
-    for( sheet = sheetList.GetFirst(); sheet != NULL; sheet = sheetList.GetNext() )
+    for( unsigned i = 0;  i < sheetList.size(); i++ )
     {
         msg << wxString::Format( _( "\n***** Sheet %s\n" ),
-                                 GetChars( sheet->PathHumanReadable() ) );
+                                 GetChars( sheetList[i].PathHumanReadable() ) );
 
-        for( SCH_ITEM* item = sheet->LastDrawList(); item != NULL; item = item->Next() )
+        for( SCH_ITEM* item = sheetList[i].LastDrawList(); item != NULL; item = item->Next() )
         {
             if( item->Type() != SCH_MARKER_T )
                 continue;

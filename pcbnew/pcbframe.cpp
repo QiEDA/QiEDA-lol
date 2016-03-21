@@ -71,6 +71,8 @@
 #include <tool/tool_dispatcher.h>
 #include <tools/common_actions.h>
 
+#include <wildcards_and_files_ext.h>
+
 #if defined(KICAD_SCRIPTING) || defined(KICAD_SCRIPTING_WXPYTHON)
 #include <python_scripting.h>
 #endif
@@ -111,6 +113,7 @@ BEGIN_EVENT_TABLE( PCB_EDIT_FRAME, PCB_BASE_FRAME )
     EVT_MENU( ID_APPEND_FILE, PCB_EDIT_FRAME::Files_io )
     EVT_MENU( ID_SAVE_BOARD_AS, PCB_EDIT_FRAME::Files_io )
     EVT_MENU( ID_COPY_BOARD_AS, PCB_EDIT_FRAME::Files_io )
+    EVT_MENU( ID_IMPORT_NON_KICAD_BOARD, PCB_EDIT_FRAME::Files_io )
     EVT_MENU_RANGE( wxID_FILE1, wxID_FILE9, PCB_EDIT_FRAME::OnFileHistory )
 
     EVT_MENU( ID_GEN_PLOT, PCB_EDIT_FRAME::ToPlotter )
@@ -231,6 +234,8 @@ BEGIN_EVENT_TABLE( PCB_EDIT_FRAME, PCB_BASE_FRAME )
                     PCB_EDIT_FRAME::OnSelectOptionToolbar )
     EVT_TOOL( ID_TB_OPTIONS_SHOW_EXTRA_VERTICAL_TOOLBAR_MICROWAVE,
                     PCB_EDIT_FRAME::OnSelectOptionToolbar )
+
+    EVT_TOOL( ID_UPDATE_PCB_FROM_SCH, PCB_EDIT_FRAME::OnUpdatePCBFromSch )
 
     EVT_TOOL_RANGE( ID_TB_OPTIONS_SHOW_ZONES, ID_TB_OPTIONS_SHOW_ZONES_OUTLINES_ONLY,
                     PCB_EDIT_FRAME::OnSelectOptionToolbar )
@@ -1079,4 +1084,31 @@ bool PCB_EDIT_FRAME::SetCurrentNetClass( const wxString& aNetClassName )
 void PCB_EDIT_FRAME::OnConfigurePaths( wxCommandEvent& aEvent )
 {
     Pgm().ConfigurePaths( this );
+}
+
+
+void PCB_EDIT_FRAME::OnUpdatePCBFromSch( wxCommandEvent& event )
+{
+    if( Kiface().IsSingle() )
+    {
+        DisplayError( this,  _( "Cannot update the PCB, because the Kicad is"
+                                 " opened in stand-alone mode. In order to create/update"
+                                 " PCBs from schematics, you need to launch Kicad shell"
+                                 " and create a PCB project." ) );
+        return;
+    } else {
+        KIWAY_PLAYER* frame = Kiway().Player( FRAME_SCH, true );
+        wxFileName schfn = Prj().AbsolutePath( Prj().GetProjectName() );
+
+        schfn.SetExt( SchematicFileExtension );
+
+        if( !frame->IsVisible() )
+        {
+            frame->OpenProjectFiles( std::vector<wxString>( 1, schfn.GetFullPath() ) );
+            frame->Show( false );
+        }
+
+        Kiway().ExpressMail( FRAME_SCH, MAIL_SCH_PCB_UPDATE_REQUEST, "", this );
+
+    }
 }

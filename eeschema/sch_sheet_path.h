@@ -1,10 +1,9 @@
-
 /*
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2009 Jean-Pierre Charras, jaen-pierre.charras@gipsa-lab.inpg.com
- * Copyright (C) 2011-2015 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 1992-2015 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2011-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -78,53 +77,63 @@
  * (usable in flat and simple hierarchies).
  */
 
+#include "sch_sheet.h"       // SCH_SHEETS
 
 class wxFindReplaceData;
 class SCH_SCREEN;
-class SCH_SHEET;
+class SCH_MARKER;
 class SCH_ITEM;
-
+class SCH_REFERENCE_LIST;
+class PART_LIBS;
 
 #define SHEET_NOT_FOUND          -1
 
 
 /**
+ * Type SCH_MULTI_UNIT_REFERENCE_MAP
+ * is used to create a map of reference designators for multi-unit parts.
+ */
+typedef std::map<wxString, SCH_REFERENCE_LIST> SCH_MULTI_UNIT_REFERENCE_MAP;
+
+/**
  * Class SCH_SHEET_PATH
- * handles access to a sheet by way of a path.
+ *
+ * handles access to a stack of flattened #SCH_SHEET objects by way of a path for
+ * creating a flattened schematic hierarchy.
+ *
  * <p>
- * The member m_sheets stores the list of sheets from the first (usually
- * g_RootSheet) to a given sheet in last position.
- * The _last_ sheet is usually the sheet we want to select or reach (which is
- * what the function Last() returns).
- * Others sheets constitute the "path" from the first to the last sheet.
+ * The #SCH_SHEET objects are stored in a list from first (usually the root sheet) to a
+ * given sheet in last position.  The _last_ sheet is usually the sheet we want to select
+ * or reach (which is what the function Last() returns).   Others sheets constitute the
+ * "path" from the first to the last sheet.
  * </p>
  */
-class SCH_SHEET_PATH
+class SCH_SHEET_PATH : public SCH_SHEETS
 {
-#define DSLSZ 32          // Max number of levels for a sheet path
+#define MAX_SHEET_DEPTH 32         /// Maximum number of levels for a sheet path.
 
-    SCH_SHEET* m_sheets[ DSLSZ ];
-    unsigned   m_numSheets;
+    int m_pageNumber;              /// Page numbers are maintained by the sheet load order.
 
 public:
     SCH_SHEET_PATH();
 
-    void Clear()
+    void SetPageNumber( int aPageNumber ) { m_pageNumber = aPageNumber; }
+
+    int GetPageNumber() const { return m_pageNumber; }
+
+    const SCH_SHEET* GetSheet( unsigned aIndex ) const
     {
-        m_numSheets = 0;
+        SCH_SHEET* retv = NULL;
+
+        if( aIndex < size() )
+            retv = at( aIndex );
+
+        return const_cast< SCH_SHEET* >( retv );
     }
 
-    unsigned GetCount()
+    SCH_SHEET* GetSheet( unsigned aIndex )
     {
-        return m_numSheets;
-    }
-
-    SCH_SHEET* GetSheet( unsigned index )
-    {
-        if( index < m_numSheets )
-            return m_sheets[index];
-
-        return NULL;
+        return const_cast< SCH_SHEET* >( static_cast< const SCH_SHEET_PATH& >( *this ).GetSheet( aIndex ) );
     }
 
     /**
@@ -166,24 +175,6 @@ public:
     SCH_ITEM* FirstDrawList() const;
 
     /**
-     * Function Push
-     * store (push) aSheet in list
-     * @param aSheet = pointer to the SCH_SHEET to store in list
-     * Push is used when entered a sheet to select or analyze it
-     * This is like cd &ltdirectory&gt in directories navigation
-     */
-    void Push( SCH_SHEET* aSheet );
-
-    /**
-     * Function Pop
-     * retrieves (pop) the last entered sheet and remove it from list
-     * @return a SCH_SHEET* pointer to the removed sheet in list
-     * Pop is used when leaving a sheet after a selection or analyze
-     * This is like cd .. in directories navigation
-     */
-    SCH_SHEET* Pop();
-
-    /**
      * Function Path
      * the path uses the time stamps which do not changes even when editing
      * sheet parameters
@@ -201,13 +192,73 @@ public:
     wxString PathHumanReadable() const;
 
     /**
-     * Function BuildSheetPathInfoFromSheetPathValue
-     * Fill this with data to access to the hierarchical sheet known by its path \a aPath
-     * @param aPath = path of the sheet to reach (in non human readable format)
-     * @param aFound - Please document me.
-     * @return true if success else false
+     * Function UpdateAllScreenReferences
+     * updates the reference and the m_Multi parameter (part selection) for all
+     * components on a screen depending on the actual sheet path.
+     * Mandatory in complex hierarchies because sheets use the same screen
+     * (basic schematic)
+     * but with different references and part selections according to the
+     * displayed sheet
      */
-    bool BuildSheetPathInfoFromSheetPathValue( const wxString& aPath, bool aFound = false );
+    void UpdateAllScreenReferences();
+
+    /**
+     * Function AnnotatePowerSymbols
+     * annotates the power symbols only starting at \a aReference in the sheet path.
+     * @param aLibs the library list to use
+     * @param aReference A pointer to the number for the reference designator of the
+     *                   first power symbol to be annotated.  If the pointer is NULL
+     *                   the annotation starts at 1.  The number is incremented for
+     *                   each power symbol annotated.
+     */
+    void AnnotatePowerSymbols( PART_LIBS* aLibs, int* aReference );
+
+    /**
+     * Function GetComponents
+     * adds a SCH_REFERENCE() object to \a aReferences for each component in the sheet.
+     * @param aLibs the library list to use
+     * @param aReferences List of references to populate.
+     * @param aIncludePowerSymbols : false to only get normal components.
+     */
+    void GetComponents( PART_LIBS* aLibs, SCH_REFERENCE_LIST& aReferences,
+                        bool aIncludePowerSymbols = true  );
+
+    /**
+     * Function GetMultiUnitComponents
+     * adds a SCH_REFERENCE_LIST object to \a aRefList for each same-reference set of
+     * multi-unit parts in the sheet. The map key for each element will be the
+     * reference designator.
+     * @param aLibs the library list to use
+     * @param aRefList Map of reference designators to reference lists
+     * @param aIncludePowerSymbols : false to only get normal components.
+     */
+    void GetMultiUnitComponents( PART_LIBS* aLibs, SCH_MULTI_UNIT_REFERENCE_MAP &aRefList,
+                                 bool aIncludePowerSymbols = true );
+
+    /**
+     * Function SetFootprintField
+     * searches last sheet in the path for a component with \a aReference and set the footprint
+     * field to \a aFootPrint if found.
+     *
+     * @param aReference The reference designator of the component.
+     * @param aFootPrint The value to set the footprint field.
+     * @param aSetVisible The value to set the field visibility flag.
+     * @return True if \a aReference was found otherwise false.
+     */
+    bool SetComponentFootprint( const wxString& aReference, const wxString& aFootPrint,
+                                bool aSetVisible );
+
+    /**
+     * Find the next schematic item in this sheet object.
+     *
+     * @param aType - The type of schematic item object to search for.
+     * @param aLastItem - Start search from aLastItem.  If no aLastItem, search from
+     *                    the beginning of the list.
+     * @param aWrap - Wrap around the end of the list to find the next item if aLastItem
+     *                is defined.
+     * @return - The next schematic item if found.  Otherwise, NULL is returned.
+     */
+    SCH_ITEM* FindNextItem( KICAD_T aType, SCH_ITEM* aLastItem = NULL, bool aWrap = false ) const;
 
     /**
      * Find the previous schematic item in this sheet path object.
@@ -246,7 +297,15 @@ public:
      */
     SCH_SHEET* FindSheetByName( const wxString& aSheetName );
 
-    SCH_SHEET_PATH& operator=( const SCH_SHEET_PATH& d1 );
+    /**
+     * Function FindSheetByPageNumber
+     *
+     * searches the #SCH_SHEET_LIST for a sheet with \a aPageNumber.
+     *
+     * @param aPageNumber is the number of the sheet to find.
+     * @return a pointer to a #SCH_SHEET object page \a aPageNumber if found or NULL if not found.
+     */
+    SCH_SHEET* FindSheetByPageNumber( int aPageNumber );
 
     bool operator==( const SCH_SHEET_PATH& d1 ) const;
 
@@ -254,100 +313,40 @@ public:
 };
 
 
+typedef std::vector< SCH_SHEET_PATH >            SCH_SHEET_PATHS;
+typedef SCH_SHEET_PATHS::iterator                SCH_SHEET_PATHS_ITER;
+typedef SCH_SHEET_PATHS::const_iterator          SCH_SHEET_PATHS_CITER;
+typedef SCH_SHEET_PATHS::reverse_iterator        SCH_SHEET_PATHS_RITER;
+typedef SCH_SHEET_PATHS::const_reverse_iterator  SCH_SHEET_PATHS_CRITER;
+
+
 /**
  * Class SCH_SHEET_LIST
- * handles the list of Sheets in a hierarchy.
- * Sheets are not unique, there can be many sheets with the same
- * filename and the same SCH_SCREEN reference.
- * The schematic (SCH_SCREEN) is shared between these sheets,
- * and component references are specific to a sheet path.
- * When a sheet is entered, component references and sheet number are updated.
+ *
+ * handles a list of #SCH_SHEET_PATH objects in a flattened hierarchy.
+ *
+ * #SCH_SHEET objects are not unique, there can be many sheets with the same filename and
+ * that share the same #SCH_SCREEN reference.   Each The schematic file (#SCH_SCREEN) may
+ * be shared between these sheets and component references are specific to a sheet path.
+ * When a sheet is entered, component references and sheet page number are updated.
  */
-class SCH_SHEET_LIST
+class SCH_SHEET_LIST : public SCH_SHEET_PATHS
 {
 private:
-    SCH_SHEET_PATH* m_list;
-    int             m_count;     /* Number of sheets included in hierarchy,
-                                  * starting at the given sheet in constructor .
-                                  * the given sheet is counted
-                                 */
-    int             m_index;     /* internal variable to handle GetNext(): cleared by
-                                  * GetFirst() and incremented by GetNext() after
-                                  * returning the next item in m_list.  Also used for
-                                  * internal calculations in BuildSheetList()
-                                  */
     bool            m_isRootSheet;
-    SCH_SHEET_PATH  m_currList;
+    SCH_SHEET_PATH  m_currentSheetPath;
 
 public:
 
     /**
      * Constructor
-     * builds the list of sheets from aSheet.
-     * If aSheet == NULL (default) build the whole list of sheets in hierarchy.
-     * So usually call it with no parameter.
+     * build a flattened list of SCH_SHEET_PATH objects from \a aSheet.
+     *
+     * If aSheet == NULL, then this is an empty hierarchy which the user can populate.
      */
     SCH_SHEET_LIST( SCH_SHEET* aSheet = NULL );
 
-    ~SCH_SHEET_LIST()
-    {
-        if( m_list )
-            delete[] m_list;
-
-        m_list = NULL;
-    }
-
-    /**
-     * Function GetCount
-     * @return the number of sheets in list:
-     * usually the number of sheets found in the whole hierarchy
-     */
-    int GetCount() const { return m_count; }
-
-    /**
-     * Function GetIndex
-     * @return the last selected screen index.
-     */
-    int GetIndex() const { return m_index; }
-
-    /**
-     * Function GetFirst
-     * @return the first item (sheet) in m_list and prepare calls to GetNext()
-     */
-    SCH_SHEET_PATH* GetFirst();
-
-    /**
-     * Function GetNext
-     * @return the next item (sheet) in m_list or NULL if no more item in
-     * sheet list
-     */
-    SCH_SHEET_PATH* GetNext();
-
-    /**
-     * Function GetLast
-     * returns the last sheet in the sheet list.
-     *
-     * @return Last sheet in the list or NULL if sheet list is empty.
-     */
-    SCH_SHEET_PATH* GetLast();
-
-    /**
-     * Function GetPrevious
-     * returns the previous sheet in the sheet list.
-     *
-     * @return The previous sheet in the sheet list or NULL if already at the
-     *         beginning of the list.
-     */
-    SCH_SHEET_PATH* GetPrevious();
-
-    /**
-     * Function GetSheet
-     *
-     * @param aIndex A index in sheet list to get the sheet.
-     * @return the sheet at \a aIndex position in m_list or NULL if \a aIndex is
-     *         outside the bounds of the index list.
-     */
-    SCH_SHEET_PATH* GetSheet( int aIndex ) const;
+    ~SCH_SHEET_LIST() {}
 
     /**
      * Function GetSheetByPath
@@ -360,6 +359,52 @@ public:
      *         \a aPath is found.
      */
     SCH_SHEET_PATH* GetSheetByPath( const wxString aPath, bool aHumanReadable = true );
+
+    /**
+     * Function IsModified
+     * checks the entire hierarchy for any modifications.
+     * @returns True if the hierarchy is modified otherwise false.
+     */
+    bool IsModified();
+
+    /**
+     * Function IsAutoSaveRequired
+     * checks the entire hierarchy for any modifications that require auto save.
+     * @return True if the hierarchy is modified otherwise false.
+     */
+    bool IsAutoSaveRequired();
+
+    void ClearModifyStatus();
+
+    /**
+     * Function AnnotatePowerSymbols
+     * clear and annotates the entire hierarchy of the sheet path list.
+     * @param aLib the library list to use
+     */
+    void AnnotatePowerSymbols( PART_LIBS* aLib );
+
+    /**
+     * Function GetComponents
+     * adds a SCH_REFERENCE() object to \a aReferences for each component in the list
+     * of sheets.
+     * @param aLibs the library list to use
+     * @param aReferences List of references to populate.
+     * @param aIncludePowerSymbols Set to false to only get normal components.
+     */
+    void GetComponents( PART_LIBS* aLibs, SCH_REFERENCE_LIST& aReferences,
+                        bool aIncludePowerSymbols = true  );
+
+    /**
+     * Function GetMultiUnitComponents
+     * adds a SCH_REFERENCE_LIST object to \a aRefList for each same-reference set of
+     * multi-unit parts in the list of sheets. The map key for each element will be the
+     * reference designator.
+     * @param aLibs the library list to use
+     * @param aRefList Map of reference designators to reference lists
+     * @param aIncludePowerSymbols Set to false to only get normal components.
+     */
+    void GetMultiUnitComponents( PART_LIBS* aLibs, SCH_MULTI_UNIT_REFERENCE_MAP &aRefList,
+                                 bool aIncludePowerSymbols = true );
 
     /**
      * Function FindNextItem
@@ -390,6 +435,28 @@ public:
                                 SCH_ITEM* aLastItem = NULL, bool aWrap = true );
 
     /**
+     * Function SetFootprintField
+     * searches all the sheets for a component with \a aReference and set the footprint
+     * field to \a aFootPrint if found.
+     *
+     * @param aReference The reference designator of the component.
+     * @param aFootPrint The value to set the footprint field.
+     * @param aSetVisible The value to set the field visibility flag.
+     * @return True if \a aReference was found otherwise false.
+     */
+    bool SetComponentFootprint( const wxString& aReference, const wxString& aFootPrint,
+                                bool aSetVisible );
+
+    /**
+     * Function IsComplexHierarchy
+     * searches all of the sheets for duplicate files names which indicates a complex
+     * hierarchy.
+     *
+     * @return true if the #SCH_SHEET_LIST is a complex hierarchy.
+     */
+    bool IsComplexHierarchy() const;
+
+    /**
      * Function TestForRecursion
      *
      * test every SCH_SHEET_PATH in the SCH_SHEET_LIST to verify if adding the sheets stored
@@ -411,8 +478,6 @@ public:
      * @return a pointer to the sheet named \a aSheetName if found or NULL if not found.
      */
     SCH_SHEET* FindSheetByName( const wxString& aSheetName );
-
-private:
 
     /**
      * Function BuildSheetList

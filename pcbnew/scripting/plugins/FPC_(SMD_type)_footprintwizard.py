@@ -102,7 +102,7 @@ class FPC_FootprintWizard(HFPW.HelpfulFootprintWizardPlugin):
         self.module.Add(pad_s1)
 
         # add footprint outline
-        linewidth = self.draw.GetLineTickness()
+        linewidth = self.draw.GetLineThickness()
         margin = linewidth
 
         # upper line
@@ -127,6 +127,9 @@ class FPC_FootprintWizard(HFPW.HelpfulFootprintWizardPlugin):
         # right pad side
         self.draw.Line(-xstart, posy, -xend, yend)
 
+        # set SMD attribute
+        self.module.SetAttributes(pcbnew.MOD_CMS)
+        
         # vertical segment at left of the pad
         xstart = xend
         yend = posy - (shl_height + linewidth + margin*2)

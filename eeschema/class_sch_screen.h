@@ -2,7 +2,7 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2009 Jean-Pierre Charras, jaen-pierre.charras@gipsa-lab.inpg.com
- * Copyright (C) 1992-2011 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -49,7 +49,6 @@ class SCH_SHEET_PIN;
 class SCH_LINE;
 class SCH_TEXT;
 class PLOTTER;
-class SCH_SHEET;
 
 
 enum SCH_LINE_TEST_T
@@ -257,20 +256,16 @@ public:
      * performs routine schematic cleaning including breaking wire and buses and
      * deleting identical objects superimposed on top of each other.
      *
-     * @param aCanvas The window to draw on.
-     * @param aDC The device context used for drawing to \a aCanvas.
      * @return True if any schematic clean up was performed.
      */
-    bool SchematicCleanUp( EDA_DRAW_PANEL* aCanvas = NULL, wxDC* aDC = NULL );
+    bool SchematicCleanUp();
 
     /**
      * Function TestDanglingEnds
      * tests all of the connectible objects in the schematic for unused connection points.
-     * @param aDC - The device context to draw the dangling status indicators.
-     * @param aCanvas - The window to draw on.
-     * @return True if any dangling ends were found.
+     * @return True if any connection state changes were made.
      */
-    bool TestDanglingEnds( EDA_DRAW_PANEL* aCanvas = NULL, wxDC* aDC = NULL );
+    bool TestDanglingEnds();
 
     /**
      * Function ExtractWires
@@ -426,11 +421,11 @@ public:
 
     /**
      * Function ClearAnnotation
-     * clears the annotation for the components in \a aSheet on the screen.
-     * @param aSheet The sheet of the component annotation to clear.  If NULL then
-     *               the entire hierarchy is cleared for this screen.
+     * clears the annotation for the components in \a aSheetPath on the screen.
+     * @param aSheetPath The sheet path of the component annotation to clear.  If NULL then
+     *                   the entire hierarchy is cleared.
      */
-    void ClearAnnotation( SCH_SHEET* aSheet );
+    void ClearAnnotation( SCH_SHEET_PATH* aSheetPath );
 
     /**
      * Function GetHierarchicalItems
@@ -501,13 +496,13 @@ public:
      * searches screen for a component with \a aReference and set the footprint field to
      * \a aFootPrint if found.
      *
-     * @param aSheet The sheet used to look up the reference designator.
+     * @param aSheetPath The sheet path used to look up the reference designator.
      * @param aReference The reference designator of the component.
      * @param aFootPrint The value to set the footprint field.
      * @param aSetVisible The value to set the field visibility flag.
      * @return True if \a aReference was found otherwise false.
      */
-    bool SetComponentFootprint( SCH_SHEET* aSheet, const wxString& aReference,
+    bool SetComponentFootprint( SCH_SHEET_PATH* aSheetPath, const wxString& aReference,
                                 const wxString& aFootPrint, bool aSetVisible );
 
     /**
@@ -549,6 +544,12 @@ public:
     SCH_SCREEN* GetFirst();
     SCH_SCREEN* GetNext();
     SCH_SCREEN* GetScreen( unsigned int aIndex ) const;
+
+    /**
+     * Function ClearAnnotation
+     * clears the annotation for all components in the hierarchy.
+     */
+    void ClearAnnotation();
 
     /**
      * Function SchematicCleanUp

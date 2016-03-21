@@ -286,7 +286,7 @@ bool PCB_EDIT_FRAME::OnRightClick( const wxPoint& aMousePos, wxMenu* aPopMenu )
                                      HK_DELETE );
 
                 AddMenuItem( aPopMenu, ID_POPUP_PCB_DELETE_DIMENSION,
-                             msg, KiBitmap( delete_xpm ) );
+                             msg, KiBitmap( delete_dimension_xpm ) );
             }
             break;
 
@@ -307,11 +307,6 @@ bool PCB_EDIT_FRAME::OnRightClick( const wxPoint& aMousePos, wxMenu* aPopMenu )
                                      HK_DUPLICATE_ITEM );
                 AddMenuItem( aPopMenu, ID_POPUP_PCB_DUPLICATE_ITEM,
                              msg, KiBitmap( duplicate_target_xpm ) );
-
-                msg = AddHotkeyName( _("Create Target Array" ), g_Board_Editor_Hokeys_Descr,
-                                     HK_CREATE_ARRAY );
-                AddMenuItem( aPopMenu, ID_POPUP_PCB_CREATE_ARRAY,
-                             msg, KiBitmap( array_target_xpm ) );
 
                 msg = AddHotkeyName( _( "Edit Target" ), g_Board_Editor_Hokeys_Descr,
                                      HK_EDIT_ITEM );

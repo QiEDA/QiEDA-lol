@@ -78,16 +78,6 @@ public:
 
     BOARD* Load( const wxString& aFileName, BOARD* aAppendToMe, const PROPERTIES* aProperties = NULL );
 
-    /* we let go of "save" support when the number of CU layers were expanded from 16 to 32.
-    void Save( const wxString& aFileName, BOARD* aBoard, const PROPERTIES* aProperties = NULL );
-
-    void FootprintSave( const wxString& aLibraryPath, const MODULE* aFootprint,
-                                    const PROPERTIES* aProperties = NULL );
-    void FootprintDelete( const wxString& aLibraryPath, const wxString& aFootprintName, const PROPERTIES* aProperties = NULL );
-
-    void FootprintLibCreate( const wxString& aLibraryPath, const PROPERTIES* aProperties = NULL );
-    */
-
     wxArrayString FootprintEnumerate( const wxString& aLibraryPath, const PROPERTIES* aProperties = NULL);
 
     MODULE* FootprintLoad( const wxString& aLibraryPath, const wxString& aFootprintName,
@@ -124,7 +114,6 @@ protected:
 
     LINE_READER*    m_reader;       ///< no ownership here.
     FILE*           m_fp;           ///< no ownership here.
-    wxString        m_filename;     ///< for saves only, name is in m_reader for loads
 
     wxString        m_field;        ///< reused to stuff MODULE fields.
     int             m_loading_format_version;   ///< which BOARD_FORMAT_VERSION am I Load()ing?
@@ -220,7 +209,6 @@ protected:
     void loadPCB_TARGET();          // "$PCB_TARGET"
 
     //-----</ load/parse functions>---------------------------------------------
-
 
     /// we only cache one footprint library for now, this determines which one.
     void cacheLib( const wxString& aLibraryPath );

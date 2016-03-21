@@ -2,8 +2,8 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2015 Jean-Pierre Charras, jp.charras at wanadoo.fr
- * Copyright (C) 2012 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 1992-2015 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2012-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,8 +48,8 @@
 #include <erc.h>
 #include <id.h>
 
-extern int           DiagErc[PIN_NMAX][PIN_NMAX];
-extern int           DefaultDiagErc[PIN_NMAX][PIN_NMAX];
+extern int           DiagErc[PINTYPE_COUNT][PINTYPE_COUNT];
+extern int           DefaultDiagErc[PINTYPE_COUNT][PINTYPE_COUNT];
 
 
 
@@ -62,7 +62,7 @@ bool DIALOG_ERC::m_tstUniqueGlobalLabels = true;    // saved only for the curren
 #define ID_MATRIX_0 1800
 
 BEGIN_EVENT_TABLE( DIALOG_ERC, DIALOG_ERC_BASE )
-    EVT_COMMAND_RANGE( ID_MATRIX_0, ID_MATRIX_0 + ( PIN_NMAX * PIN_NMAX ) - 1,
+    EVT_COMMAND_RANGE( ID_MATRIX_0, ID_MATRIX_0 + ( PINTYPE_COUNT * PINTYPE_COUNT ) - 1,
                        wxEVT_COMMAND_BUTTON_CLICKED, DIALOG_ERC::ChangeErrorLevel )
 END_EVENT_TABLE()
 
@@ -90,9 +90,9 @@ void DIALOG_ERC::Init()
 {
     m_initialized = false;
 
-    for( int ii = 0; ii < PIN_NMAX; ii++ )
+    for( int ii = 0; ii < PINTYPE_COUNT; ii++ )
     {
-        for( int jj = 0; jj < PIN_NMAX; jj++ )
+        for( int jj = 0; jj < PINTYPE_COUNT; jj++ )
             m_buttonList[ii][jj] = NULL;
     }
 
@@ -200,13 +200,13 @@ void DIALOG_ERC::OnLeftClickMarkersList( wxHtmlLinkEvent& event )
         return;
 
     // Search for the selected marker
-    SCH_SHEET_PATH* sheet;
-    SCH_SHEET_LIST  SheetList;
+    unsigned i;
+    SCH_SHEET_LIST  sheetList( g_RootSheet );
     bool notFound = true;
 
-    for( sheet = SheetList.GetFirst(); sheet; sheet = SheetList.GetNext() )
+    for( i = 0;  i < sheetList.size(); i++ )
     {
-        SCH_ITEM* item = (SCH_ITEM*) sheet->LastDrawList();
+        SCH_ITEM* item = (SCH_ITEM*) sheetList[i].LastDrawList();
 
         for( ; item; item = item->Next() )
         {
@@ -230,11 +230,11 @@ void DIALOG_ERC::OnLeftClickMarkersList( wxHtmlLinkEvent& event )
         return;
     }
 
-    if( *sheet != m_parent->GetCurrentSheet() )
+    if( sheetList[i] != m_parent->GetCurrentSheet() )
     {
-        sheet->LastScreen()->SetZoom( m_parent->GetScreen()->GetZoom() );
-        m_parent->SetCurrentSheet( *sheet );
-        m_parent->GetCurrentSheet().Last()->UpdateAllScreenReferences();
+        sheetList[i].LastScreen()->SetZoom( m_parent->GetScreen()->GetZoom() );
+        m_parent->SetCurrentSheet( sheetList[i] );
+        m_parent->GetCurrentSheet().UpdateAllScreenReferences();
     }
 
     m_lastMarkerFound = marker;
@@ -289,7 +289,7 @@ void DIALOG_ERC::ReBuildMatrixPanel()
     if( m_initialized == false )
     {
         // Print row labels
-        for( int ii = 0; ii < PIN_NMAX; ii++ )
+        for( int ii = 0; ii < PINTYPE_COUNT; ii++ )
         {
             int y = pos.y + (ii * bitmap_size.y);
             text = new wxStaticText( m_matrixPanel, -1, CommentERC_H[ii],
@@ -304,7 +304,7 @@ void DIALOG_ERC::ReBuildMatrixPanel()
     else
         pos = m_buttonList[0][0]->GetPosition();
 
-    for( int ii = 0; ii < PIN_NMAX; ii++ )
+    for( int ii = 0; ii < PINTYPE_COUNT; ii++ )
     {
         int y = pos.y + (ii * bitmap_size.y);
 
@@ -322,7 +322,7 @@ void DIALOG_ERC::ReBuildMatrixPanel()
                 text     = new wxStaticText( m_matrixPanel, -1, CommentERC_V[ii], txtpos );
             }
 
-            int event_id = ID_MATRIX_0 + ii + ( jj * PIN_NMAX );
+            int event_id = ID_MATRIX_0 + ii + ( jj * PINTYPE_COUNT );
             BITMAP_DEF bitmap_butt = erc_green_xpm;
 
             delete m_buttonList[ii][jj];
@@ -371,14 +371,12 @@ void DIALOG_ERC::setDRCMatrixButtonState( wxBitmapButton *aButton, int aState )
 
 void DIALOG_ERC::DisplayERC_MarkersList()
 {
-    SCH_SHEET_LIST sheetList;
+    SCH_SHEET_LIST sheetList( g_RootSheet);
     m_MarkersList->ClearList();
 
-    SCH_SHEET_PATH* sheet = sheetList.GetFirst();
-
-    for( ; sheet != NULL; sheet = sheetList.GetNext() )
+    for( unsigned i = 0; i < sheetList.size(); i++ )
     {
-        SCH_ITEM* item = sheet->LastDrawList();
+        SCH_ITEM* item = sheetList[i].LastDrawList();
 
         for( ; item != NULL; item = item->Next() )
         {
@@ -419,7 +417,7 @@ void DIALOG_ERC::ChangeErrorLevel( wxCommandEvent& event )
     wxBitmapButton* butt = (wxBitmapButton*) event.GetEventObject();
     pos  = butt->GetPosition();
 
-    x = ii / PIN_NMAX; y = ii % PIN_NMAX;
+    x = ii / PINTYPE_COUNT; y = ii % PINTYPE_COUNT;
 
     level = DiagErc[y][x];
 
@@ -454,8 +452,8 @@ void DIALOG_ERC::TestErc( wxArrayString* aMessagesList )
     m_tstUniqueGlobalLabels = m_cbTestUniqueGlbLabels->GetValue();
 
     // Build the whole sheet list in hierarchy (sheet, not screen)
-    int refDes = 1;
-    g_RootSheet->AnnotatePowerSymbols( Prj().SchLibs(), &refDes );
+    SCH_SHEET_LIST sheets( g_RootSheet );
+    sheets.AnnotatePowerSymbols( Prj().SchLibs() );
 
     if( m_parent->CheckAnnotate( aMessagesList, false ) )
     {
@@ -479,7 +477,7 @@ void DIALOG_ERC::TestErc( wxArrayString* aMessagesList )
         /* Ff wire list has changed, delete Undo Redo list to avoid pointers on deleted
          * data problems.
          */
-        if( screen->SchematicCleanUp( NULL ) )
+        if( screen->SchematicCleanUp() )
             screen->ClearUndoRedoList();
     }
 
@@ -567,6 +565,11 @@ void DIALOG_ERC::TestErc( wxArrayString* aMessagesList )
 
     // Display new markers:
     m_parent->GetCanvas()->Refresh();
+
+    // Display message
+    wxString msg = _( "Finished" );
+    msg += wxT( "\n" );
+    aMessagesList->Add( msg );
 
     if( m_writeErcFile )
     {

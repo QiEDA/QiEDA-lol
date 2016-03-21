@@ -197,7 +197,7 @@ set( BMAPS_MID
     delete_bus
     delete_circle
     delete_connection
-    delete_cotation
+    delete_dimension
     delete_field
     delete_glabel
     delete_line
@@ -293,6 +293,7 @@ set( BMAPS_MID
     icon_txt
     import3d
     image
+    import_brd_file
     import_cmp_from_lib
     import_footprint_names
     import_hierarchical_label
@@ -324,6 +325,7 @@ set( BMAPS_MID
     lang_pl
     lang_pt
     lang_ru
+    lang_sk
     lang_sl
     language
     layers_manager
@@ -337,7 +339,6 @@ set( BMAPS_MID
     library_update
     library
     library_table
-    libview
     lines90
     list_nets
     load_module_board
@@ -361,6 +362,7 @@ set( BMAPS_MID
     module_options
     module_pin_filtered_list
     module_library_list
+    module_name_filtered_list
     module_ratsnest
     module
     modview_icon
@@ -497,7 +499,6 @@ set( BMAPS_MID
     rotate_pos_z
     save_as
     save_library
-    save_netlist
     save_part_in_mem
     save_project
     save_setup
@@ -552,7 +553,6 @@ set( BMAPS_MID
     width_track_via
     width_track
     width_vias
-    window_close
     wizard_add_fplib_small
     zip_tool
     zip

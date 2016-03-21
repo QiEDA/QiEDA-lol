@@ -2,8 +2,8 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2015 Jean-Pierre Charras, jp.charras at wanadoo.fr
- * Copyright (C) 2008-2013 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 2004-2015 KiCad Developers, see change_log.txt for contributors.
+ * Copyright (C) 2008-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 2004-2016 KiCad Developers, see change_log.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,10 +38,9 @@
 #include <wildcards_and_files_ext.h>
 
 #include <general.h>
-#include <sch_sheet.h>
+#include <sch_sheet_path.h>
 #include <sch_component.h>
 #include <sch_reference_list.h>
-#include <sch_sheet_path.h>
 
 #include <dsnlexer.h>
 #include <ptree.h>
@@ -54,9 +53,10 @@ void SCH_EDIT_FRAME::backAnnotateFootprints( const std::string& aChangedSetOfRef
 {
     // Build a flat list of components in schematic:
     SCH_REFERENCE_LIST  refs;
+    SCH_SHEET_LIST      sheets( g_RootSheet );
     bool                isChanged = false;
 
-    g_RootSheet->GetComponents( Prj().SchLibs(), refs, false );
+    sheets.GetComponents( Prj().SchLibs(), refs, false );
 
     DSNLEXER    lexer( aChangedSetOfReferences, FROM_UTF8( __func__ ) );
     PTREE       doc;
@@ -134,8 +134,9 @@ bool SCH_EDIT_FRAME::ProcessCmpToFootprintLinkFile( const wxString& aFullFilenam
 {
     // Build a flat list of components in schematic:
     SCH_REFERENCE_LIST  referencesList;
+    SCH_SHEET_LIST      sheetList( g_RootSheet );
 
-    g_RootSheet->GetComponents( Prj().SchLibs(), referencesList, false );
+    sheetList.GetComponents( Prj().SchLibs(), referencesList, false );
 
     FILE* cmpFile = wxFopen( aFullFilename, wxT( "rt" ) );
 

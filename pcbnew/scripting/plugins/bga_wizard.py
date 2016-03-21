@@ -82,11 +82,18 @@ class BGAWizard(HFPW.HelpfulFootprintWizardPlugin):
                                           pads["outline x margin"])
 
         # Courtyard
-        cmargin = self.draw.GetLineTickness()
+        cmargin = self.draw.GetLineThickness()
         self.draw.SetLayer(pcbnew.F_CrtYd)
         sizex = (ssx + cmargin) * 2
         sizey = (ssy + cmargin) * 2
+        # round size to nearest 0.1mm, rectangle will thus land on a 0.05mm grid
+        sizex = self.PutOnGridMM(sizex, 0.1)
+        sizey = self.PutOnGridMM(sizey, 0.1)
+        # set courtyard line thickness to the one defined in KLC
+        self.draw.SetLineThickness(pcbnew.FromMM(0.05))
         self.draw.Box(0, 0, sizex, sizey)
+        # restore line thickness to previous value
+        self.draw.SetLineThickness(pcbnew.FromMM(cmargin))
 
         #reference and value
         text_size = self.GetTextSize()  # IPC nominal
@@ -94,5 +101,7 @@ class BGAWizard(HFPW.HelpfulFootprintWizardPlugin):
         self.draw.Value(0, ypos, text_size)
         self.draw.Reference(0, -ypos, text_size)
 
+        # set SMD attribute
+        self.module.SetAttributes(pcbnew.MOD_CMS)
 
 BGAWizard().register()

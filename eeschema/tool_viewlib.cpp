@@ -31,17 +31,16 @@
 #include <wx/aui/aui.h>
 #include <wx/menu.h>
 #include <wx/string.h>
-
-#include <macros.h>
-#include <eeschema_id.h>
-
-#include <general.h>
-#include <hotkeys.h>
-#include <class_library.h>
-#include <viewlib_frame.h>
 #include <dialog_helpers.h>
+#include <macros.h>
 #include <menus_helpers.h>
-#include <help_common_strings.h>
+
+#include "class_library.h"
+#include "eeschema_id.h"
+#include "general.h"
+#include "help_common_strings.h"
+#include "hotkeys.h"
+#include "viewlib_frame.h"
 
 
 void LIB_VIEW_FRAME::ReCreateHToolbar()
@@ -244,9 +243,6 @@ void LIB_VIEW_FRAME::ReCreateMenuBar( void )
 
     // Menu Help:
     wxMenu* helpMenu = new wxMenu;
-
-    // Version info
-    AddHelpVersionInfoMenuEntry( helpMenu );
 
     // Contents
     AddMenuItem( helpMenu, wxID_HELP,

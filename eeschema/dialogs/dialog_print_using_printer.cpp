@@ -2,7 +2,7 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2015 Jean-Pierre Charras, jp.charras at wanadoo.fr
- * Copyright (C) 2015 KiCad Developers, see CHANGELOG.TXT for contributors.
+ * Copyright (C) 2015-2016 KiCad Developers, see CHANGELOG.TXT for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -91,6 +91,7 @@ public:
     void DrawPage( SCH_SCREEN* aScreen );
 };
 
+
 /**
  * Custom schematic print preview frame.
  * This derived preview frame remembers its size and position during a session
@@ -134,6 +135,7 @@ private:
     static wxPoint  s_pos;
     static wxSize   s_size;
 };
+
 
 wxPoint SCH_PREVIEW_FRAME::s_pos;
 wxSize  SCH_PREVIEW_FRAME::s_size;
@@ -250,7 +252,7 @@ void DIALOG_PRINT_USING_PRINTER::OnPrintPreview( wxCommandEvent& event )
 
     if( preview == NULL )
     {
-        DisplayError( this, wxT( "Print preview error!" ) );
+        DisplayError( this, _( "Print preview error!" ) );
         return;
     }
 
@@ -312,6 +314,14 @@ void DIALOG_PRINT_USING_PRINTER::OnPrintButtonClick( wxCommandEvent& event )
 
 bool SCH_PRINTOUT::OnPrintPage( int page )
 {
+    SCH_SHEET_LIST sheetList( g_RootSheet );
+
+    wxCHECK_MSG( page >= 1 && page <= (int)sheetList.size(), false,
+                 wxT( "Cannot print invalid page number." ) );
+
+    wxCHECK_MSG( sheetList[ page - 1].LastScreen() != NULL, false,
+                 wxT( "Cannot print page with NULL screen." ) );
+
     wxString msg;
     msg.Printf( _( "Print page %d" ), page );
     m_parent->ClearMsgPanel();
@@ -319,28 +329,13 @@ bool SCH_PRINTOUT::OnPrintPage( int page )
 
     SCH_SCREEN*     screen       = m_parent->GetScreen();
     SCH_SHEET_PATH  oldsheetpath = m_parent->GetCurrentSheet();
-    SCH_SHEET_PATH  list;
-    SCH_SHEET_LIST  SheetList( NULL );
-    SCH_SHEET_PATH* sheetpath = SheetList.GetSheet( page - 1 );
-
-    if( list.BuildSheetPathInfoFromSheetPathValue( sheetpath->Path() ) )
-    {
-        m_parent->SetCurrentSheet( list );
-        m_parent->GetCurrentSheet().Last()->UpdateAllScreenReferences();
-        m_parent->SetSheetNumberAndCount();
-        screen = m_parent->GetCurrentSheet().LastScreen();
-    }
-    else
-    {
-        screen = NULL;
-    }
-
-    if( screen == NULL )
-        return false;
-
+    m_parent->SetCurrentSheet( sheetList[ page - 1 ] );
+    m_parent->GetCurrentSheet().UpdateAllScreenReferences();
+    m_parent->SetSheetNumberAndCount();
+    screen = m_parent->GetCurrentSheet().LastScreen();
     DrawPage( screen );
     m_parent->SetCurrentSheet( oldsheetpath );
-    m_parent->GetCurrentSheet().Last()->UpdateAllScreenReferences();
+    m_parent->GetCurrentSheet().UpdateAllScreenReferences();
     m_parent->SetSheetNumberAndCount();
 
     return true;
@@ -359,6 +354,7 @@ bool SCH_PRINTOUT::HasPage( int pageNum )
     int pageCount;
 
     pageCount = g_RootSheet->CountSheets();
+
     if( pageCount >= pageNum )
         return true;
 

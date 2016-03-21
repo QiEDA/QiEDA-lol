@@ -37,7 +37,7 @@ class RowedGridArray(PA.PadGridArray):
 
 class RowedFootprint(HFPW.HelpfulFootprintWizardPlugin):
 
-    pad_count_key = 'pas count'
+    pad_count_key = 'pad count'
     row_count_key = 'row count'
     row_spacing_key = 'row spacing'
     pad_length_key = 'pad length'
@@ -104,6 +104,20 @@ class RowedFootprint(HFPW.HelpfulFootprintWizardPlugin):
 
         self.DrawBox(ssx, ssy)
 
+        # Courtyard
+        cmargin = self.draw.GetLineThickness()
+        self.draw.SetLayer(pcbnew.F_CrtYd)
+        sizex = (ssx + cmargin) * 2
+        sizey = (ssy + cmargin) * 2
+        # round size to nearest 0.1mm, rectangle will thus land on a 0.05mm grid
+        sizex = self.PutOnGridMM(sizex, 0.1)
+        sizey = self.PutOnGridMM(sizey, 0.1)
+        # set courtyard line thickness to the one defined in KLC
+        self.draw.SetLineThickness(pcbnew.FromMM(0.05))
+        self.draw.Box(0, 0, sizex, sizey)
+        # restore line thickness to previous value
+        self.draw.SetLineThickness(pcbnew.FromMM(cmargin))
+
         #reference and value
         text_size = self.GetTextSize()  # IPC nominal
 
@@ -117,6 +131,11 @@ class RowedFootprint(HFPW.HelpfulFootprintWizardPlugin):
             self.draw.Value(0, 0, text_size)
             self.draw.Reference(-text_px, 0, text_size, orientation_degree=90)
 
+        # set the attribute
+        if self.GetName() == "S-DIP":
+            self.module.SetAttributes(pcbnew.MOD_DEFAULT)
+        elif self.GetName() == "SOIC":
+            self.module.SetAttributes(pcbnew.MOD_CMS)
 
 class SDIPWizard(RowedFootprint):
 
@@ -176,7 +195,7 @@ class SDIPWizard(RowedFootprint):
 
             # draw the notch
             notchWidth = ssy/1.5
-            notchHeight = self.draw.GetLineTickness()*3
+            notchHeight = self.draw.GetLineThickness()*3
 
             # NotchedBox draws the notch on top. Rotate the box 90 degrees
             # to have it on the left

@@ -1,11 +1,3 @@
-# the map generation creates on Windows/gcc a lot of useless warnings
-# so disable it on windows
-if( WIN32 AND NOT CMAKE_CROSSCOMPILING )
-    set( MAKE_LINK_MAPS false )
-else()
-    set( MAKE_LINK_MAPS true )
-endif()
-
 add_definitions(-DGERBVIEW)
 
 include_directories( BEFORE ${INC_BEFORE} )
@@ -78,6 +70,8 @@ set( GERBVIEW_EXTRA_SRCS
 if( MINGW )
     # GERBVIEW_RESOURCES variable is set by the macro.
     mingw_resource_compiler( gerbview )
+else()
+    set( GERBVIEW_RESOURCES gerbview.rc )
 endif()
 
 if( APPLE )
@@ -131,6 +125,7 @@ target_link_libraries( gerbview_kiface
     common
     polygon
     bitmaps
+    gal
     ${wxWidgets_LIBRARIES}
     ${GDI_PLUS_LIBRARIES}
     )

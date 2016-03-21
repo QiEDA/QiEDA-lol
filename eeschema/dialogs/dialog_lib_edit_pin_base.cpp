@@ -1,10 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar  9 2015)
+// C++ code generated with wxFormBuilder (version Mar 28 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
+#include "pin_shape_combobox.h"
+#include "pin_type_combobox.h"
 #include "wx/bmpcbox.h"
 
 #include "dialog_lib_edit_pin_base.h"
@@ -61,14 +63,14 @@ DIALOG_LIB_EDIT_PIN_BASE::DIALOG_LIB_EDIT_PIN_BASE( wxWindow* parent, wxWindowID
 	
 	fgSizerPins->Add( m_staticTextEType, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 	
-	m_choiceElectricalType = new wxBitmapComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY ); 
+	m_choiceElectricalType = new PinTypeComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY ); 
 	fgSizerPins->Add( m_choiceElectricalType, 0, wxEXPAND|wxTOP|wxBOTTOM, 5 );
 	
 	m_staticTextGstyle = new wxStaticText( this, wxID_ANY, _("Graphic &Style:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextGstyle->Wrap( -1 );
 	fgSizerPins->Add( m_staticTextGstyle, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 	
-	m_choiceStyle = new wxBitmapComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY ); 
+	m_choiceStyle = new PinShapeComboBox( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY ); 
 	fgSizerPins->Add( m_choiceStyle, 0, wxEXPAND|wxTOP|wxBOTTOM, 5 );
 	
 	
@@ -80,11 +82,11 @@ DIALOG_LIB_EDIT_PIN_BASE::DIALOG_LIB_EDIT_PIN_BASE( wxWindow* parent, wxWindowID
 	wxStaticBoxSizer* sbSizerPinSharing;
 	sbSizerPinSharing = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Sharing") ), wxVERTICAL );
 	
-	m_checkApplyToAllParts = new wxCheckBox( this, wxID_ANY, _("Common to all &units in component"), wxDefaultPosition, wxDefaultSize, 0 );
-	sbSizerPinSharing->Add( m_checkApplyToAllParts, 0, wxALL, 3 );
+	m_checkApplyToAllParts = new wxCheckBox( sbSizerPinSharing->GetStaticBox(), wxID_ANY, _("Common to all &units in component"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerPinSharing->Add( m_checkApplyToAllParts, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 	
-	m_checkApplyToAllConversions = new wxCheckBox( this, wxID_ANY, _("Common to all body &styles (DeMorgan)"), wxDefaultPosition, wxDefaultSize, 0 );
-	sbSizerPinSharing->Add( m_checkApplyToAllConversions, 0, wxALL, 3 );
+	m_checkApplyToAllConversions = new wxCheckBox( sbSizerPinSharing->GetStaticBox(), wxID_ANY, _("Common to all body &styles (DeMorgan)"), wxDefaultPosition, wxDefaultSize, 0 );
+	sbSizerPinSharing->Add( m_checkApplyToAllConversions, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 	
 	
 	boarderSizer->Add( sbSizerPinSharing, 0, wxEXPAND|wxALL, 5 );
@@ -92,7 +94,7 @@ DIALOG_LIB_EDIT_PIN_BASE::DIALOG_LIB_EDIT_PIN_BASE( wxWindow* parent, wxWindowID
 	wxStaticBoxSizer* sbSizerSchematicProperties;
 	sbSizerSchematicProperties = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Schematic Properties") ), wxVERTICAL );
 	
-	m_checkShow = new wxCheckBox( this, wxID_ANY, _("&Visible"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkShow = new wxCheckBox( sbSizerSchematicProperties->GetStaticBox(), wxID_ANY, _("&Visible"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_checkShow->SetValue(true); 
 	sbSizerSchematicProperties->Add( m_checkShow, 0, wxALL, 3 );
 	

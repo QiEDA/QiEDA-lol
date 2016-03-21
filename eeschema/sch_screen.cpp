@@ -3,8 +3,8 @@
  *
  * Copyright (C) 2013 Jean-Pierre Charras, jp.charras at wanadoo.fr
  * Copyright (C) 2012 SoftPLC Corporation, Dick Hollenbeck <dick@softplc.com>
- * Copyright (C) 2008-2015 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 1992-2015 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2008-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -425,7 +425,7 @@ bool SCH_SCREEN::IsTerminalPoint( const wxPoint& aPosition, int aLayer )
 }
 
 
-bool SCH_SCREEN::SchematicCleanUp( EDA_DRAW_PANEL* aCanvas, wxDC* aDC )
+bool SCH_SCREEN::SchematicCleanUp()
 {
     SCH_ITEM* item, * testItem;
     bool      modified = false;
@@ -458,7 +458,8 @@ bool SCH_SCREEN::SchematicCleanUp( EDA_DRAW_PANEL* aCanvas, wxDC* aDC )
                     testItem = testItem->Next();
                 }
             }
-            else if ( ( ( item->Type() == SCH_JUNCTION_T ) && ( testItem->Type() == SCH_JUNCTION_T ) ) && ( testItem != item ) )
+            else if ( ( ( item->Type() == SCH_JUNCTION_T )
+                      && ( testItem->Type() == SCH_JUNCTION_T ) ) && ( testItem != item ) )
             {
                 if ( testItem->HitTest( item->GetPosition() ) )
                 {
@@ -480,10 +481,7 @@ bool SCH_SCREEN::SchematicCleanUp( EDA_DRAW_PANEL* aCanvas, wxDC* aDC )
         }
     }
 
-    TestDanglingEnds( aCanvas, aDC );
-
-    if( aCanvas && modified )
-        aCanvas->Refresh();
+    TestDanglingEnds();
 
     return modified;
 }
@@ -758,7 +756,7 @@ int SCH_SCREEN::CountConnectedItems( const wxPoint& aPos, bool aTestJunctions ) 
 }
 
 
-void SCH_SCREEN::ClearAnnotation( SCH_SHEET* aSheet )
+void SCH_SCREEN::ClearAnnotation( SCH_SHEET_PATH* aSheetPath )
 {
     for( SCH_ITEM* item = m_drawList.begin(); item; item = item->Next() )
     {
@@ -766,7 +764,7 @@ void SCH_SCREEN::ClearAnnotation( SCH_SHEET* aSheet )
         {
             SCH_COMPONENT* component = (SCH_COMPONENT*) item;
 
-            component->ClearAnnotation( aSheet );
+            component->ClearAnnotation( aSheetPath );
 
             // Clear the modified component flag set by component->ClearAnnotation
             // because we do not use it here and we should not leave this flag set,
@@ -934,28 +932,22 @@ int SCH_SCREEN::UpdatePickList()
 }
 
 
-bool SCH_SCREEN::TestDanglingEnds( EDA_DRAW_PANEL* aCanvas, wxDC* aDC )
+bool SCH_SCREEN::TestDanglingEnds()
 {
     SCH_ITEM* item;
     std::vector< DANGLING_END_ITEM > endPoints;
-    bool hasDanglingEnds = false;
+    bool hasStateChanged = false;
 
     for( item = m_drawList.begin(); item; item = item->Next() )
         item->GetEndPoints( endPoints );
 
     for( item = m_drawList.begin(); item; item = item->Next() )
     {
-        if( item->IsDanglingStateChanged( endPoints ) && ( aCanvas ) && ( aDC ) )
-        {
-            item->Draw( aCanvas, aDC, wxPoint( 0, 0 ), g_XorMode );
-            item->Draw( aCanvas, aDC, wxPoint( 0, 0 ), GR_DEFAULT_DRAWMODE );
-        }
-
-        if( item->IsDangling() )
-            hasDanglingEnds = true;
+        if( item->IsDanglingStateChanged( endPoints ) )
+            hasStateChanged = true;
     }
 
-    return hasDanglingEnds;
+    return hasStateChanged;
 }
 
 
@@ -1106,7 +1098,7 @@ SCH_TEXT* SCH_SCREEN::GetLabel( const wxPoint& aPosition, int aAccuracy )
 }
 
 
-bool SCH_SCREEN::SetComponentFootprint( SCH_SHEET* aSheet, const wxString& aReference,
+bool SCH_SCREEN::SetComponentFootprint( SCH_SHEET_PATH* aSheetPath, const wxString& aReference,
                                         const wxString& aFootPrint, bool aSetVisible )
 {
     SCH_COMPONENT* component;
@@ -1119,7 +1111,7 @@ bool SCH_SCREEN::SetComponentFootprint( SCH_SHEET* aSheet, const wxString& aRefe
 
         component = (SCH_COMPONENT*) item;
 
-        if( aReference.CmpNoCase( component->GetRef( aSheet ) ) == 0 )
+        if( aReference.CmpNoCase( component->GetRef( aSheetPath ) ) == 0 )
         {
             // Found: Init Footprint Field
 
@@ -1128,7 +1120,6 @@ bool SCH_SCREEN::SetComponentFootprint( SCH_SHEET* aSheet, const wxString& aRefe
              * it is probably not yet initialized
              */
             SCH_FIELD * fpfield = component->GetField( FOOTPRINT );
-
             if( fpfield->GetText().IsEmpty()
               && ( fpfield->GetTextPosition() == component->GetPosition() ) )
             {
@@ -1432,6 +1423,13 @@ void SCH_SCREENS::BuildScreenList( EDA_ITEM* aItem )
             strct = strct->Next();
         }
     }
+}
+
+
+void SCH_SCREENS::ClearAnnotation()
+{
+    for( size_t i = 0;  i < m_screens.size();  i++ )
+        m_screens[i]->ClearAnnotation( NULL );
 }
 
 

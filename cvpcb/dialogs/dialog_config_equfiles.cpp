@@ -115,12 +115,6 @@ void DIALOG_CONFIG_EQUFILES::OnEditEquFile( wxCommandEvent& event )
 }
 
 
-void DIALOG_CONFIG_EQUFILES::OnCancelClick( wxCommandEvent& event )
-{
-    EndModal( wxID_CANCEL );
-}
-
-
 void DIALOG_CONFIG_EQUFILES::OnOkClick( wxCommandEvent& event )
 {
     // Save new equ file list if the files list was modified
@@ -133,7 +127,7 @@ void DIALOG_CONFIG_EQUFILES::OnOkClick( wxCommandEvent& event )
             m_Parent->m_EquFilesNames.Add( m_ListEquiv->GetString( ii ) );
 
         wxCommandEvent evt( ID_SAVE_PROJECT );
-        m_Parent->SaveProjectFile( evt );
+        m_Parent->SaveProjectFile();
     }
 
     EndModal( wxID_OK );

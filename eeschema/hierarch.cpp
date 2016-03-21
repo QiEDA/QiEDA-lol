@@ -2,8 +2,8 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2004 Jean-Pierre Charras, jp.charras at wanadoo.fr
- * Copyright (C) 2008-2011 Wayne Stambaugh <stambaughw@verizon.net>
- * Copyright (C) 2004-2011 KiCad Developers, see change_log.txt for contributors.
+ * Copyright (C) 2008-2016 Wayne Stambaugh <stambaughw@verizon.net>
+ * Copyright (C) 2004-2016 KiCad Developers, see change_log.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -158,7 +158,7 @@ HIERARCHY_NAVIG_DLG::HIERARCHY_NAVIG_DLG( SCH_EDIT_FRAME* aParent, const wxPoint
     m_Tree->SetItemBold( cellule, true );
 
     SCH_SHEET_PATH list;
-    list.Push( g_RootSheet );
+    list.push_back( g_RootSheet );
     m_Tree->SetItemData( cellule, new TreeItemData( list ) );
 
     if( m_Parent->GetCurrentSheet().Last() == g_RootSheet )
@@ -227,7 +227,7 @@ void HIERARCHY_NAVIG_DLG::BuildSheetsTree( SCH_SHEET_PATH* list, wxTreeItemId*  
             SCH_SHEET* sheet = (SCH_SHEET*) schitem;
             m_nbsheets++;
             menu = m_Tree->AppendItem( *previousmenu, sheet->GetName(), 0, 1 );
-            list->Push( sheet );
+            list->push_back( sheet );
             m_Tree->SetItemData( menu, new TreeItemData( *list ) );
             int ll = m_Tree->GetItemText( menu ).Len();
 
@@ -248,7 +248,7 @@ void HIERARCHY_NAVIG_DLG::BuildSheetsTree( SCH_SHEET_PATH* list, wxTreeItemId*  
 
             BuildSheetsTree( list, &menu );
             m_Tree->Expand( menu );
-            list->Pop();
+            list->pop_back();
         }
 
         schitem = schitem->Next();
@@ -285,7 +285,7 @@ void SCH_EDIT_FRAME::DisplayCurrentSheet()
     GetScreen()->SetGrid( m_LastGridSizeId + ID_POPUP_GRID_LEVEL_1000 );
 
     // update the References
-    m_CurrentSheet->Last()->UpdateAllScreenReferences();
+    m_CurrentSheet->UpdateAllScreenReferences();
     SetSheetNumberAndCount();
     m_canvas->SetCanStartBlock( -1 );
 
@@ -295,7 +295,7 @@ void SCH_EDIT_FRAME::DisplayCurrentSheet()
         screen->m_FirstRedraw = false;
         SetCrossHairPosition( GetScrollCenterPosition() );
         m_canvas->MoveCursorToCrossHair();
-        screen->SchematicCleanUp( GetCanvas(), NULL );
+        screen->SchematicCleanUp();
     }
     else
     {
