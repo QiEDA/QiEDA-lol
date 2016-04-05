@@ -137,8 +137,7 @@ static void InitKiCadAboutNew( AboutAppInfo& info )
     description << wxT( "</p>" );
 
     /* websites */
-    description << wxT( "<p>" );
-    description << wxT( "<b><u>" )
+    description << wxT( "<p><b><u>" )
                 << _( "KiCad on the web" )
                 << wxT( "</u></b>" ); // bold & underlined font for caption
 
@@ -149,47 +148,61 @@ static void InitKiCadAboutNew( AboutAppInfo& info )
                                   _( "The official KiCad site" ) )
                 << wxT( "</li>" );
     description << wxT( "<li>" )
-                << HtmlHyperlink( wxT( "http://iut-tice.ujf-grenoble.fr/kicad" ),
-                                  _( "The original site of the KiCad project founder" ) )
-                << wxT( "</li>" );
-    description << wxT( "<li>" )
                 << HtmlHyperlink( wxT( "https://launchpad.net/kicad" ),
                                   _( "Developer's website on Launchpad" ) )
                 << wxT("</li>" );
     description << wxT( "<li>" )
+                << HtmlHyperlink( wxT( "https://github.com/KiCad/" ),
+                                  _( "Our official Repository for component and footprint libraries" ) )
+                << wxT( "</li>" );
+
+    description << wxT( "<p><u>" )
+                << _( "Non official repositories" )
+                << wxT( "</u>" );
+    description << wxT( "<li>" )
                 << HtmlHyperlink( wxT( "http://www.kicadlib.org" ),
-                                  _( "Repository with additional component libraries" ) )
+                                  _( "Additional component libraries repository (kicadlib)" ) )
+                << wxT( "</li>" );
+    description << wxT( "<li>" )
+                << HtmlHyperlink( wxT( "http://smisioto.no-ip.org/elettronica/kicad/kicad-en.htm" ),
+                                  _( "Additional component libraries repository (smisioto)" ) )
                 << wxT( "</li>" );
     description << wxT( "</ul>" );
     description << wxT( "</p>" );
 
-    description << wxT( "<p>" );
-    description << wxT( "<b><u>" )
-                << _( "Contribute to KiCad" )
+    description << wxT( "<p><b><u>" )
+                << _( "Bug tracker" )
                 << wxT( "</u></b>" ); // bold & underlined font caption
 
     // bullet-ed list with some http links
     description << wxT( "<ul>" );
     description << wxT( "<li>" )
-                <<HtmlHyperlink( wxT( "https://bugs.launchpad.net/kicad" ),
-                                 _( "Report bugs if you found any" ) )
+                <<HtmlHyperlink( wxT( "https://bugs.launchpad.net/kicad/+bugs?orderby=-id&start=0" ),
+                                 _( "Report or examine bugs" ) )
                 << wxT( "</li>" );
-    description << wxT( "<li>" )
-                << HtmlHyperlink( wxT( "https://blueprints.launchpad.net/kicad" ),
-                                  _( "File an idea for improvement" ) )
-                << wxT( "</li>" );
-    description << wxT( "<li>" )
-                << HtmlHyperlink( wxT( "http://www.kicadlib.org/Kicad_related_links.html" ),
-                                  _( "KiCad links to user groups, tutorials and much more" ) )
-                << wxT( "</li>" );
-    description << wxT( "</ul>" );
+    description << wxT( "</ul></p>" );
 
-    description << wxT( "</p>" );
+    description << wxT( "<p><b><u>" )
+                << _( "KiCad user group and community" )
+                << wxT( "</u></b>" ); // bold & underlined font caption
+
+    description << wxT( "<ul>" );
+    description << wxT( "<li>" )
+                << HtmlHyperlink( wxT( "https://groups.yahoo.com/neo/groups/kicad-users/info" ),
+                                  _( "KiCad user group" ) )
+                << wxT( "</li>" );
+
+    description << wxT( "<li>" )
+                << HtmlHyperlink( wxT( "https://forum.kicad.info" ),
+                                  _( "KiCad forum" ) )
+                << wxT( "</li>" );
+
+    description << wxT( "</ul></p>" );
 
     info.SetDescription( description );
 
 
-    /* License information also HTML formatted */
+    // License information also HTML formatted:
     wxString license;
     license
         << wxT( "<div align='center'>" )

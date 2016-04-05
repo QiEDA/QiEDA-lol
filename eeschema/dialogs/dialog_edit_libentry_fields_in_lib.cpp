@@ -3,7 +3,7 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2011-2013 SoftPLC Corporation, Dick Hollenbeck <dick@softplc.com>
- * Copyright (C) 2007 KiCad Developers, see change_log.txt for contributors.
+ * Copyright (C) 2007-2016 KiCad Developers, see change_log.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,6 +40,8 @@
 #include <sch_component.h>
 #include <sch_field.h>
 #include <template_fieldnames.h>
+#include <dialog_helpers.h>
+#include <sch_validators.h>
 
 #include <dialog_edit_libentry_fields_in_lib_base.h>
 
@@ -240,7 +242,7 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::OnOKButtonClick( wxCommandEvent& event 
     // test if reference prefix is acceptable
     if( !SCH_COMPONENT::IsReferenceStringValid( m_FieldsBuf[REFERENCE].GetText() ) )
     {
-        DisplayError( NULL, _( "Illegal reference prefix. A reference must start by a letter" ) );
+        DisplayError( NULL, _( "Illegal reference.  References must start with a letter." ) );
         return;
     }
 
@@ -281,15 +283,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::OnOKButtonClick( wxCommandEvent& event 
 
         ++i;
     }
-
-#if defined(DEBUG)
-    for( unsigned i = 0;  i<m_FieldsBuf.size();  ++i )
-    {
-        printf( "save[%u].name:'%s' value:'%s'\n", i,
-                TO_UTF8( m_FieldsBuf[i].GetName() ),
-                TO_UTF8( m_FieldsBuf[i].GetText() ) );
-    }
-#endif
 
     // copy all the fields back, fully replacing any previous fields
     m_libEntry->SetFields( m_FieldsBuf );
@@ -485,13 +478,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::initBuffers()
 
     m_libEntry->GetFields( cmpFields );
 
-#if defined(DEBUG)
-    for( unsigned i=0; i<cmpFields.size();  ++i )
-    {
-        printf( "cmpFields[%u].name:%s\n", i, TO_UTF8( cmpFields[i].GetName() ) );
-    }
-#endif
-
     /*  We have 3 component related field lists to be aware of: 1) UI
         presentation (m_FieldsBuf), 2) fields in component ram copy, and 3)
         fields recorded with component on disk. m_FieldsBuf is the list of UI
@@ -516,9 +502,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::initBuffers()
     // fixed fields:
     for( int i=0; i<MANDATORY_FIELDS; ++i )
     {
-#ifdef DEBUG
-        printf( "add fixed:%s\n", TO_UTF8( cmpFields[i].GetName() ) );
-#endif
         m_FieldsBuf.push_back( cmpFields[i] );
     }
 
@@ -544,10 +527,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::initBuffers()
         // values from the component will be set.
         if( !libField )
         {
-#ifdef DEBUG
-            printf( "add template:%s\n", TO_UTF8( it->m_Name ) );
-#endif
-
             fld.SetName( it->m_Name );
             fld.SetText( it->m_Value );   // empty? ok too.
 
@@ -558,9 +537,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::initBuffers()
         }
         else
         {
-#ifdef DEBUG
-            printf( "match template:%s\n", TO_UTF8( libField->GetName() ) );
-#endif
             fld = *libField;    // copy values from component, m_Name too
         }
 
@@ -576,9 +552,6 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::initBuffers()
 
         if( !buf )
         {
-#ifdef DEBUG
-            printf( "add cmp:%s\n", TO_UTF8( cmp->GetName() ) );
-#endif
             m_FieldsBuf.push_back( *cmp );
         }
     }
@@ -694,6 +667,7 @@ void DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::copySelectedFieldToPanel()
     // if fieldNdx == REFERENCE, VALUE, then disable delete button
     deleteFieldButton->Enable( fieldNdx >= MANDATORY_FIELDS );
 
+    fieldValueTextCtrl->SetValidator( SCH_FIELD_VALIDATOR( field.GetId() ) );
     fieldValueTextCtrl->SetValue( field.GetText() );
 
     textSizeTextCtrl->SetValue( WIDGET_GRAPHIC_TEXT_CTRL::FormatSize( g_UserUnit, field.GetSize().x ) );
@@ -746,6 +720,11 @@ bool DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::copyPanelToSelectedField()
     if( fieldNdx >= m_FieldsBuf.size() )        // traps the -1 case too
         return true;
 
+    // Check for illegal field text.
+    if( fieldValueTextCtrl->GetValidator()
+      && !fieldValueTextCtrl->GetValidator()->Validate( this ) )
+        return false;
+
     LIB_FIELD& field = m_FieldsBuf[fieldNdx];
 
     if( showCheckBox->GetValue() )
@@ -783,16 +762,8 @@ bool DIALOG_EDIT_LIBENTRY_FIELDS_IN_LIB::copyPanelToSelectedField()
     if( field.GetId() >= MANDATORY_FIELDS )
     {
         wxString name = fieldNameTextCtrl->GetValue();
-
-#ifdef DEBUG
-        printf("name:%s\n", TO_UTF8( name ) );
-#endif
         field.SetName( name );
     }
-
-#ifdef DEBUG
-    printf("setname:%s\n", TO_UTF8( field.GetName() ) );
-#endif
 
     setRowItem( fieldNdx, field );  // update fieldListCtrl
 

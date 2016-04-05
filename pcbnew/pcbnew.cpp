@@ -55,7 +55,6 @@
 #include <hotkeys.h>
 #include <wildcards_and_files_ext.h>
 #include <class_board.h>
-#include <3d_viewer.h>
 #include <fp_lib_table.h>
 #include <module_editor_frame.h>
 #include <modview_frame.h>
@@ -97,6 +96,7 @@ wxString    g_DocModulesFileName = wxT( "footprints_doc/footprints.pdf" );
 DLIST<TRACK> g_CurrentTrackList;
 
 bool g_DumpZonesWhenFilling = false;
+KIWAY* TheKiway = NULL;
 
 namespace PCB {
 
@@ -120,6 +120,7 @@ static struct IFACE : public KIFACE_I
         {
         case FRAME_PCB:
             frame = dynamic_cast< wxWindow* >( new PCB_EDIT_FRAME( aKiway, aParent ) );
+            TheKiway = aKiway;
 
 #if defined( KICAD_SCRIPTING )
             // give the scripting helpers access to our frame

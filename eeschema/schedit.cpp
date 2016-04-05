@@ -796,7 +796,15 @@ void SCH_EDIT_FRAME::PrepareMoveItem( SCH_ITEM* aItem, wxDC* aDC )
         aItem->SetStoredPos( wxPoint( 0,0 ) );
     }
     else
-        aItem->SetStoredPos( GetCrossHairPosition() - aItem->GetPosition() );
+    {
+        // Round the point under the cursor to a multiple of the grid
+        wxPoint cursorpos = GetCrossHairPosition() - aItem->GetPosition();
+        wxPoint gridsize = GetScreen()->GetGridSize();
+        cursorpos.x = ( cursorpos.x / gridsize.x ) * gridsize.x;
+        cursorpos.y = ( cursorpos.y / gridsize.y ) * gridsize.y;
+
+        aItem->SetStoredPos( cursorpos );
+    }
 
     OnModify();
 
@@ -865,18 +873,20 @@ void SCH_EDIT_FRAME::OnRotate( wxCommandEvent& aEvent )
     case SCH_GLOBAL_LABEL_T:
     case SCH_HIERARCHICAL_LABEL_T:
         m_canvas->MoveCursorToCrossHair();
-        ChangeTextOrient( (SCH_TEXT*) item, &dc );
+        ChangeTextOrient( (SCH_TEXT*) item );
+        m_canvas->Refresh();
         break;
 
     case SCH_FIELD_T:
         m_canvas->MoveCursorToCrossHair();
-        RotateField( (SCH_FIELD*) item, &dc );
+        RotateField( (SCH_FIELD*) item );
         if( item->GetParent()->Type() == SCH_COMPONENT_T )
         {
             // Now that we're moving a field, they're no longer autoplaced.
             SCH_COMPONENT *parent = static_cast<SCH_COMPONENT*>( item->GetParent() );
             parent->ClearFieldsAutoplaced();
         }
+        m_canvas->Refresh();
         break;
 
     case SCH_BITMAP_T:
