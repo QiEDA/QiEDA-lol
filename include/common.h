@@ -226,7 +226,6 @@ public:
         // use thread safe, atomic operation
         if( __sync_fetch_and_add( &C_count, 1 ) == 0 )
         {
-            // printf( "setting C locale.\n" );
             SetLocaleTo_C_standard();
         }
     }
@@ -236,7 +235,6 @@ public:
         // use thread safe, atomic operation
         if( __sync_sub_and_fetch( &C_count, 1 ) == 0 )
         {
-            // printf( "restoring default locale.\n" );
             SetLocaleTo_Default();
         }
 

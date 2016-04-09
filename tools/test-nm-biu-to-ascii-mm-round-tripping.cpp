@@ -63,7 +63,6 @@ int parseBIU( const char* s )
 {
     double d = strtod( s, NULL );
     return KiROUND( double( d * BIU_PER_MM ) );
-//    return int( d * BIU_PER_MM );
 }
 
 
@@ -86,12 +85,9 @@ int main( int argc, char** argv )
         exit(0);
     }
 
-    // printf( "sizeof(long double): %zd\n", sizeof( long double ) );
-
     // Emperically prove that we can round trip all 4 billion 32 bit integers representative
     // of nanometers out to textual floating point millimeters, and back without error using
     // the above two functions.
-//    for( int i = INT_MIN;  int64_t( i ) <= int64_t( INT_MAX );  ++i )
     for( int64_t j = INT_MIN;  j  <= int64_t( INT_MAX );  ++j )
     {
         int i = int( j );

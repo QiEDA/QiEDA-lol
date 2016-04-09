@@ -777,8 +777,6 @@ exit:   // single point of exit, no returns elsewhere please.
     curOffset = cur - start;
 
     next = head;
-
-    // printf("tok:\"%s\"\n", curText.c_str() );
     return curTok;
 }
 

@@ -58,8 +58,6 @@ LSET::LSET( unsigned aIdCount, LAYER_ID aFirst, ... ) :
         {
             LAYER_ID id = (LAYER_ID) va_arg( ap, int );
 
-            // printf( "%s: id:%d LAYER_ID_COUNT:%d\n", __func__, id, LAYER_ID_COUNT );
-
             assert( unsigned( id ) < LAYER_ID_COUNT );
 
             set( id );

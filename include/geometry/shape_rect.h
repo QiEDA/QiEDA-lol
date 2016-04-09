@@ -74,7 +74,6 @@ public:
     {
         BOX2I bbox( VECTOR2I( m_p0.x - aClearance,  m_p0.y - aClearance ),
                     VECTOR2I( m_w + 2 * aClearance, m_h + 2 * aClearance ) );
-        //printf("bb : %s\n",bbox.Format().c_str());
         return bbox;
     }
 

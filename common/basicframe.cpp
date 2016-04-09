@@ -294,8 +294,6 @@ void EDA_BASE_FRAME::SaveSettings( wxConfigBase* aCfg )
     // all of the legacy frame persistence position code can be removed.
     wxString perspective = m_auimgr.SavePerspective();
 
-    // printf( "perspective(%s): %s\n",
-    //    TO_UTF8( m_FrameName + entryPerspective ), TO_UTF8( perspective ) );
     aCfg->Write( baseCfgName + entryPerspective, perspective );
     aCfg->Write( baseCfgName + entryMruPath, m_mruPath );
 }

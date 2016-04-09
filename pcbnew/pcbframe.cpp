@@ -347,8 +347,6 @@ PCB_EDIT_FRAME::PCB_EDIT_FRAME( KIWAY* aKiway, wxWindow* aParent ) :
     int pointSize = font.GetPointSize();
     int screenHeight = wxSystemSettings::GetMetric( wxSYS_SCREEN_Y );
 
-    // printf( "pointSize:%d  80%%:%d\n", pointSize, (pointSize*8)/10 );
-
     if( screenHeight <= 900 )
         pointSize = (pointSize * 8) / 10;
 

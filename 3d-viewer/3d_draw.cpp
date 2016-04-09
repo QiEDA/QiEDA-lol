@@ -107,21 +107,28 @@ public:
 void EDA_3D_CANVAS::create_and_render_shadow_buffer( GLuint *aDst_gl_texture,
         GLuint aTexture_size, bool aDraw_body, int aBlurPasses )
 {
+    CheckGLError( __FILE__, __LINE__ );
     glDisable( GL_TEXTURE_2D );
 
+    CheckGLError( __FILE__, __LINE__ );
     glViewport( 0, 0, aTexture_size, aTexture_size);
 
+    CheckGLError( __FILE__, __LINE__ );
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+    CheckGLError( __FILE__, __LINE__ );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Render body and shapes
 
+    CheckGLError( __FILE__, __LINE__ );
     if( aDraw_body && m_glLists[GL_ID_BODY] )
         glCallList( m_glLists[GL_ID_BODY] );
 
+    CheckGLError( __FILE__, __LINE__ );
     if( m_glLists[GL_ID_3DSHAPES_SOLID_FRONT] )
         glCallList( m_glLists[GL_ID_3DSHAPES_SOLID_FRONT] );
 
+    CheckGLError( __FILE__, __LINE__ );
     // Create and Initialize the float depth buffer
 
     float *depthbufferFloat = (float*) malloc( aTexture_size * aTexture_size * sizeof(float) );
@@ -130,8 +137,11 @@ void EDA_3D_CANVAS::create_and_render_shadow_buffer( GLuint *aDst_gl_texture,
         depthbufferFloat[i] = 1.0f;
 
     glPixelStorei( GL_PACK_ALIGNMENT, 4 );
+    CheckGLError( __FILE__, __LINE__ );
     glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );
+    CheckGLError( __FILE__, __LINE__ );
     glReadBuffer( GL_BACK_LEFT );
+    CheckGLError( __FILE__, __LINE__ );
     glReadPixels( 0, 0,
                   aTexture_size, aTexture_size,
                   GL_DEPTH_COMPONENT, GL_FLOAT, depthbufferFloat );
@@ -209,9 +219,12 @@ void EDA_3D_CANVAS::generateFakeShadowsTextures( REPORTER* aErrorMessages, REPOR
     m_shadow_init = true;
 
     glClearColor( 0, 0, 0, 1 );
+    CheckGLError( __FILE__, __LINE__ );
 
     glMatrixMode( GL_PROJECTION );
+    CheckGLError( __FILE__, __LINE__ );
     glLoadIdentity();
+    CheckGLError( __FILE__, __LINE__ );
 
     const float zDistMax = Millimeter2iu( 3.5 ) * GetPrm3DVisu().m_BiuTo3Dunits;
 
@@ -225,36 +238,48 @@ void EDA_3D_CANVAS::generateFakeShadowsTextures( REPORTER* aErrorMessages, REPOR
 
     // Render FRONT shadow
     glMatrixMode( GL_MODELVIEW );
+    CheckGLError( __FILE__, __LINE__ );
     glLoadIdentity();
+    CheckGLError( __FILE__, __LINE__ );
     glTranslatef( 0.0f, 0.0f, zpos );
+    CheckGLError( __FILE__, __LINE__ );
     glRotatef( 180.0f, 0.0f, 1.0f, 0.0f );
 
+    CheckGLError( __FILE__, __LINE__ );
     // move the board in order to draw it with its center at 0,0 3D coordinates
     glTranslatef( -GetPrm3DVisu().m_BoardPos.x * GetPrm3DVisu().m_BiuTo3Dunits,
                   -GetPrm3DVisu().m_BoardPos.y * GetPrm3DVisu().m_BiuTo3Dunits,
                   0.0f );
+    CheckGLError( __FILE__, __LINE__ );
 
     create_and_render_shadow_buffer( &m_text_fake_shadow_front, 512, false, 1 );
+    CheckGLError( __FILE__, __LINE__ );
 
     zpos = GetPrm3DVisu().GetLayerZcoordBIU( B_Paste ) * GetPrm3DVisu().m_BiuTo3Dunits;
 
     // Render BACK shadow
     glMatrixMode( GL_MODELVIEW );
+    CheckGLError( __FILE__, __LINE__ );
     glLoadIdentity();
+    CheckGLError( __FILE__, __LINE__ );
     glTranslatef( 0.0f, 0.0f, fabs( zpos ) );
+    CheckGLError( __FILE__, __LINE__ );
 
 
     // move the board in order to draw it with its center at 0,0 3D coordinates
     glTranslatef( -GetPrm3DVisu().m_BoardPos.x * GetPrm3DVisu().m_BiuTo3Dunits,
                   -GetPrm3DVisu().m_BoardPos.y * GetPrm3DVisu().m_BiuTo3Dunits,
                   0.0f );
+    CheckGLError( __FILE__, __LINE__ );
 
     create_and_render_shadow_buffer( &m_text_fake_shadow_back, 512, false, 1 );
 
 
     // Render ALL BOARD shadow
     glMatrixMode( GL_PROJECTION );
+    CheckGLError( __FILE__, __LINE__ );
     glLoadIdentity();
+    CheckGLError( __FILE__, __LINE__ );
 
     // Normalization scale to convert bouding box
     // to normalize 3D units between -1.0 and +1.0
@@ -270,20 +295,27 @@ void EDA_3D_CANVAS::generateFakeShadowsTextures( REPORTER* aErrorMessages, REPOR
              -v.y * BoundingBoxBoardiuTo3Dunits / 2.0f,
               v.y * BoundingBoxBoardiuTo3Dunits / 2.0f,
              0.0f, zDistance );
+    CheckGLError( __FILE__, __LINE__ );
 
     glMatrixMode( GL_MODELVIEW );
+    CheckGLError( __FILE__, __LINE__ );
     glLoadIdentity();
+    CheckGLError( __FILE__, __LINE__ );
 
     // fits the bouding box to scale this size
     glScalef( BoundingBoxBoardiuTo3Dunits, BoundingBoxBoardiuTo3Dunits, 1.0f );
+    CheckGLError( __FILE__, __LINE__ );
 
     // Place the eye in the lowerpoint of boudingbox and turn arround and look up to the model
     glTranslatef( 0.0f, 0.0f, m_fastAABBox_Shadow.Min().z );
+    CheckGLError( __FILE__, __LINE__ );
     glRotatef( 180.0, 0.0f, 1.0f, 0.0f );
 
+    CheckGLError( __FILE__, __LINE__ );
     // move the bouding box in order to draw it with its center at 0,0 3D coordinates
     glTranslatef( -(m_fastAABBox_Shadow.Min().x + v.x / 2.0f), -(m_fastAABBox_Shadow.Min().y + v.y / 2.0f), 0.0f );
-
+    
+    CheckGLError( __FILE__, __LINE__ );
     create_and_render_shadow_buffer( &m_text_fake_shadow_board, 512, true, 10 );
 
 #ifdef DEBUG

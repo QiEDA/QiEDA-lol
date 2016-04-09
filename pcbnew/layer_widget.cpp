@@ -603,7 +603,6 @@ wxSize LAYER_WIDGET::GetBestSize() const
         for( int i=0;  i<LYR_COLUMN_COUNT;  ++i )
         {
             totWidth += widths[i] + m_LayersFlexGridSizer->GetHGap();
-            // printf("widths[%d]:%d\n", i, widths[i] );
         }
     }
     // Account for the parent's frame:
@@ -628,7 +627,6 @@ wxSize LAYER_WIDGET::GetBestSize() const
         for( int i=0;  i<RND_COLUMN_COUNT;  ++i )
         {
             totWidth += widths[i] + m_RenderFlexGridSizer->GetHGap();
-            // printf("widths[%d]:%d\n", i, widths[i] );
         }
     }
     // account for the parent's frame, this one has void space of 10 PLUS a border:
@@ -857,14 +855,6 @@ class MYFRAME : public wxFrame
         void OnLayerColorChange( int aLayer, EDA_COLOR_T aColor )
         {
             printf( "OnLayerColorChange( aLayer:%d, aColor:%d )\n", aLayer, aColor );
-
-            /* a test trigger only
-            if( aLayer == 2 )
-            {
-                ClearLayerRows();
-                printf(" GetLayerRowCount(): %d\n", GetLayerRowCount() );
-            }
-            */
         }
 
         bool OnLayerSelect( LAYER_NUM aLayer )

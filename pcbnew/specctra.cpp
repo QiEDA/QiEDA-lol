@@ -3538,8 +3538,6 @@ UNIT_RES UNIT_RES::Default( NULL, T_resolution );
 
 int PADSTACK::Compare( PADSTACK* lhs, PADSTACK* rhs )
 {
-    // printf( "PADSTACK::Compare( %p, %p)\n", lhs, rhs );
-
     if( !lhs->hash.size() )
         lhs->hash = lhs->makeHash();
 
@@ -3570,27 +3568,8 @@ int IMAGE::Compare( IMAGE* lhs, IMAGE* rhs )
 
     int result = lhs->hash.compare( rhs->hash );
 
-    // printf("\"%s\"  \"%s\" ret=%d\n", lhs->hash.c_str(), rhs->hash.c_str(), result );
-
     return result;
 }
-
-
-//-----<COMPONENT>--------------------------------------------------------
-
-/*
-int COMPONENT::Compare( COMPONENT* lhs, COMPONENT* rhs )
-{
-    if( !lhs->hash.size() )
-        lhs->hash = lhs->makeHash();
-
-    if( !rhs->hash.size() )
-        rhs->hash = rhs->makeHash();
-
-    int result = lhs->hash.compare( rhs->hash );
-    return result;
-}
-*/
 
 //-----<PARSER>-----------------------------------------------------------
 PARSER::PARSER( ELEM* aParent ) :

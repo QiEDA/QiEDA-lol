@@ -461,7 +461,6 @@ public:
 
     virtual ~PLUGIN()
     {
-        //printf( "~%s", __func__ );
     };
 
 
