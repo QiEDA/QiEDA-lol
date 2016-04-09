@@ -2,8 +2,8 @@
  * This program source code file is part of KiCad, a free EDA CAD application.
  *
  * Copyright (C) 2011 Jean-Pierre Charras, <jp.charras@wanadoo.fr>
- * Copyright (C) 2013 SoftPLC Corporation, Dick Hollenbeck <dick@softplc.com>
- * Copyright (C) 1992-2013 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2013-2016 SoftPLC Corporation, Dick Hollenbeck <dick@softplc.com>
+ * Copyright (C) 1992-2016 KiCad Developers, see AUTHORS.txt for contributors.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,6 +44,7 @@
 #include <fpid.h>
 #include <class_module.h>
 #include <boost/thread.hpp>
+#include <html_messagebox.h>
 
 
 void FOOTPRINT_INFO::load()
@@ -71,17 +72,11 @@ void FOOTPRINT_INFO::load()
     }
 }
 
-#define NTOLERABLE_ERRORS   4       // max errors before aborting, although threads
-                                    // in progress will still pile on for a bit.  e.g. if 9 threads
-                                    // expect 9 greater than this.
 
 void FOOTPRINT_LIST::loader_job( const wxString* aNicknameList, int aJobZ )
 {
     for( int i=0; i<aJobZ; ++i )
     {
-        if( m_error_count >= NTOLERABLE_ERRORS )
-            break;
-
         const wxString& nickname = aNicknameList[i];
 
         try
@@ -203,19 +198,23 @@ bool FOOTPRINT_INFO::InLibrary( const wxString& aLibrary ) const
 
 void FOOTPRINT_LIST::DisplayErrors( wxTopLevelWindow* aWindow )
 {
-#ifdef DEBUG
-    printf( "m_error_count:%d\n", m_error_count );
-#endif
+    // @todo: go to a more HTML !<table>! ? centric output, possibly with
+    // recommendations for remedy of errors.  Add numeric error codes
+    // to PARSE_ERROR, and switch on them for remedies, etc.  Full
+    // access is provided to everything in every exception!
 
-    wxString msg = _( "Errors were encountered loading footprints" );
+    HTML_MESSAGE_BOX dlg( aWindow, _( "Load Error" ) );
 
-    msg += wxT( '\n' );
+    dlg.MessageSet( _( "Errors were encountered loading footprints:" ) );
+
+    wxString msg;
 
     for( unsigned i = 0; i<m_errors.size();  ++i )
     {
-        msg += m_errors[i].errorText;
-        msg += wxT( '\n' );
+        msg += wxT( "<p>" ) + m_errors[i].errorText + wxT( "</p>" );
     }
 
-    DisplayError( aWindow, msg );
+    dlg.AddHTML_Text( msg );
+
+    dlg.ShowModal();
 }
